@@ -26,6 +26,7 @@ export interface LeaderboardFilters {
   timeframe?: string;
   ageGroup?: string;
   badge?: string;
+  pullUpRange?: string;
 }
 
 export interface Badge {
@@ -63,23 +64,23 @@ export interface FormState {
 
 export interface Profile {
   id: string;
-  userId: string;
+  user_id: string;
   email: string;
-  fullName?: string;
-  socialMedia?: string;
+  full_name?: string;
+  social_media?: string;
   age?: number;
   gender?: string;
   organization?: string;
   region: string;
   phone?: string;
   club?: string;
-  stripeCustomerId?: string;
-  isPaid: boolean;
+  stripe_customer_id?: string;
+  is_paid: boolean;
   role: 'user' | 'admin';
   badges: Badge[];
-  createdAt: string;
-  updatedAt: string;
-  isProfileCompleted?: boolean;
+  created_at: string;
+  updated_at: string;
+  is_profile_completed?: boolean;
 }
 
 export interface SubscriptionPlan {

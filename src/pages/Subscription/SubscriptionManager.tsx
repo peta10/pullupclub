@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CalendarX, CreditCard, Loader2, Shield } from 'lucide-react';
 import { format } from 'date-fns';
-import { getActiveSubscription, createCustomerPortalSession } from '../../lib/stripe';
+import { getActiveSubscription, openCustomerPortal } from '../../lib/stripe';
 
 interface SubscriptionManagerProps {
   onError?: (error: string) => void;
@@ -35,16 +35,12 @@ const SubscriptionManager: React.FC<SubscriptionManagerProps> = ({ onError }) =>
   const handleManageSubscription = async () => {
     try {
       setIsLoading(true);
-      const portalUrl = await createCustomerPortalSession();
-      if (portalUrl) {
-        window.location.href = portalUrl;
-      } else {
-        throw new Error("Failed to create customer portal session");
-      }
+      await openCustomerPortal();
     } catch (error) {
-      console.error("Error creating portal session:", error);
-      setError("Failed to open customer portal. Please try again later.");
-      if (onError) onError("Failed to open customer portal. Please try again later.");
+      console.error("Error opening customer portal:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to open customer portal";
+      setError(errorMessage);
+      if (onError) onError(errorMessage);
     } finally {
       setIsLoading(false);
     }

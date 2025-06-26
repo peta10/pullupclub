@@ -3,6 +3,7 @@ import { Submission } from "../../types";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 // Live countdown hook with seconds
 const useLiveCountdown = () => {
@@ -155,11 +156,11 @@ const SubmissionDashboard = () => {
         ) : (
           <div>
             <p className="text-gray-400 mb-4">Submit your pull-up video to compete this month</p>
-            <a href="/submit">
+            <Link to="/submit">
               <button className="bg-[#9b9b6f] hover:bg-[#a5a575] text-black font-semibold px-6 py-2 rounded-lg transition-colors">
                 Submit Video
               </button>
-            </a>
+            </Link>
           </div>
         )}
       </div>
@@ -258,11 +259,11 @@ const SubmissionDashboard = () => {
             <p className="text-gray-500 text-sm mb-4">
               Your submission history will appear here once you submit your first video.
             </p>
-            <a href="/submit">
+            <Link to="/submit">
               <button className="bg-[#9b9b6f] hover:bg-[#a5a575] text-black font-semibold py-2 px-4 rounded-lg transition-colors">
                 Submit Your First Video
               </button>
-            </a>
+            </Link>
           </div>
         )}
       </div>

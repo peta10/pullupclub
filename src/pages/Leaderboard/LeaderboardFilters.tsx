@@ -27,6 +27,15 @@ const LeaderboardFilters: React.FC<LeaderboardFiltersProps> = ({ filters, onFilt
     'Australia/Oceania'
   ];
 
+  const pullUpRanges = [
+    '1-10',
+    '11-20',
+    '21-30',
+    '31-40',
+    '41-50',
+    '50+'
+  ];
+
   return (
     <div className="bg-gray-900 p-4 rounded-lg mb-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
@@ -39,7 +48,24 @@ const LeaderboardFilters: React.FC<LeaderboardFiltersProps> = ({ filters, onFilt
         </button>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div>
+          <label className="block text-gray-400 text-sm mb-1">Pull-Ups</label>
+          <select
+            name="pullUpRange"
+            value={filters.pullUpRange || ''}
+            onChange={handleChange}
+            className="w-full bg-gray-950 border border-gray-800 rounded py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
+          >
+            <option value="">All Pull-Ups</option>
+            {pullUpRanges.map((range) => (
+              <option key={range} value={range}>
+                {range} Pull-Ups
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div>
           <label className="block text-gray-400 text-sm mb-1">Club</label>
           <select

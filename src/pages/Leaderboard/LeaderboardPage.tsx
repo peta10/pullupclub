@@ -98,6 +98,15 @@ const LeaderboardPage: React.FC = () => {
   // Filtering logic (client-side, same as before)
   let filtered = finalData;
   if (filters) {
+    if (filters.pullUpRange) {
+      const range = filters.pullUpRange;
+      const count = range === '50+' ? 50 : parseInt(range.split('-')[1], 10);
+      const minCount = range === '50+' ? 50 : parseInt(range.split('-')[0], 10);
+      filtered = filtered.filter(s => {
+        const pullUps = s.actualPullUpCount ?? s.pullUpCount;
+        return range === '50+' ? pullUps >= count : (pullUps >= minCount && pullUps <= count);
+      });
+    }
     if (filters.club) filtered = filtered.filter(s => s.clubAffiliation === filters.club);
     if (filters.region) filtered = filtered.filter(s => s.region === filters.region);
     if (filters.gender) filtered = filtered.filter(s => s.gender === filters.gender);

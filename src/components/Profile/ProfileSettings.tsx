@@ -9,6 +9,7 @@ const REGION_OPTIONS = [
   'South America',
   'Europe',
   'Asia',
+  'Middle East',
   'Africa',
   'Australia/Oceania',
 ];
@@ -30,8 +31,8 @@ const ProfileSettings: React.FC = () => {
   useEffect(() => {
     if (profile) {
       setFormData({
-        fullName: profile.fullName || '',
-        socialMedia: profile.socialMedia || '',
+        fullName: profile.full_name || '',
+        socialMedia: profile.social_media || '',
         age: profile.age ? String(profile.age) : '',
         gender: profile.gender || '',
         organization: profile.organization || '',
@@ -44,8 +45,8 @@ const ProfileSettings: React.FC = () => {
   useEffect(() => {
     if (!profile) return;
     const initial = {
-      fullName: profile.fullName || '',
-      socialMedia: profile.socialMedia || '',
+      fullName: profile.full_name || '',
+      socialMedia: profile.social_media || '',
       age: profile.age ? String(profile.age) : '',
       gender: profile.gender || '',
       organization: profile.organization || '',
@@ -74,6 +75,7 @@ const ProfileSettings: React.FC = () => {
         organization: formData.organization,
         region: formData.region,
         phone: formData.phone,
+        is_profile_completed: true,
         updated_at: new Date().toISOString(),
       };
       const { error } = await supabase
@@ -88,17 +90,17 @@ const ProfileSettings: React.FC = () => {
         .eq('id', user.id)
         .single();
       if (fetchError) throw fetchError;
-      if (setProfile) {
+      if (setProfile && updated) {
         setProfile((prev) => prev ? {
           ...prev,
-          fullName: updated.full_name,
-          socialMedia: updated.social_media,
+          full_name: updated.full_name,
+          social_media: updated.social_media,
           age: updated.age,
           gender: updated.gender,
           organization: updated.organization,
           region: updated.region,
           phone: updated.phone,
-          isProfileCompleted: updated.is_profile_completed,
+          is_profile_completed: true,
         } : prev);
       }
       setDirty(false);

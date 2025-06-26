@@ -538,6 +538,7 @@ const SubmissionForm: React.FC = () => {
                     <li>Clear, unobstructed view of the full movement</li>
                     <li>Chin must clear the bar for each rep</li>
                     <li>Full arm extension at the bottom of each rep</li>
+                    <li>Hands must be shoulder-width apart; grip should not exceed 4 feet in width</li>
                     <li>Continuous recording without cuts or edits</li>
                     <li>Video must be publicly accessible</li>
                   </ul>

@@ -15,16 +15,6 @@ interface VerificationResult {
   error?: string;
 }
 
-const REGION_OPTIONS = [
-  "North America",
-  "South America",
-  "Europe",
-  "Asia",
-  "Africa",
-  "Australia/Oceania",
-  "Middle East"
-];
-
 const SignupAccessPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -35,30 +25,20 @@ const SignupAccessPage: React.FC = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    confirmPassword: '',
-    fullName: '',
-    phone: '',
-    age: '',
-    gender: '',
-    organization: '',
-    region: ''
+    confirmPassword: ''
   });
 
   const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
-    // If user is already logged in, redirect to dashboard
     if (user) {
       navigate('/profile');
       return;
     }
-
-    // If no session ID, redirect to subscription page
     if (!sessionId) {
       navigate('/subscription');
       return;
     }
-
     verifyStripeSession();
   }, [sessionId, user, navigate]);
 
@@ -67,18 +47,15 @@ const SignupAccessPage: React.FC = () => {
       const { data, error } = await supabase.functions.invoke('verify-stripe-session', {
         body: { sessionId }
       });
-
       if (error) {
         console.error('Error verifying session:', error);
         setVerificationStatus('invalid');
         setVerificationResult({ isValid: false, error: 'Failed to verify payment session' });
         return;
       }
-
       if (data.success && data.isValid) {
         setVerificationStatus('valid');
         setVerificationResult(data);
-        // Pre-fill email if available
         if (data.customerEmail) {
           setFormData(prev => ({ ...prev, email: data.customerEmail }));
         }
@@ -93,7 +70,7 @@ const SignupAccessPage: React.FC = () => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -101,51 +78,34 @@ const SignupAccessPage: React.FC = () => {
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsCreatingAccount(true);
-
     try {
-      // Validate form
       if (formData.password !== formData.confirmPassword) {
         toast.error('Passwords do not match');
         return;
       }
-
       if (!isPasswordValid) {
         toast.error('Please ensure your password meets all requirements.');
         return;
       }
-
-      // Create account with Supabase Auth
       const { error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           data: {
-            full_name: formData.fullName,
-            phone: formData.phone,
-            age: formData.age ? parseInt(formData.age) : null,
-            gender: formData.gender,
-            organization: formData.organization,
-            region: formData.region,
             stripe_customer_id: verificationResult?.customerId,
             is_paid: true
           }
         }
       });
-
       if (authError) {
         console.error('Error creating account:', authError);
         toast.error(`Failed to create account: ${authError.message}`);
         return;
       }
-
-      // Account created successfully
       toast.success('Account created successfully! Redirecting...');
-      
-      // Wait a moment for the trigger to create the profile, then redirect
       setTimeout(() => {
         navigate('/profile');
       }, 1500);
-
     } catch (error) {
       console.error('Error creating account:', error);
       toast.error('Failed to create account. Please try again.');
@@ -154,12 +114,13 @@ const SignupAccessPage: React.FC = () => {
     }
   };
 
-  // Password validation logic (copied from SignUpForm)
-  const hasMinLength = formData.password.length >= 6;
+  // Password validation logic
+  const hasMinLength = formData.password.length >= 8;
   const hasUpperCase = /[A-Z]/.test(formData.password);
   const hasLowerCase = /[a-z]/.test(formData.password);
   const hasNumber = /[0-9]/.test(formData.password);
-  const isPasswordValid = hasMinLength && hasUpperCase && hasLowerCase && hasNumber;
+  const passwordsMatch = formData.password === formData.confirmPassword && formData.password.length > 0;
+  const isPasswordValid = hasMinLength && hasUpperCase && hasLowerCase && hasNumber && passwordsMatch;
 
   const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
     <div className="flex items-center space-x-2 text-sm">
@@ -229,91 +190,12 @@ const SignupAccessPage: React.FC = () => {
                 placeholder="Email"
               />
               <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                required
-                className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
-                placeholder="Full Name"
-              />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <input
-                    type="number"
-                    name="age"
-                    value={formData.age}
-                    onChange={handleInputChange}
-                    min="13"
-                    max="100"
-                    className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
-                    placeholder="Age"
-                  />
-                </div>
-                <div className="relative w-full">
-                  <select
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleInputChange}
-                    className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f] appearance-none"
-                    style={{ backgroundColor: '#232323', color: '#fff' }}
-                  >
-                    <option value="">Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                    <option value="prefer-not-to-say">Prefer not to say</option>
-                  </select>
-                  <span className="pointer-events-none absolute right-4 top-1/2 transform -translate-y-1/2">
-                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-300">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </span>
-                </div>
-              </div>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
-                placeholder="Phone Number"
-              />
-              <input
-                type="text"
-                name="organization"
-                value={formData.organization}
-                onChange={handleInputChange}
-                className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
-                placeholder="Organization (Optional)"
-              />
-              <div className="relative w-full">
-                <select
-                  name="region"
-                  value={formData.region}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f] appearance-none"
-                  style={{ backgroundColor: '#232323', color: '#fff' }}
-                >
-                  <option value="">Region</option>
-                  {REGION_OPTIONS.map(option => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
-                <span className="pointer-events-none absolute right-4 top-1/2 transform -translate-y-1/2">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-300">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </span>
-              </div>
-              <input
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
                 required
-                minLength={6}
+                minLength={8}
                 className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
                 placeholder="Password"
               />
@@ -323,7 +205,7 @@ const SignupAccessPage: React.FC = () => {
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 required
-                minLength={6}
+                minLength={8}
                 className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
                 placeholder="Confirm Password"
               />
@@ -332,10 +214,11 @@ const SignupAccessPage: React.FC = () => {
                 <p className="text-sm font-medium text-gray-300 mb-2">
                   Password Requirements:
                 </p>
-                <PasswordRequirement met={hasMinLength} text="At least 6 characters" />
+                <PasswordRequirement met={hasMinLength} text="At least 8 characters" />
                 <PasswordRequirement met={hasUpperCase} text="One uppercase letter" />
                 <PasswordRequirement met={hasLowerCase} text="One lowercase letter" />
                 <PasswordRequirement met={hasNumber} text="One number" />
+                <PasswordRequirement met={passwordsMatch} text="Passwords match" />
               </div>
               <Button
                 type="submit"

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Provider, AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { supabase, isDevelopment, getRedirectUrl } from "../lib/supabase.ts";
 import { createCheckoutSession, getActiveSubscription } from "../lib/stripe.ts";
+import { Badge } from "../types";
 
 interface User {
   id: string;
@@ -33,15 +34,24 @@ interface ProfileSettings {
 }
 
 interface Profile extends ProfileSettings {
-  isProfileCompleted: boolean;
-  socialMedia: string | null;
-  region: string;
-  role: "user" | "admin";
-  fullName?: string;
+  id: string;
+  user_id: string;
+  email: string;
+  full_name?: string;
+  social_media?: string | null;
   age?: number;
   gender?: string;
   organization?: string;
+  region: string;
   phone?: string;
+  club?: string;
+  stripe_customer_id?: string;
+  is_paid: boolean;
+  role: 'user' | 'admin';
+  badges: Badge[];
+  created_at: string;
+  updated_at: string;
+  is_profile_completed?: boolean;
 }
 
 interface AuthContextType {
@@ -167,100 +177,130 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const fetchProfile = async (userId: string, retryCount = 0) => {
+    console.log("[AuthContext] Starting fetchProfile for user:", userId, "retry:", retryCount);
+    
+    // Get current session for metadata sync
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      await syncMetadataToProfile(userId, session);
+    }
+
+    // Set a timeout to prevent infinite waiting
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("Profile fetch timeout")), 10000);
+    });
+
     try {
-      console.log("[AuthContext] Fetching profile for user:", userId, "retry:", retryCount);
-      
       // First check if user has admin role
-      const { data: adminData, error: adminError } = await supabase
-        .from('admin_roles')
+      console.log("[AuthContext] Checking admin role...");
+      let isUserAdmin = false;
+      try {
+        const adminResponse = await Promise.race([
+          supabase.from('admin_roles').select('*').eq('user_id', userId),
+          timeoutPromise
+        ]) as { data: any[] | null; error: any };
+        isUserAdmin = Boolean(adminResponse?.data && adminResponse.data.length > 0);
+        console.log("[AuthContext] Admin role check complete. Is admin:", isUserAdmin);
+        setIsAdmin(isUserAdmin);
+      } catch (error) {
+        console.error("[AuthContext] Error checking admin role:", error);
+      }
+
+      // Then fetch profile data
+      console.log("[AuthContext] Fetching profile data...");
+      let { data: profileData, error: profileError } = await supabase
+        .from('profiles')
         .select('*')
-        .eq('user_id', userId);
-
-      const isUserAdmin = !adminError && adminData && adminData.length > 0;
-      console.log("[AuthContext] Admin check result:", { isUserAdmin, adminData, adminError });
-      
-      setIsAdmin(isUserAdmin);
-
-      // Then fetch the full profile
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
+        .eq('id', userId)
         .single();
 
-      console.log("[AuthContext] Raw profile data from DB:", profileData);
-      if (profileData) {
-        console.log("[AuthContext] Social media from DB:", profileData.social_media);
-      }
+      console.log("[AuthContext] Profile query complete. Error:", profileError, "Data:", profileData);
 
       if (profileError) {
-        if (profileError.code === "PGRST116") {
-          console.log("[AuthContext] Profile not found, this might be a new user. Creating fallback profile.");
-          
-          if (retryCount < 3) {
-            console.log("[AuthContext] Retrying profile fetch in", (retryCount + 1) * 1000, "ms");
-            setTimeout(() => fetchProfile(userId, retryCount + 1), (retryCount + 1) * 1000);
-            return;
-          }
-          
-          // After retries, create a fallback profile object
-          console.log("[AuthContext] Creating fallback profile after retries");
-          const fallbackProfile: Profile = {
-            isProfileCompleted: false,
-            socialMedia: null,
-            region: '',
-            role: (isUserAdmin ? "admin" : "user") as "user" | "admin",
-            fullName: '',
-            age: 0,
-            gender: '',
-            organization: '',
-            phone: '',
-            ...defaultSettings
-          };
-          
-          console.log("[AuthContext] Setting fallback profile:", fallbackProfile);
-          setProfile(fallbackProfile);
-          setIsFirstLogin(true);
-          
-          console.log("[AuthContext] Setting fallback profile");
-          return;
+        if (retryCount < 3) {
+          console.log("[AuthContext] Retrying profile fetch...");
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return fetchProfile(userId, retryCount + 1);
         }
-        console.error("Error fetching profile:", profileError);
-        return;
+        throw profileError;
       }
 
-      console.log("[AuthContext] Profile data received:", profileData);
+      if (!profileData) {
+        // If no profile exists, create one
+        console.log("[AuthContext] No profile found, creating new profile");
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert([{
+            id: userId,
+            user_id: userId,
+            email: session?.user?.email,
+            is_paid: session?.user?.user_metadata?.is_paid || false,
+            role: isUserAdmin ? 'admin' : 'user',
+            notification_preferences: defaultSettings.notification_preferences,
+            theme_preferences: defaultSettings.theme_preferences,
+            privacy_settings: defaultSettings.privacy_settings,
+            user_settings: defaultSettings.user_settings,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }])
+          .select()
+          .single();
 
-      const profileObject: Profile = {
-        isProfileCompleted: profileData.is_profile_completed || false,
-        socialMedia: profileData.social_media,
-        region: profileData.region || '',
-        role: (isUserAdmin ? "admin" : "user") as "user" | "admin",
-        fullName: profileData.full_name,
+        if (createError) throw createError;
+        profileData = newProfile;
+      }
+
+      // Ensure user_id is set
+      if (!profileData.user_id) {
+        console.log("[AuthContext] Fixing missing user_id");
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ user_id: userId })
+          .eq('id', userId);
+        
+        if (updateError) {
+          console.error("[AuthContext] Error updating user_id:", updateError);
+        }
+        profileData.user_id = userId;
+      }
+
+      console.log("[AuthContext] Mapping profile data to context format");
+      const mappedProfile: Profile = {
+        id: profileData.id,
+        user_id: profileData.user_id || userId,
+        email: profileData.email,
+        full_name: profileData.full_name,
+        social_media: profileData.social_media,
         age: profileData.age,
         gender: profileData.gender,
         organization: profileData.organization,
+        region: profileData.region,
         phone: profileData.phone,
-        user_settings: profileData.user_settings || defaultSettings.user_settings,
+        club: profileData.club,
+        stripe_customer_id: profileData.stripe_customer_id,
+        is_paid: profileData.is_paid,
+        role: profileData.role || 'user',
+        badges: profileData.badges || [],
+        created_at: profileData.created_at,
+        updated_at: profileData.updated_at,
+        is_profile_completed: profileData.is_profile_completed,
         notification_preferences: profileData.notification_preferences || defaultSettings.notification_preferences,
         theme_preferences: profileData.theme_preferences || defaultSettings.theme_preferences,
-        privacy_settings: profileData.privacy_settings || defaultSettings.privacy_settings
+        privacy_settings: profileData.privacy_settings || defaultSettings.privacy_settings,
+        user_settings: profileData.user_settings || {}
       };
 
-      console.log("[AuthContext] Setting profile object:", profileObject);
-      setProfile(profileObject);
-      setIsFirstLogin(!profileData.is_profile_completed);
-
-      if (user) {
-        const updatedUser: User = {
-          ...user,
-          role: isUserAdmin ? "admin" : "user"
-        };
-        console.log("[AuthContext] Updating user with role:", updatedUser);
-        setUser(updatedUser);
+      console.log("[AuthContext] Setting profile object:", mappedProfile);
+      setProfile(mappedProfile);
+      console.log("[AuthContext] Profile fetch completed successfully");
+    } catch (error) {
+      console.error("[AuthContext] Error in fetchProfile:", error);
+      if (retryCount < 3) {
+        console.log("[AuthContext] Retrying profile fetch...");
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return fetchProfile(userId, retryCount + 1);
       }
-    } catch (err) {
-      console.error("Error in fetchProfile:", err);
+      throw error;
     }
   };
 
@@ -328,6 +368,64 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (error) {
       console.error(`Error updating ${settingType}:`, error);
       throw error;
+    }
+  };
+
+  // --- ADDED: syncMetadataToProfile ---
+  const syncMetadataToProfile = async (userId: string, session: Session) => {
+    try {
+      const userMetadata = session.user.user_metadata || {};
+      const isPaidInMetadata = userMetadata.is_paid === true || userMetadata.is_paid === 'true';
+      const stripeCustomerIdInMetadata = userMetadata.stripe_customer_id;
+      
+      // Get current profile
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('is_paid, stripe_customer_id')
+        .eq('id', userId)
+        .single();
+      
+      if (!currentProfile) return;
+      
+      // Check if sync is needed
+      const needsSync = (
+        (isPaidInMetadata && !currentProfile.is_paid) ||
+        (stripeCustomerIdInMetadata && !currentProfile.stripe_customer_id)
+      );
+      
+      if (needsSync) {
+        console.log('[AuthContext] Syncing metadata to profile:', {
+          metadata_is_paid: isPaidInMetadata,
+          profile_is_paid: currentProfile.is_paid,
+          metadata_customer_id: stripeCustomerIdInMetadata,
+          profile_customer_id: currentProfile.stripe_customer_id
+        });
+        
+        const updateData: any = {
+          updated_at: new Date().toISOString()
+        };
+        
+        if (isPaidInMetadata && !currentProfile.is_paid) {
+          updateData.is_paid = true;
+        }
+        
+        if (stripeCustomerIdInMetadata && !currentProfile.stripe_customer_id) {
+          updateData.stripe_customer_id = stripeCustomerIdInMetadata;
+        }
+        
+        const { error } = await supabase
+          .from('profiles')
+          .update(updateData)
+          .eq('id', userId);
+          
+        if (error) {
+          console.error('[AuthContext] Error syncing metadata:', error);
+        } else {
+          console.log('[AuthContext] Successfully synced metadata to profile');
+        }
+      }
+    } catch (error) {
+      console.error('[AuthContext] Error in syncMetadataToProfile:', error);
     }
   };
 
@@ -415,15 +513,22 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const devUser = { id: "dev-user-id", email: "dev@example.com" };
       setUser(devUser);
       setProfile({
-        isProfileCompleted: false,
-        socialMedia: null,
+        id: 'dev-user-id',
+        user_id: 'dev-user-id',
+        email: 'dev@example.com',
+        social_media: null,
         region: '',
         role: "user" as "user" | "admin",
-        fullName: '',
+        full_name: '',
         age: 0,
         gender: '',
         organization: '',
         phone: '',
+        is_paid: false,
+        badges: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        is_profile_completed: false,
         ...defaultSettings
       });
       setIsFirstLogin(true);
@@ -496,15 +601,22 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const devUser = { id: "dev-user-id", email: "dev@example.com" };
       setUser(devUser);
       setProfile({
-        isProfileCompleted: false,
-        socialMedia: null,
+        id: 'dev-user-id',
+        user_id: 'dev-user-id',
+        email: 'dev@example.com',
+        social_media: null,
         region: '',
         role: "user" as "user" | "admin",
-        fullName: '',
+        full_name: '',
         age: 0,
         gender: '',
         organization: '',
         phone: '',
+        is_paid: false,
+        badges: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        is_profile_completed: false,
         ...defaultSettings
       });
       setIsFirstLogin(true);

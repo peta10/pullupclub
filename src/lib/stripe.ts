@@ -194,23 +194,20 @@ export const getActiveSubscription = async () => {
       return null;
     }
 
-    const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/subscription-status`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      },
-    );
+    const { data, error } = await supabase.functions.invoke('subscription-status', {
+      headers: { Authorization: `Bearer ${session.access_token}` }
+    });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to get subscription status');
+    if (error) {
+      // Handle 401 by signing out
+      if (error.status === 401) {
+        console.warn('getActiveSubscription: Session expired, signing out');
+        await supabase.auth.signOut();
+        return null;
+      }
+      throw error;
     }
 
-    const data = await response.json();
     return data;
   } catch (error) {
     console.error('Error getting subscription status:', error);
@@ -232,24 +229,19 @@ export const cancelSubscription = async (): Promise<boolean> => {
       throw new Error("User not authenticated");
     }
 
-    const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/cancel-subscription`,
+    const { data, error } = await supabase.functions.invoke(
+      "cancel-subscription",
       {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: {},               // no payload needed for this function
       }
     );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to cancel subscription");
+    if (error) {
+      throw new Error(error.message || "Failed to cancel subscription");
     }
 
-    const data = await response.json();
-    return data.success;
+    return data?.success ?? false;
   } catch (error) {
     console.error("Error cancelling subscription:", error);
     throw error;
@@ -347,5 +339,20 @@ export async function startCheckout(plan: 'monthly' | 'annual' = 'monthly') {
       value: 1,
     });
     alert('Unable to start checkout. Please try again later.');
+  }
+}
+
+/**
+ * Opens Stripe Customer Portal in a new window for subscription management
+ * Users can cancel subscriptions, update payment methods, and view billing history
+ */
+export async function openCustomerPortal() {
+  try {
+    const url = await createCustomerPortalSession();
+    if (!url) throw new Error('Unable to open billing portal');
+    window.location.assign(url);
+  } catch (err) {
+    console.error('Error opening customer portal:', err);
+    throw new Error('Unable to access billing portal. Please try again later.');
   }
 }

@@ -11,8 +11,8 @@ const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>("submissions");
   const [formData, setFormData] = useState({
-    fullName: "",
-    socialMedia: "",
+    full_name: "",
+    social_media: "",
     age: "",
     gender: "",
     organization: "",
@@ -22,7 +22,7 @@ const ProfilePage: React.FC = () => {
   const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
-    if (isFirstLogin && profile && !profile.isProfileCompleted) {
+    if (isFirstLogin && profile && !profile.is_profile_completed) {
       setActiveTab("settings");
     }
   }, [isFirstLogin, profile]);
@@ -30,8 +30,8 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     if (profile) {
       setFormData({
-        fullName: profile.fullName || '',
-        socialMedia: profile.socialMedia || '',
+        full_name: profile.full_name || '',
+        social_media: profile.social_media || '',
         age: profile.age?.toString() || '',
         gender: profile.gender || '',
         organization: profile.organization || '',
@@ -43,16 +43,16 @@ const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     const initial = profile ? {
-      fullName: (profile as any).fullName ?? (profile as any).full_name ?? "",
-      socialMedia: (profile as any).socialMedia ?? (profile as any).social_media ?? "",
-      age: (profile as any).age !== undefined ? String((profile as any).age) : ((profile as any).age !== undefined ? String((profile as any).age) : ""),
-      gender: (profile as any).gender ?? "",
-      organization: (profile as any).organization ?? (profile as any).organisation ?? "",
-      region: (profile as any).region ?? "",
-      phone: (profile as any).phone ?? "",
+      full_name: profile.full_name || "",
+      social_media: profile.social_media || "",
+      age: profile.age !== undefined ? String(profile.age) : "",
+      gender: profile.gender || "",
+      organization: profile.organization || "",
+      region: profile.region || "",
+      phone: profile.phone || "",
     } : {
-      fullName: "",
-      socialMedia: "",
+      full_name: "",
+      social_media: "",
       age: "",
       gender: "",
       organization: "",

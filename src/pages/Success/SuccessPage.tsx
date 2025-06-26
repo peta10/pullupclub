@@ -14,6 +14,7 @@ const SuccessPage: React.FC = () => {
   const isResubmission = searchParams.get("resubmit") === "true";
   const isStripeSuccess = searchParams.get("checkout") === "completed";
   const planType = searchParams.get("plan") as "monthly" | "annual" || "monthly";
+  const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
     if (authIsLoading) {
@@ -34,10 +35,12 @@ const SuccessPage: React.FC = () => {
             );
             navigate("/profile");
           } else {
-            console.warn(
-              `[SuccessPage] User not logged in after payment, redirecting to /create-account as a fallback. isStripeSuccess=${isStripeSuccess}`
-            );
-            navigate("/create-account");
+            // Redirect to signup-access with session_id if Stripe checkout
+            if (sessionId && isStripeSuccess) {
+              navigate(`/signup-access?session_id=${sessionId}`);
+            } else {
+              navigate("/login");
+            }
           }
           return 0;
         }
@@ -46,7 +49,7 @@ const SuccessPage: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [navigate, user, authIsLoading, isResubmission, isStripeSuccess]);
+  }, [navigate, user, authIsLoading, isResubmission, isStripeSuccess, sessionId]);
 
   if (authIsLoading) {
     return (
