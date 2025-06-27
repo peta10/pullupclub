@@ -1,40 +1,81 @@
 {
-  "nav": {
+  "navigation": {
     "home": "Inicio",
     "leaderboard": "Clasificación",
-    "ethos": "Nuestro Ethos",
-    "shop": "Tienda",
-    "dashboard": "Panel",
-    "admin": "Admin",
-    "logout": "Cerrar sesión",
-    "login": "Iniciar sesión",
-    "signup": "Regístrate"
+    "profile": "Perfil",
+    "submit": "Enviar Video",
+    "rules": "Reglas",
+    "faq": "Preguntas Frecuentes",
+    "ethos": "Nuestra Filosofía",
+    "login": "Iniciar Sesión",
+    "logout": "Cerrar Sesión",
+    "adminDashboard": "Panel de Administrador",
+    "adminUsers": "Gestión de Usuarios"
   },
   "buttons": {
-    "save": "Guardar",
-    "cancel": "Cancelar",
     "submit": "Enviar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
     "edit": "Editar",
     "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "retry": "Reintentar",
+    "close": "Cerrar",
+    "view": "Ver",
+    "upload": "Subir",
     "approve": "Aprobar",
     "reject": "Rechazar",
-    "viewVideo": "Ver video",
-    "loadMore": "Cargar más",
-    "resetFilters": "Restablecer filtros"
+    "manage": "Gestionar",
+    "subscribe": "Suscribirse",
+    "signUp": "Registrarse",
+    "createAccount": "Crear Cuenta"
+  },
+  "footer": {
+    "title": "Pull-Up Club",
+    "description": "El destino principal para competiciones de dominadas y desafíos de fitness. Pon a prueba tu fuerza, compite con otros y escala en la clasificación.",
+    "quickLinks": "Enlaces Rápidos",
+    "submitVideo": "Enviar Tu Video",
+    "leaderboard": "Clasificación",
+    "rules": "Reglas de la Competición",
+    "faq": "Preguntas Frecuentes",
+    "privacy": "Política de Privacidad",
+    "cookies": "Política de Cookies",
+    "contactUs": "Contáctanos",
+    "email": "Email: support@pullupclub.com",
+    "phone": "Teléfono: (619) 363-4597",
+    "address": "Dirección: 871 Harold Pl, San Diego, CA 91914",
+    "facebook": "Facebook",
+    "instagram": "Instagram",
+    "youtube": "YouTube",
+    "copyright": "© {{year}} Pull-Up Club. Todos los derechos reservados."
   },
   "labels": {
-    "name": "Nombre",
-    "email": "Correo electrónico",
+    "email": "Correo Electrónico",
     "password": "Contraseña",
-    "confirmPassword": "Confirmar contraseña",
-    "age": "Edad",
-    "gender": "Género",
-    "city": "Ciudad",
-    "state": "Estado",
-    "country": "País",
-    "club": "Club",
-    "organization": "Organización",
-    "socialHandle": "Red social",
-    "phone": "Número de teléfono"
+    "fullName": "Nombre Completo",
+    "username": "Nombre de Usuario",
+    "confirmPassword": "Confirmar Contraseña",
+    "videoUrl": "URL del Video",
+    "pullUpCount": "Número de Dominadas",
+    "notes": "Notas"
+  },
+  "status": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "pending": "Pendiente",
+    "approved": "Aprobado",
+    "rejected": "Rechazado",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "connecting": "Conectando...",
+    "connected": "Conectado"
+  },
+  "misc": {
+    "or": "o",
+    "logoAlt": "Logo de Pull-Up Club"
+  },
+  "errors": {
+    "generic": "Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde."
   }
 } 

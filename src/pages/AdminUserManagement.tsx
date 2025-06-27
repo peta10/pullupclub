@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase.ts";
 import { adminApi } from "../utils/edgeFunctions.ts";
 import { Alert } from "../components/ui/Alert";
+import { useTranslation } from 'react-i18next';
+import Head from "../components/Layout/Head.tsx";
 
 interface User {
   id: string;
@@ -18,6 +20,7 @@ interface User {
 }
 
 const AdminUserManagement: React.FC = () => {
+  const { t } = useTranslation('admin');
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -204,11 +207,7 @@ const AdminUserManagement: React.FC = () => {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this user? This action cannot be undone."
-      )
-    ) {
+    if (!confirm(t('users.actions.confirmDelete'))) {
       return;
     }
 
@@ -286,6 +285,10 @@ const AdminUserManagement: React.FC = () => {
 
   return (
     <Layout>
+      <Head>
+        <title>{t("meta.title")}</title>
+        <meta name="description" content={t("meta.description")} />
+      </Head>
       <div className="bg-black min-h-screen py-10">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
@@ -296,12 +299,12 @@ const AdminUserManagement: React.FC = () => {
                 className="flex items-center space-x-2"
               >
                 <ArrowLeft size={18} />
-                <span>Back to Dashboard</span>
+                <span>{t('users.back')}</span>
               </Button>
               <div className="flex items-center space-x-2">
                 <Users className="text-[#9b9b6f]" size={32} />
                 <h1 className="text-3xl font-bold text-white">
-                  User Management
+                  {t('users.title')}
                 </h1>
               </div>
             </div>
@@ -310,14 +313,14 @@ const AdminUserManagement: React.FC = () => {
               onClick={fetchUsers}
               className="flex items-center space-x-2"
             >
-              <span>Refresh Users</span>
+              <span>{t('users.refresh')}</span>
             </Button>
           </div>
 
           {error && (
             <Alert 
               variant="error" 
-              title="Error" 
+              title={t('users.error')} 
               description={error} 
               className="mb-6" 
             />
@@ -326,7 +329,7 @@ const AdminUserManagement: React.FC = () => {
           {isLoading ? (
             <div className="bg-gray-800 p-8 rounded-lg text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-              <p className="text-white">Loading users...</p>
+              <p className="text-white">{t('users.loading')}</p>
             </div>
           ) : (
             <div className="bg-gray-800 rounded-lg overflow-hidden">
@@ -335,22 +338,22 @@ const AdminUserManagement: React.FC = () => {
                   <thead className="bg-gray-900">
                     <tr>
                       <th className="py-4 px-6 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">
-                        Email
+                        {t('users.table.email')}
                       </th>
                       <th className="py-4 px-6 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">
-                        Name
+                        {t('users.table.name')}
                       </th>
                       <th className="py-4 px-6 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">
-                        Role
+                        {t('users.table.role')}
                       </th>
                       <th className="py-4 px-6 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">
-                        Paid
+                        {t('users.table.paid')}
                       </th>
                       <th className="py-4 px-6 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">
-                        Created At
+                        {t('users.table.createdAt')}
                       </th>
                       <th className="py-4 px-6 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">
-                        Actions
+                        {t('users.table.actions')}
                       </th>
                     </tr>
                   </thead>
@@ -361,7 +364,7 @@ const AdminUserManagement: React.FC = () => {
                           colSpan={6}
                           className="py-8 px-6 text-center text-gray-400"
                         >
-                          No users found
+                          {t('users.noUsers')}
                         </td>
                       </tr>
                     ) : (
@@ -382,7 +385,7 @@ const AdminUserManagement: React.FC = () => {
                                   : "bg-gray-700 text-gray-300"
                               }`}
                             >
-                              {user.is_admin ? "Admin" : user.role || "User"}
+                              {user.is_admin ? t('users.role_admin') : t('users.role_user')}
                             </span>
                           </td>
                           <td className="py-4 px-6">
@@ -393,7 +396,7 @@ const AdminUserManagement: React.FC = () => {
                                   : "bg-red-900 text-red-300"
                               }`}
                             >
-                              {user.is_paid ? "Yes" : "No"}
+                              {user.is_paid ? t('users.paid_yes') : t('users.paid_no')}
                             </span>
                           </td>
                           <td className="py-4 px-6 text-gray-300">
@@ -418,16 +421,16 @@ const AdminUserManagement: React.FC = () => {
                                 {actionStatus?.userId === user.id && 
                                  (actionStatus.action === "admin_add" || actionStatus.action === "admin_remove") && 
                                  actionStatus.status === "processing" ? (
-                                  "Processing..."
+                                  t('users.actions.processing')
                                 ) : user.is_admin ? (
                                   <>
                                     <Unlock size={16} className="mr-2" />
-                                    Remove Admin
+                                    {t('users.actions.removeAdmin')}
                                   </>
                                 ) : (
                                   <>
                                     <Lock size={16} className="mr-2" />
-                                    Make Admin
+                                    {t('users.actions.makeAdmin')}
                                   </>
                                 )}
                               </Button>
@@ -444,27 +447,23 @@ const AdminUserManagement: React.FC = () => {
                                 {actionStatus?.userId === user.id && 
                                  actionStatus.action === "delete" && 
                                  actionStatus.status === "processing" 
-                                  ? "Deleting..." 
-                                  : "Delete"}
+                                  ? t('users.actions.deleting') 
+                                  : t('users.actions.delete')}
                               </Button>
                             </div>
                             
                             {/* Show status messages */}
                             {actionStatus?.userId === user.id && actionStatus.status === "error" && (
                               <div className="mt-2 text-red-400 text-xs">
-                                Error: {actionStatus.message}
+                                {t('users.actions.status.error', { message: actionStatus.message })}
                               </div>
                             )}
                             
                             {actionStatus?.userId === user.id && actionStatus.status === "success" && (
                               <div className="mt-2 text-green-400 text-xs">
-                                Success: {
-                                  actionStatus.action === "admin_add" 
-                                    ? "Admin role added" 
-                                    : actionStatus.action === "admin_remove"
-                                    ? "Admin role removed"
-                                    : "User deleted"
-                                }
+                                {actionStatus.action === "admin_add" ? t('users.actions.status.addSuccess')
+                                  : actionStatus.action === "admin_remove" ? t('users.actions.status.removeSuccess')
+                                  : t('users.actions.status.deleteSuccess')}
                               </div>
                             )}
                           </td>

@@ -1,25 +1,27 @@
 import React from "react";
 import { Link } from "../ui/Link";
+import { useTranslation } from "react-i18next";
 
 const Footer: React.FC = () => {
+  const { t } = useTranslation('common');
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="bg-black text-white py-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-lg font-bold text-[#9b9b6f] mb-4">
-              Pull-Up Club
+              {t('footer.title')}
             </h3>
             <p className="text-gray-400">
-              The premier destination for pull-up competitions and fitness
-              challenges. Test your strength, compete with others, and climb the
-              leaderboard.
+              {t('footer.description')}
             </p>
           </div>
 
           <div>
             <h3 className="text-lg font-bold text-[#9b9b6f] mb-4">
-              Quick Links
+              {t('footer.quickLinks')}
             </h3>
             <ul className="space-y-2">
               <li>
@@ -27,7 +29,7 @@ const Footer: React.FC = () => {
                   href="/submit"
                   className="text-gray-400 hover:text-white"
                 >
-                  Submit Your Video
+                  {t('footer.submitVideo')}
                 </Link>
               </li>
               <li>
@@ -35,17 +37,17 @@ const Footer: React.FC = () => {
                   href="/leaderboard"
                   className="text-gray-400 hover:text-white"
                 >
-                  Leaderboard
+                  {t('footer.leaderboard')}
                 </Link>
               </li>
               <li>
                 <Link href="/rules" className="text-gray-400 hover:text-white">
-                  Competition Rules
+                  {t('footer.rules')}
                 </Link>
               </li>
               <li>
                 <Link href="/faq" className="text-gray-400 hover:text-white">
-                  FAQ
+                  {t('footer.faq')}
                 </Link>
               </li>
               <li>
@@ -53,7 +55,7 @@ const Footer: React.FC = () => {
                   href="/privacy"
                   className="text-gray-400 hover:text-white"
                 >
-                  Privacy Policy
+                  {t('footer.privacy')}
                 </Link>
               </li>
               <li>
@@ -61,7 +63,7 @@ const Footer: React.FC = () => {
                   href="/cookies"
                   className="text-gray-400 hover:text-white"
                 >
-                  Cookies Policy
+                  {t('footer.cookies')}
                 </Link>
               </li>
             </ul>
@@ -69,19 +71,19 @@ const Footer: React.FC = () => {
 
           <div>
             <h3 className="text-lg font-bold text-[#9b9b6f] mb-4">
-              Contact Us
+              {t('footer.contactUs')}
             </h3>
             <ul className="space-y-2 text-gray-400">
-              <li>Email: support@pullupclub.com</li>
-              <li>Phone: (619) 363-4597</li>
-              <li>Address: 871 Harold Pl, San Diego, CA 91914</li>
+              <li>{t('footer.email')}</li>
+              <li>{t('footer.phone')}</li>
+              <li>{t('footer.address')}</li>
             </ul>
             <div className="mt-4 flex space-x-4">
               <Link
                 href="https://www.facebook.com/profile.php?id=61576131712807"
                 className="text-gray-400 hover:text-white"
               >
-                <span className="sr-only">Facebook</span>
+                <span className="sr-only">{t('footer.facebook')}</span>
                 <svg
                   className="h-6 w-6"
                   fill="currentColor"
@@ -99,7 +101,7 @@ const Footer: React.FC = () => {
                 href="https://www.instagram.com/battlebunkerpullupclub?igsh=Mndsdjd3aHZha2Vw"
                 className="text-gray-400 hover:text-white"
               >
-                <span className="sr-only">Instagram</span>
+                <span className="sr-only">{t('footer.instagram')}</span>
                 <svg
                   className="h-6 w-6"
                   fill="currentColor"
@@ -117,7 +119,7 @@ const Footer: React.FC = () => {
                 href="https://www.youtube.com/@bbpullupclub"
                 className="text-gray-400 hover:text-white"
               >
-                <span className="sr-only">YouTube</span>
+                <span className="sr-only">{t('footer.youtube')}</span>
                 <svg
                   className="h-6 w-6"
                   fill="currentColor"
@@ -133,8 +135,7 @@ const Footer: React.FC = () => {
 
         <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
           <p>
-            &copy; {new Date().getFullYear()} Battle Bunker Pull-Up Competition.
-            All rights reserved.
+            {t('footer.copyright', { year: currentYear })}
           </p>
         </div>
       </div>

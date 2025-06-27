@@ -8,21 +8,35 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    lng: 'en',
     fallbackLng: 'en',
     debug: false,
     interpolation: { escapeValue: false },
-    backend: {
-      loadPath: '/locales/{{lng}}/{{ns}}.json',
-    },
+    backend: { loadPath: '/locales/{{lng}}/{{ns}}.json' },
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
     },
-    ns: [
-      'common', 'auth', 'profile', 'leaderboard', 'submissions', 'admin', 'ethos', 'shop', 'errors', 'validation'
-    ],
-    defaultNS: 'common',
+    // Helpful log in dev when a key is missing
+    saveMissing: process.env.NODE_ENV === 'development',
+    missingKeyHandler: (lng, ns, key) => {
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.warn(`MISSING TRANSLATION: [${lng}] ${ns}:${key}`)
+      }
+    },
   });
+
+/** Central list of supported languages + flags + text-direction */
+export const getAvailableLanguages = () => [
+  { code: 'en', name: 'English',   flag: '🇺🇸', dir: 'ltr' },
+  { code: 'es', name: 'Español',   flag: '🇪🇸', dir: 'ltr' },
+  { code: 'fr', name: 'Français',  flag: '🇫🇷', dir: 'ltr' },
+  { code: 'de', name: 'Deutsch',   flag: '🇩🇪', dir: 'ltr' },
+  { code: 'pt', name: 'Português', flag: '🇧🇷', dir: 'ltr' },
+  { code: 'zh', name: '中文',       flag: '🇨🇳', dir: 'ltr' },
+  { code: 'ja', name: '日本語',     flag: '🇯🇵', dir: 'ltr' },
+  { code: 'ko', name: '한국어',     flag: '🇰🇷', dir: 'ltr' },
+  { code: 'ar', name: 'العربية',    flag: '🇸🇦', dir: 'rtl' },
+]
 
 export default i18n; 

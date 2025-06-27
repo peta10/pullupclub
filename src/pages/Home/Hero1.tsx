@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef, memo } from 'react';
 import { Button } from '../../components/ui/Button';
 import { Link } from '../../components/ui/Link';
 import { Zap } from 'lucide-react';
+import { useTranslation, Trans } from 'react-i18next';
 
 // Use the same color and font conventions as Hero.tsx
 // const FALLBACK_ACTIVE_USERS = 1230
 
 // Lazy load non-critical features
 const LazyActivityTicker = memo(() => {
+  const { t } = useTranslation('home');
   const [recentActivity, setRecentActivity] = useState([
     { name: "Marcus", location: "Chicago", pullUps: 25, time: "2 min ago" }
   ]);
@@ -31,11 +33,11 @@ const LazyActivityTicker = memo(() => {
         name,
         location: city,
         pullUps: Math.floor(Math.random() * 40) + 10,
-        time: "Just now"
+        time: t('hero.justNow')
       }]);
     }, 8000);
     return () => clearInterval(interval);
-  }, []);
+  }, [t]);
 
   return (
     <div className="absolute top-4 left-0 right-0 z-10">
@@ -43,10 +45,22 @@ const LazyActivityTicker = memo(() => {
         <div className="flex items-center text-sm">
           <div className="flex items-center space-x-2 mr-4">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-green-400">LIVE</span>
+            <span className="text-green-400">{t('hero.live')}</span>
           </div>
           <span className="text-gray-300">
-            <span className="text-[#9b9b6f] font-semibold">{recentActivity[0].name}</span> from {recentActivity[0].location} completed <span className="text-[#9b9b6f]">{recentActivity[0].pullUps} pull-ups</span>
+            <Trans
+              i18nKey="hero.liveActivity"
+              t={t}
+              values={{
+                name: recentActivity[0].name,
+                location: recentActivity[0].location,
+                pullUps: recentActivity[0].pullUps,
+              }}
+              components={[
+                <span className="text-[#9b9b6f] font-semibold" />,
+                <span className="text-[#9b9b6f]" />,
+              ]}
+            />
           </span>
         </div>
       </div>
@@ -55,6 +69,7 @@ const LazyActivityTicker = memo(() => {
 });
 
 const Hero1: React.FC = () => {
+  const { t } = useTranslation('home');
   const [imageLoaded, setImageLoaded] = useState(false);
   const [animationsEnabled, setAnimationsEnabled] = useState(false);
   const [displayedActiveUsers, setDisplayedActiveUsers] = useState(0);
@@ -179,7 +194,7 @@ const Hero1: React.FC = () => {
           />
           <img
             src="/pullup_header_desktop.webp"
-            alt="Athlete doing pull-ups"
+            alt={t('hero.alt_athlete')}
             className={`w-full h-full object-cover object-right sm:object-center lg:object-left transition-opacity duration-1000 ${imageLoaded ? 'opacity-40' : 'opacity-0'}`}
             loading="eager"
             fetchPriority="high"
@@ -196,56 +211,63 @@ const Hero1: React.FC = () => {
         {/* Animated Warriors Joined Counter */}
         <div className={`mb-2 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
           <span className="block text-2xl md:text-3xl font-bold tracking-tight text-white">
-            {displayedActiveUsers.toLocaleString()}+ <span className="text-[#9b9b6f]">Warriors Joined</span>
+            {displayedActiveUsers.toLocaleString()}+ <span className="text-[#9b9b6f]">{t('hero.warriorsJoined')}</span>
           </span>
         </div>
         {/* Dramatic Headline Animation */}
         <div className={`mb-2 transition-all duration-700 ${headlineVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
             <span className="block text-[#9b9b6f]">
-              Welcome to Pull-Up Club
+              {t('hero.title')}
             </span>
           </h1>
         </div>
         {/* Dramatic Subtitle Animation */}
         <div className={`transition-all duration-700 ${subtitleVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <p className="mt-4 text-xl text-gray-300 max-w-3xl">
-            Rule #1: You don't talk about Pull-Up Club, but your reps will speak for themselves.
+            {t('hero.subtitle')}
           </p>
         </div>
 
         <div className="mt-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-          <Button size="lg">
+          <Button size="lg" className="bg-[#a5a676] hover:bg-[#8f8f66] text-white rounded-full px-8 py-3">
             <Link href="/subscription" className="text-white">
-              Sign Up Now
+              {t('hero.cta')}
             </Link>
           </Button>
-          <Button variant="secondary" size="lg">
+          <Button variant="secondary" size="lg" className="bg-[#1a1a1a] hover:bg-[#2a2a2a] text-white rounded-full px-8 py-3">
             <Link href="/leaderboard" className="text-white">
-              View Leaderboard
+              {t('hero.secondaryCta')}
             </Link>
           </Button>
         </div>
 
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8">
           <div className="flex flex-col">
-            <span className="text-4xl font-bold text-[#9b9b6f]">$9.99/mo</span>
-            <span className="mt-2 text-gray-400">Cancel Anytime</span>
+            <span className="text-4xl font-bold text-[#9b9b6f]">{t('hero.price')}</span>
+            <span className="mt-2 text-gray-400">{t('hero.cancelAnytime')}</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-4xl font-bold text-[#9b9b6f]">Global</span>
-            <span className="mt-2 text-gray-400">Leaderboard</span>
+            <span className="text-4xl font-bold text-[#9b9b6f]">{t('hero.global')}</span>
+            <span className="mt-2 text-gray-400">{t('hero.leaderboard')}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-4xl font-bold text-[#9b9b6f]">5</span>
-            <span className="mt-2 text-gray-400">Badge Types</span>
+            <span className="mt-2 text-gray-400">{t('hero.badgeTypes')}</span>
           </div>
         </div>
 
         <div className="mt-8 flex items-center space-x-4 text-sm text-gray-400">
           <div className="flex items-center space-x-2">
             <Zap className="w-4 h-4 text-[#9b9b6f]" />
-            <span><span className="text-[#9b9b6f] font-bold">{currentPullUps}</span> pull-ups completed in the last 24 hours</span>
+            <span>
+              <Trans
+                i18nKey="hero.pullUpsToday"
+                t={t}
+                values={{ count: currentPullUps }}
+                components={[<span className="text-[#9b9b6f] font-bold" />]}
+              />
+            </span>
           </div>
         </div>
       </div>

@@ -1,0 +1,41 @@
+{
+  "title": "Competition Rules",
+  "meta": {
+    "title": "Competition Rules | Pull-Up Club",
+    "description": "Official rules for the Battle Bunker Pull-Up Club competition. Read the guidelines for video submission, pull-up standards, and judging criteria."
+  },
+  "mainTitle": "Official Video Submission Rules",
+  "introduction": "To ensure fairness, consistency, and integrity across all entries, all participants must adhere to the following Video Submission Requirements. Any video submission that fails to meet any of these criteria may be denied without notice. If you are a member of the Pull-Up Club and pay the monthly fee, you are allowed one video submission per month.",
+  "section1": {
+    "title": "1. Clear and Unobstructed View",
+    "point1": "The entire body and bar must be clearly visible at all times throughout the video.",
+    "point2": "Camera angle must not hide or obscure key points of movement (e.g., chin, arms, lockout position).",
+    "point3": "Avoid dark lighting, excessive backlighting, or shaky camera work. Stabilize your shot before beginning."
+  },
+  "section2": {
+    "title": "2. Proper Form Requirements",
+    "intro": "To count as a valid rep, each repetition must meet the following standards:",
+    "point1": "Chin Over Bar: The athlete's chin must clearly rise above the horizontal plane of the bar for each rep.",
+    "point2": "Full Extension: Arms must reach full extension (elbows locked out) at the bottom of every repetition.",
+    "point3": "Reps performed with kipping, swinging, or partial range of motion may not be counted at our discretion."
+  },
+  "section3": {
+    "title": "3. Continuous Recording",
+    "point1": "The video must be captured in one continuous take from start to finish, no cuts, edits, slow motion, or time skips.",
+    "point2": "Ensure the recording starts before the first rep and continues until after the final rep is completed.",
+    "point3": "Do not crop or splice footage in post-production."
+  },
+  "section4": {
+    "title": "4. Video Authenticity",
+    "intro": "Your submission must be 100% real, unaltered footage. By submitting, you agree that:",
+    "point1": "The video is not generated, enhanced, or altered by any AI tools.",
+    "point2": "The video is not manipulated using looping, layering, or time edits to falsely extend or improve performance.",
+    "point3": "Any submission found to violate this will be automatically disqualified."
+  },
+  "section5": {
+    "title": "5. Public Access",
+    "point1": "Your video must be publicly accessible on a platform like Instagram, TikTok, YouTube or Facebook.",
+    "point2": "Private, password-protected, or expired links will not be reviewed or counted."
+  },
+  "conclusion": "By submitting your video, you acknowledge and accept these rules in full. We reserve the right to deny any submission that does not clearly meet these standards."
+} 

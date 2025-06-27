@@ -6,6 +6,8 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
 import { Button } from '../../components/ui/Button';
+import { useTranslation } from 'react-i18next';
+import Head from '../../components/Layout/Head';
 
 interface VerificationResult {
   isValid: boolean;
@@ -16,6 +18,7 @@ interface VerificationResult {
 }
 
 const SignupAccessPage: React.FC = () => {
+  const { t } = useTranslation('subscription');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -80,11 +83,11 @@ const SignupAccessPage: React.FC = () => {
     setIsCreatingAccount(true);
     try {
       if (formData.password !== formData.confirmPassword) {
-        toast.error('Passwords do not match');
+        toast.error(t('common:errors.passwordMismatch'));
         return;
       }
       if (!isPasswordValid) {
-        toast.error('Please ensure your password meets all requirements.');
+        toast.error(t('common:errors.passwordRequirementsNotMet'));
         return;
       }
       const { error: authError } = await supabase.auth.signUp({
@@ -102,13 +105,13 @@ const SignupAccessPage: React.FC = () => {
         toast.error(`Failed to create account: ${authError.message}`);
         return;
       }
-      toast.success('Account created successfully! Redirecting...');
+      toast.success(t('common:status.success'));
       setTimeout(() => {
         navigate('/profile');
       }, 1500);
     } catch (error) {
       console.error('Error creating account:', error);
-      toast.error('Failed to create account. Please try again.');
+      toast.error(t('common:errors.generic'));
     } finally {
       setIsCreatingAccount(false);
     }
@@ -132,11 +135,12 @@ const SignupAccessPage: React.FC = () => {
   if (verificationStatus === 'loading') {
     return (
       <Layout>
+        <Head><title>{t('meta.title')}</title></Head>
         <div className="min-h-screen bg-black flex items-center justify-center">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin text-[#9b9b6f] mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-white mb-2">Verifying Payment</h2>
-            <p className="text-gray-400">Please wait while we verify your payment...</p>
+            <h2 className="text-xl font-semibold text-white mb-2">{t('signup.verifying')}</h2>
+            <p className="text-gray-400">{t('signup.verifyingDesc')}</p>
           </div>
         </div>
       </Layout>
@@ -146,18 +150,16 @@ const SignupAccessPage: React.FC = () => {
   if (verificationStatus === 'invalid') {
     return (
       <Layout>
+        <Head><title>{t('meta.title')}</title></Head>
         <div className="min-h-screen bg-black flex items-center justify-center">
           <div className="max-w-md mx-auto text-center">
             <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-4">Payment Verification Failed</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">{t('signup.failedTitle')}</h2>
             <p className="text-gray-400 mb-6">
-              {verificationResult?.error || 'We could not verify your payment. Please try again.'}
+              {verificationResult?.error || t('signup.failedDesc')}
             </p>
-            <Button 
-              onClick={() => navigate('/subscription')}
-              className="bg-[#9b9b6f] text-black hover:bg-[#7a7a58]"
-            >
-              Back to Subscription
+            <Button onClick={() => navigate('/subscription')} className="bg-[#9b9b6f] text-black hover:bg-[#7a7a58]">
+              {t('signup.backButton')}
             </Button>
           </div>
         </div>
@@ -167,16 +169,15 @@ const SignupAccessPage: React.FC = () => {
 
   return (
     <Layout>
+      <Head><title>{t('meta.title')}</title></Head>
       <div className="min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden w-full">
         <div className="relative z-10 w-full max-w-sm rounded-3xl bg-gradient-to-r from-[#ffffff10] to-[#121212] backdrop-blur-sm shadow-2xl p-8 flex flex-col items-center">
           <div className="flex items-center justify-center mb-6">
             <img src="/PUClogo-optimized.webp" alt="Pull-Up Club Logo" className="h-16 w-auto" />
           </div>
           <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-[#9b9b6f] mb-2 text-center">Payment Successful!</h1>
-          <p className="text-gray-400 text-sm mb-6 text-center">
-            Now create your account to access the Pull-Up Club platform.
-          </p>
+          <h1 className="text-3xl font-bold text-[#9b9b6f] mb-2 text-center">{t('signup.successTitle')}</h1>
+          <p className="text-gray-400 text-sm mb-6 text-center">{t('signup.successDesc')}</p>
           <div className="w-full">
             <form onSubmit={handleCreateAccount} className="flex flex-col w-full gap-4">
               <input
@@ -187,7 +188,7 @@ const SignupAccessPage: React.FC = () => {
                 required
                 readOnly={!!verificationResult?.customerEmail}
                 className={`w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f] ${verificationResult?.customerEmail ? 'opacity-75 cursor-not-allowed' : ''}`}
-                placeholder="Email"
+                placeholder={t('common:labels.email')}
               />
               <input
                 type="password"
@@ -197,7 +198,7 @@ const SignupAccessPage: React.FC = () => {
                 required
                 minLength={8}
                 className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
-                placeholder="Password"
+                placeholder={t('signup.passwordPlaceholder')}
               />
               <input
                 type="password"
@@ -207,18 +208,15 @@ const SignupAccessPage: React.FC = () => {
                 required
                 minLength={8}
                 className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
-                placeholder="Confirm Password"
+                placeholder={t('signup.confirmPasswordPlaceholder')}
               />
-              {/* Password Requirements */}
               <div className="space-y-2 bg-white/5 p-4 rounded-xl">
-                <p className="text-sm font-medium text-gray-300 mb-2">
-                  Password Requirements:
-                </p>
-                <PasswordRequirement met={hasMinLength} text="At least 8 characters" />
-                <PasswordRequirement met={hasUpperCase} text="One uppercase letter" />
-                <PasswordRequirement met={hasLowerCase} text="One lowercase letter" />
-                <PasswordRequirement met={hasNumber} text="One number" />
-                <PasswordRequirement met={passwordsMatch} text="Passwords match" />
+                <p className="text-sm font-medium text-gray-300 mb-2">{t('signup.requirementsTitle')}</p>
+                <PasswordRequirement met={hasMinLength} text={t('signup.reqMinLength')} />
+                <PasswordRequirement met={hasUpperCase} text={t('signup.reqUpperCase')} />
+                <PasswordRequirement met={hasLowerCase} text={t('signup.reqLowerCase')} />
+                <PasswordRequirement met={hasNumber} text={t('signup.reqNumber')} />
+                <PasswordRequirement met={passwordsMatch} text={t('signup.reqMatch')} />
               </div>
               <Button
                 type="submit"
@@ -228,10 +226,10 @@ const SignupAccessPage: React.FC = () => {
                 {isCreatingAccount ? (
                   <span className="flex items-center justify-center">
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Creating Account...
+                    {t('signup.creatingButton')}
                   </span>
                 ) : (
-                  'Create Account & Access Platform'
+                  t('signup.createButton')
                 )}
               </Button>
             </form>

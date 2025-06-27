@@ -11,6 +11,7 @@ import { useLeaderboard } from '../../hooks/useLeaderboard';
 import { useCache } from '../../context/CacheProvider';
 import CacheManager from '../../utils/cacheManager';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { getBadgesForSubmission } from '../../data/mockData';
 
 // PaginationControls component
 const PaginationControls: React.FC<{
@@ -18,6 +19,8 @@ const PaginationControls: React.FC<{
   totalPages: number;
   onPageChange: (page: number) => void;
 }> = ({ currentPage, totalPages, onPageChange }) => {
+  const { t } = useTranslation('leaderboard');
+
   const getPageNumbers = () => {
     const pages = [];
     const maxVisible = 5;
@@ -41,7 +44,7 @@ const PaginationControls: React.FC<{
         disabled={currentPage === 1}
         className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Previous
+        {t('pagination.previous')}
       </button>
       {getPageNumbers().map((pageNumber) => (
         <button
@@ -61,7 +64,7 @@ const PaginationControls: React.FC<{
         disabled={currentPage === totalPages}
         className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Next
+        {t('pagination.next')}
       </button>
     </div>
   );
@@ -73,7 +76,7 @@ const LeaderboardPage: React.FC = () => {
   const [itemsPerPage] = useState(10);
   const [showBadgeLegend, setShowBadgeLegend] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const { t } = useTranslation('leaderboard');
+  const { t } = useTranslation(['leaderboard', 'common']);
   const { data: cachedData = [], isLoading: cachedLoading, error: cachedError } = useLeaderboardWithCache(filters);
   const { leaderboardData: originalData = [], isLoading: originalLoading, error: originalError } = useLeaderboard();
   const { cacheInfo, clearAllCaches } = useCache();
@@ -95,7 +98,7 @@ const LeaderboardPage: React.FC = () => {
     }
   }, [cachedData?.length, originalData?.length]);
 
-  // Filtering logic (client-side, same as before)
+  // Filtering logic
   let filtered = finalData;
   if (filters) {
     if (filters.pullUpRange) {
@@ -120,11 +123,14 @@ const LeaderboardPage: React.FC = () => {
       }
     }
     if (filters.badge) {
-      // You may want to use your badge logic here
-      // For now, just filter by badge id if available
-      // (Assume getBadgesForSubmission is available in scope if needed)
+      filtered = filtered.filter(s => {
+        const pullUps = s.actualPullUpCount ?? s.pullUpCount;
+        const badges = getBadgesForSubmission(pullUps);
+        return badges.some(badge => badge.id === filters.badge);
+      });
     }
   }
+
   // Sort by pull-up count DESC, then approvedAt ASC
   filtered = [...filtered].sort((a, b) => {
     const aCount = a.actualPullUpCount ?? a.pullUpCount;
@@ -145,8 +151,8 @@ const LeaderboardPage: React.FC = () => {
     setCurrentPage(1); // Reset to first page when filters change
   };
 
-  if (finalLoading) return <LoadingState message={t('loading')} />;
-  if (finalError) return <ErrorState message={typeof finalError === 'string' ? finalError : 'Failed to load leaderboard.'} />;
+  if (finalLoading) return <LoadingState message={t('table.loading')} />;
+  if (finalError) return <ErrorState message={typeof finalError === 'string' ? finalError : t('common:errors.generic')} />;
 
   return (
     <Layout>
@@ -154,21 +160,21 @@ const LeaderboardPage: React.FC = () => {
         <div className="container mx-auto px-4">
           {process.env.NODE_ENV === 'development' && (
             <div className="bg-gray-800 p-4 rounded-lg mb-4 border border-yellow-500">
-              <h4 className="text-yellow-400 font-medium mb-2">Cache Debug Info</h4>
+              <h4 className="text-yellow-400 font-medium mb-2">{t('dev.cacheDebug')}</h4>
               <div className="text-sm text-gray-300">
-                <p>Cache Size: {cacheInfo?.size ? `${Math.round(cacheInfo.size / 1024)}KB` : 'Loading...'}</p>
-                <p>Cached Keys: {cacheInfo?.keys?.length || 0}</p>
+                <p>{t('dev.cacheSize', { size: Math.round((cacheInfo?.size || 0) / 1024) })}</p>
+                <p>{t('dev.cachedKeys', { count: cacheInfo?.keys?.length || 0 })}</p>
                 <button 
                   onClick={() => clearAllCaches()} 
                   className="mt-2 bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700"
                 >
-                  Clear All Cache
+                  {t('dev.clearCache')}
                 </button>
               </div>
             </div>
           )}
           <div className="flex items-center justify-center mb-8">
-            <img src="/PUClogo-optimized.webp" alt="Pull-Up Club Logo" className="h-10 w-auto mr-3" />
+            <img src="/PUClogo-optimized.webp" alt={t('common:misc.logoAlt')} className="h-10 w-auto mr-3" />
             <h1 className="text-3xl font-bold text-white">{t('title')}</h1>
           </div>
           <div className="text-center mb-8">
@@ -185,7 +191,7 @@ const LeaderboardPage: React.FC = () => {
               aria-expanded={showBadgeLegend}
               aria-controls="badge-legend-mobile"
             >
-              <span className="font-medium">{showBadgeLegend ? 'Hide Badge Legend' : 'View Badge Legend'}</span>
+              <span className="font-medium">{showBadgeLegend ? t('mobile.hideBadgeLegend') : t('mobile.showBadgeLegend')}</span>
               {showBadgeLegend ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
             </button>
             {showBadgeLegend && (
@@ -203,7 +209,7 @@ const LeaderboardPage: React.FC = () => {
               aria-expanded={showFilters}
               aria-controls="filters-mobile"
             >
-              <span className="font-medium">{showFilters ? 'Hide Filters' : 'Filter Results'}</span>
+              <span className="font-medium">{showFilters ? t('mobile.hideFilters') : t('mobile.showFilters')}</span>
               {showFilters ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
             </button>
             {showFilters && (

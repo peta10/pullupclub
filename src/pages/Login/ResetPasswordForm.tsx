@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 interface ResetPasswordFormProps {
   onBackToLogin: () => void;
@@ -14,11 +15,12 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const { resetPassword } = useAuth();
+  const { t } = useTranslation(['auth', 'common']);
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      setError("Please enter your email address");
+      setError(t('errors.invalidEmail'));
       return;
     }
 
@@ -31,7 +33,11 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "An error occurred";
-      setError(errorMessage);
+      if (errorMessage.includes("User not found")) {
+        setError(t('errors.userNotFound'));
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -39,12 +45,15 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
 
   return (
     <form onSubmit={handlePasswordReset} className="w-full flex flex-col gap-4">
+      <p className="text-sm text-gray-300 text-center mb-2">
+        {t('resetPassword.instructions')}
+      </p>
       <div className="w-full">
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
+          placeholder={t('resetPassword.emailLabel')}
           className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
           required
         />
@@ -57,7 +66,7 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
         disabled={isLoading}
         className="w-full bg-white/10 text-white font-medium px-5 py-3 rounded-full shadow hover:bg-white/20 transition mb-3 text-sm"
       >
-        {isLoading ? "Sending..." : "Send reset link"}
+        {isLoading ? t('common:status.loading') : t('resetPassword.submitButton')}
       </button>
 
       <div className="text-center mt-2">
@@ -66,7 +75,7 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
           onClick={onBackToLogin}
           className="text-xs text-gray-400 hover:text-white underline"
         >
-          Back to login
+          {t('resetSent.backToLogin')}
         </button>
       </div>
     </form>

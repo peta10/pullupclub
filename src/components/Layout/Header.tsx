@@ -21,7 +21,7 @@ const Header: React.FC = () => {
           <Link to="/" className="flex items-center space-x-2 text-[#9b9b6f] hover:text-[#7a7a58] transition-colors">
             <img 
               src={"/battlebunker-logo-optimized.webp"}
-              alt="Battle Bunker"
+              alt={t('misc.logoAlt')}
               className="h-8 w-auto"
             />
             <span className="text-xl font-bold tracking-wider"></span>
@@ -30,26 +30,26 @@ const Header: React.FC = () => {
           <nav className="hidden md:flex items-center space-x-8">
             <Link to="/" className="font-medium hover:text-[#9b9b6f] transition-colors flex items-center">
               <Home className="h-4 w-4 mr-1" />
-              {t('nav.home')}
+              {t('navigation.home')}
             </Link>
             <Link to="/leaderboard" className="font-medium hover:text-[#9b9b6f] transition-colors flex items-center">
               <Trophy className="h-4 w-4 mr-1" />
-              {t('nav.leaderboard')}
+              {t('navigation.leaderboard')}
             </Link>
             <Link to="/ethos" className="font-medium hover:text-[#9b9b6f] transition-colors flex items-center">
               <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 4h9" /><path strokeLinecap="round" strokeLinejoin="round" d="M4 6v12a2 2 0 002 2h8V4H6a2 2 0 00-2 2z" /></svg>
-              {t('nav.ethos')}
+              {t('navigation.ethos')}
             </Link>
             {user ? (
               <div className="flex items-center space-x-4">
                 <Link to="/profile" className="flex items-center space-x-2 font-medium hover:text-[#9b9b6f] transition-colors">
                   <User size={20} />
-                  <span>{t('nav.dashboard')}</span>
+                  <span>{t('navigation.profile')}</span>
                 </Link>
                 {isAdmin && (
                   <Link to="/admin-dashboard" className="font-medium hover:text-[#9b9b6f] transition-colors flex items-center">
                     <Shield className="h-4 w-4 mr-1" />
-                    {t('nav.admin')}
+                    {t('navigation.adminDashboard')}
                   </Link>
                 )}
                 <button
@@ -58,18 +58,18 @@ const Header: React.FC = () => {
                   type="button"
                 >
                   <LogOut className="h-4 w-4 mr-1" />
-                  {t('nav.logout')}
+                  {t('navigation.logout')}
                 </button>
               </div>
             ) : (
               <>
                 <Link to="/subscription" className="font-medium hover:text-[#9b9b6f] transition-colors flex items-center">
                   <UserPlus className="h-4 w-4 mr-1" />
-                  {t('nav.signup')}
+                  {t('buttons.signUp')}
                 </Link>
                 <Link to="/login" className="font-medium hover:text-[#9b9b6f] transition-colors flex items-center">
                   <LogIn className="h-4 w-4 mr-1" />
-                  {t('nav.login')}
+                  {t('navigation.login')}
                 </Link>
               </>
             )}
@@ -79,7 +79,7 @@ const Header: React.FC = () => {
           <button 
             className="md:hidden text-white focus:outline-none" 
             onClick={toggleMobileMenu}
-            aria-label="Toggle menu"
+            aria-label={t('navigation.toggleMenu')}
           >
             {isMobileMenuOpen ? (
               <X size={24} />
@@ -99,7 +99,7 @@ const Header: React.FC = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Home className="h-4 w-4 mr-1" />
-                {t('nav.home')}
+                {t('navigation.home')}
               </Link>
               <Link 
                 to="/leaderboard" 
@@ -107,7 +107,7 @@ const Header: React.FC = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Trophy className="h-4 w-4 mr-1" />
-                {t('nav.leaderboard')}
+                {t('navigation.leaderboard')}
               </Link>
               <Link 
                 to="/ethos" 
@@ -115,7 +115,7 @@ const Header: React.FC = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 4h9" /><path strokeLinecap="round" strokeLinejoin="round" d="M4 6v12a2 2 0 002 2h8V4H6a2 2 0 00-2 2z" /></svg>
-                {t('nav.ethos')}
+                {t('navigation.ethos')}
               </Link>
               {user ? (
                 <>
@@ -125,7 +125,7 @@ const Header: React.FC = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <User size={20} />
-                    <span>{t('nav.dashboard')}</span>
+                    <span>{t('navigation.profile')}</span>
                   </Link>
                   {isAdmin && (
                     <Link 
@@ -134,7 +134,7 @@ const Header: React.FC = () => {
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <Shield className="h-4 w-4 mr-1" />
-                      {t('nav.admin')}
+                      {t('navigation.adminDashboard')}
                     </Link>
                   )}
                   <button
@@ -146,7 +146,7 @@ const Header: React.FC = () => {
                     type="button"
                   >
                     <LogOut className="h-4 w-4 mr-1" />
-                    {t('nav.logout')}
+                    {t('navigation.logout')}
                   </button>
                 </>
               ) : (
@@ -157,7 +157,7 @@ const Header: React.FC = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <UserPlus className="h-4 w-4 mr-1" />
-                    {t('nav.signup')}
+                    {t('buttons.signUp')}
                   </Link>
                   <Link 
                     to="/login" 
@@ -165,7 +165,7 @@ const Header: React.FC = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <LogIn className="h-4 w-4 mr-1" />
-                    {t('nav.login')}
+                    {t('navigation.login')}
                   </Link>
                 </>
               )}

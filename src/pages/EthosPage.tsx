@@ -2,9 +2,7 @@ import React from "react";
 import Layout from "../components/Layout/Layout";
 import Head from "../components/Layout/Head";
 import { Shield, Users, Activity } from "lucide-react";
-import { useTranslation } from "react-i18next";
-
-const FULL_LEGEND = `In the early days of Battle Bunker, there was a soldier named Alkeios. During a brutal mission deep behind enemy lines, his unit was trapped — 100 men and women, buried alive in a collapsed underground bunker. The only way out was vertical, a 60-foot shaft with no ladder, no ropes, and no exit plan. One by one, Alkeios pulled them out with nothing but his bare hands and iron will, 100 rescues, each one costing him blood, pain, and breath. When the final soldier reached safety, Alkeios collapsed. His body was broken, but none were left behind. That act of endurance, sacrifice, and unbreakable resolve became known as the origin of the Pull-Up Club, where every pull-up is a nod to the warrior who lifted others from the pit when all hope was gone.`;
+import { useTranslation, Trans } from "react-i18next";
 
 const EthosPage: React.FC = () => {
   const { t } = useTranslation("ethos");
@@ -40,8 +38,12 @@ const EthosPage: React.FC = () => {
             <div className="text-lg md:text-xl text-gray-400 mb-6 font-semibold tracking-wide text-left md:text-left">
               (Battle Bunker Official Lore)
             </div>
-            <div className="text-lg md:text-xl text-gray-300 leading-relaxed md:leading-relaxed font-serif whitespace-pre-line" style={{lineHeight:1.7}}>
-              {FULL_LEGEND}
+            <div className="text-lg md:text-xl text-gray-300 leading-relaxed md:leading-relaxed font-serif space-y-4" style={{lineHeight:1.7}}>
+              <p>
+                <Trans i18nKey="legend.quote1" t={t} components={[<strong className="text-white"/>]} />
+              </p>
+              <p>{t("legend.quote2")}</p>
+              <p>{t("legend.summary")}</p>
             </div>
           </div>
         </div>

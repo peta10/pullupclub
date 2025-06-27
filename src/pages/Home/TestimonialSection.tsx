@@ -1,32 +1,35 @@
 import React, { memo } from 'react';
-
-const testimonials = [
-  {
-    quote: "Battle Bunker's Pull-Up Challenge pushed me to my limits. I went from 15 to 25 pull-ups in just two months!",
-    author: "Mike Johnson",
-    role: "CrossFit Athlete",
-    imageSrc: "/optimized-avatars/mike-johnson.svg"
-  },
-  {
-    quote: "The leaderboard keeps me motivated. Seeing my name climb each week is incredibly satisfying.",
-    author: "Sarah Williams",
-    role: "Battle Bunker Elite Member",
-    imageSrc: "/optimized-avatars/sarah-williams.svg"
-  },
-  {
-    quote: "This platform created friendly competition among my members. Everyone's training harder!",
-    author: "Dave Rodriguez",
-    role: "Owner, Iron Warriors Gym",
-    imageSrc: "/optimized-avatars/dave-rodriguez.svg"
-  }
-];
+import { useTranslation } from 'react-i18next';
 
 const TestimonialSection: React.FC = memo(() => {
+  const { t } = useTranslation('home');
+
+  const testimonials = [
+    {
+      quote: t('testimonials.testimonial1.quote'),
+      author: t('testimonials.testimonial1.author'),
+      role: t('testimonials.testimonial1.role'),
+      imageSrc: "/optimized-avatars/mike-johnson.svg"
+    },
+    {
+      quote: t('testimonials.testimonial2.quote'),
+      author: t('testimonials.testimonial2.author'),
+      role: t('testimonials.testimonial2.role'),
+      imageSrc: "/optimized-avatars/sarah-williams.svg"
+    },
+    {
+      quote: t('testimonials.testimonial3.quote'),
+      author: t('testimonials.testimonial3.author'),
+      role: t('testimonials.testimonial3.role'),
+      imageSrc: "/optimized-avatars/dave-rodriguez.svg"
+    }
+  ];
+
   return (
     <section className="bg-black py-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-white">What Participants Say</h2>
+          <h2 className="text-3xl font-bold text-white">{t('testimonials.title')}</h2>
           <div className="w-20 h-1 bg-[#9b9b6f] mx-auto mt-4 mb-6"></div>
         </div>
         

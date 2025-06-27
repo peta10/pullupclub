@@ -5,10 +5,13 @@ import { useAuth } from "../../context/AuthContext";
 import SubmissionDashboard from "./SubmissionDashboard";
 import ProfileSettings from "../../components/Profile/ProfileSettings";
 import SubscriptionRewards from "./SubscriptionRewards";
+import { useTranslation } from "react-i18next";
+import Head from "../../components/Layout/Head";
 
 const ProfilePage: React.FC = () => {
   const { user, isFirstLogin, profile } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation('profile');
   const [activeTab, setActiveTab] = useState<string>("submissions");
   const [formData, setFormData] = useState({
     full_name: "",
@@ -80,10 +83,14 @@ const ProfilePage: React.FC = () => {
 
   return (
     <Layout>
+      <Head>
+        <title>{t("meta.title")}</title>
+        <meta name="description" content={t("meta.description")} />
+      </Head>
       <div className="container mx-auto px-4 py-8">
         {/* Profile Header - Clean, no background */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Your Profile</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">{t('title')}</h1>
           <p className="text-gray-400">{user?.email}</p>
         </div>
 
@@ -98,7 +105,7 @@ const ProfilePage: React.FC = () => {
                   : "text-gray-400 hover:text-white"
               }`}
             >
-              Submissions
+              {t('sidebar.submissions')}
             </button>
             <button
               onClick={() => setActiveTab("settings")}
@@ -108,7 +115,7 @@ const ProfilePage: React.FC = () => {
                   : "text-gray-400 hover:text-white"
               }`}
             >
-              Settings
+              {t('sidebar.settings')}
             </button>
             <button
               onClick={() => setActiveTab("subscription")}
@@ -118,7 +125,7 @@ const ProfilePage: React.FC = () => {
                   : "text-gray-400 hover:text-white"
               }`}
             >
-              Subscription & Rewards
+              {t('sidebar.subscriptionAndRewards')}
             </button>
           </nav>
         </div>

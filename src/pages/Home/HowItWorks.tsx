@@ -1,22 +1,25 @@
 import React from 'react';
 import { Camera, Award, Medal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const HowItWorks: React.FC = () => {
+  const { t } = useTranslation('home');
+
   const steps = [
     {
       icon: <Camera size={48} className="text-[#9b9b6f]" />,
-      title: "1. Record & Submit",
-      description: "Record your best pull-up performance, post it publicly and submit the video link along with a fee."
+      title: t('howItWorks.step1.title'),
+      description: t('howItWorks.step1.description')
     },
     {
       icon: <Award size={48} className="text-[#9b9b6f]" />,
-      title: "2. Get Reviewed",
-      description: "Our team will review your submission for proper form and count your pull-ups."
+      title: t('howItWorks.step2.title'),
+      description: t('howItWorks.step2.description')
     },
     {
       icon: <Medal size={48} className="text-[#9b9b6f]" />,
-      title: "3. Join the Leaderboard",
-      description: "Once verified, your performance will be featured on our global leaderboard."
+      title: t('howItWorks.step3.title'),
+      description: t('howItWorks.step3.description')
     }
   ];
 
@@ -24,11 +27,10 @@ const HowItWorks: React.FC = () => {
     <section className="bg-black py-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-white">How It Works</h2>
+          <h2 className="text-3xl font-bold text-white">{t('howItWorks.title')}</h2>
           <div className="w-20 h-1 bg-[#9b9b6f] mx-auto mt-4 mb-6"></div>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Join the Battle Bunker Pull-Up Challenge in three simple steps.
-            Show your strength and compete with athletes worldwide.
+            {t('howItWorks.subtitle')}
           </p>
         </div>
         

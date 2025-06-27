@@ -13,6 +13,8 @@ import type { Submission } from '../../types';
 import { clubs, regions } from '../../data/mockData';
 import toast from 'react-hot-toast';
 import { Link } from '../../components/ui/Link';
+import { useTranslation } from 'react-i18next';
+import Head from '../../components/Layout/Head';
 
 interface FormData {
   pullUpCount: number;
@@ -60,60 +62,58 @@ const useMonthlyCountdown = () => {
 
 // Add eligibility message component
 const EligibilityMessage: React.FC<{ status: EligibilityStatus; countdown: Countdown }> = ({ status, countdown }) => {
+  const { t } = useTranslation('submission');
   if (!status) return null;
   switch (status.status) {
     case 'eligible':
       return (
         <div className="bg-green-900 border border-green-700 text-white p-6 rounded-lg mb-6">
-          <h3 className="font-semibold text-lg mb-2">✅ Ready to Submit!</h3>
+          <h3 className="font-semibold text-lg mb-2">{t('eligibility.eligible.title')}</h3>
           <p className="mb-3">{status.message}</p>
           <div className="bg-green-800 p-3 rounded">
-            <p className="text-sm font-medium">Monthly Deadline:</p>
-            <p className="text-lg">{countdown.days} days, {countdown.hours} hours, {countdown.minutes} minutes remaining</p>
+            <p className="text-sm font-medium">{t('eligibility.eligible.deadline')}</p>
+            <p className="text-lg">{t('eligibility.eligible.remaining', { days: countdown.days, hours: countdown.hours, minutes: countdown.minutes })}</p>
           </div>
         </div>
       );
     case 'rejected':
       return (
         <div className="bg-yellow-900 border border-yellow-700 text-white p-6 rounded-lg mb-6">
-          <h3 className="font-semibold text-lg mb-2">🔄 Resubmission Available</h3>
+          <h3 className="font-semibold text-lg mb-2">🔄 {t('eligibility.rejected.title')}</h3>
           <p className="mb-3">{status.message}</p>
           <div className="bg-yellow-800 p-3 rounded">
-            <p className="text-sm">You received an email with feedback. Address the issues and submit again!</p>
+            <p className="text-sm">{t('eligibility.rejected.message')}</p>
           </div>
         </div>
       );
     case 'pending':
       return (
         <div className="bg-blue-900 border border-blue-700 text-white p-6 rounded-lg mb-6">
-          <h3 className="font-semibold text-lg mb-2">⏳ Under Review</h3>
+          <h3 className="font-semibold text-lg mb-2">⏳ {t('eligibility.pending.title')}</h3>
           <p className="mb-3">{status.message}</p>
           <div className="bg-blue-800 p-3 rounded">
-            <p className="text-sm">We'll notify you via email once your submission is reviewed.</p>
+            <p className="text-sm">{t('eligibility.pending.message')}</p>
           </div>
         </div>
       );
     case 'approved_waiting':
       return (
         <div className="bg-gray-900 border border-gray-700 text-white p-6 rounded-lg mb-6">
-          <h3 className="font-semibold text-lg mb-2">🎉 Submission Approved!</h3>
-          <p className="mb-3">Congratulations! Your submission was approved and is on the leaderboard.</p>
+          <h3 className="font-semibold text-lg mb-2">🎉 {t('eligibility.approved.title')}</h3>
+          <p className="mb-3">{t('eligibility.approved.message')}</p>
           <div className="bg-gray-800 p-3 rounded">
-            <p className="text-sm font-medium">Next submission available in:</p>
-            <p className="text-lg">{countdown.days} days, {countdown.hours} hours, {countdown.minutes} minutes</p>
+            <p className="text-sm font-medium">{t('eligibility.approved.nextSubmission')}</p>
+            <p className="text-lg">{t('eligibility.approved.remaining', { days: countdown.days, hours: countdown.hours, minutes: countdown.minutes })}</p>
           </div>
         </div>
       );
     case 'error':
       return (
         <div className="bg-red-900 border border-red-700 text-white p-6 rounded-lg mb-6">
-          <h3 className="font-semibold text-lg mb-2">❌ Error</h3>
+          <h3 className="font-semibold text-lg mb-2">❌ {t('common:status.error')}</h3>
           <p>{status.message}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="mt-2 px-4 py-2 bg-red-800 hover:bg-red-700 rounded text-sm"
-          >
-            Retry
+          <button onClick={() => window.location.reload()} className="mt-2 px-4 py-2 bg-red-800 hover:bg-red-700 rounded text-sm">
+            {t('eligibility.retry')}
           </button>
         </div>
       );
@@ -124,6 +124,7 @@ const EligibilityMessage: React.FC<{ status: EligibilityStatus; countdown: Count
 
 const VideoSubmissionPage: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useTranslation(['submission', 'common']);
   const { submitVideo, uploading } = useVideoSubmission();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData & { otherClubAffiliation?: string }>({
@@ -205,18 +206,7 @@ const VideoSubmissionPage: React.FC = () => {
     });
 
     if (result.success) {
-      toast.success('Video submitted successfully!', {
-        duration: 3000,
-        style: {
-          background: '#1f2937',
-          color: '#ffffff',
-          border: '1px solid #9b9b6f',
-        },
-        iconTheme: {
-          primary: '#9b9b6f',
-          secondary: '#ffffff',
-        },
-      });
+      toast.success(t('successToast'));
       navigate('/profile');
     }
   };
@@ -242,18 +232,14 @@ const VideoSubmissionPage: React.FC = () => {
           <div className="max-w-xl mx-auto">
             <Alert
               variant="warning"
-              title="Authentication Required"
-              description="You need to be logged in to submit videos. Please log in or create an account to continue."
+              title={t('noAuth.title')}
+              description={t('noAuth.description')}
               icon={<Info size={24} />}
             />
             
             <div className="mt-6 flex justify-center space-x-4">
-              <LinkButton to="/login">
-                Log In
-              </LinkButton>
-              <LinkButton to="/create-account" variant="outline">
-                Create Account
-              </LinkButton>
+              <LinkButton to="/login">{t('noAuth.login')}</LinkButton>
+              <LinkButton to="/create-account" variant="outline">{t('noAuth.createAccount')}</LinkButton>
             </div>
           </div>
         </div>
@@ -264,17 +250,16 @@ const VideoSubmissionPage: React.FC = () => {
   if (isCheckingEligibility) {
     return (
       <Layout>
+        <Head><title>{t('meta.title')}</title><meta name="description" content={t('meta.description')} /></Head>
         <div className="bg-black min-h-screen py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto">
             <div className="flex items-center justify-center mb-8 gap-4">
-              <img src="/PUClogo (1).webp" alt="Pull-Up Club Logo" style={{ height: 48, width: 48 }} className="mr-2" />
-              <h1 className="text-3xl font-bold text-white text-center">
-                Submit Your Pull-Up Video
-              </h1>
+              <img src="/PUClogo (1).webp" alt={t('common:misc.logoAlt')} style={{ height: 48, width: 48 }} className="mr-2" />
+              <h1 className="text-3xl font-bold text-white text-center">{t('title')}</h1>
             </div>
             
             <div className="bg-gray-800 p-6 rounded-lg mb-6 text-center">
-              <p className="text-white">Checking submission eligibility...</p>
+              <p className="text-white">{t('eligibility.checking')}</p>
             </div>
           </div>
         </div>
@@ -285,10 +270,11 @@ const VideoSubmissionPage: React.FC = () => {
   if (!isCheckingEligibility && eligibilityStatus) {
     return (
       <Layout>
+        <Head><title>{t('meta.title')}</title><meta name="description" content={t('meta.description')} /></Head>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-white mb-4">Submit Your Video</h1>
-            <p className="text-gray-300">Submit your pull-up video to compete on the leaderboard</p>
+            <h1 className="text-4xl font-bold text-white mb-4">{t('title')}</h1>
+            <p className="text-gray-300">{t('subtitle')}</p>
           </div>
           <EligibilityMessage 
             status={eligibilityStatus} 
@@ -299,9 +285,7 @@ const VideoSubmissionPage: React.FC = () => {
               <form onSubmit={handleSubmit} className="p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="pullUpCount" className="block text-gray-300 font-medium mb-2">
-                      Pull-Up Count <span className="text-[#9b9b6f]">*</span>
-                    </label>
+                    <label htmlFor="pullUpCount" className="block text-gray-300 font-medium mb-2">{t('form.pullUpCount')} <span className="text-[#9b9b6f]">*</span></label>
                     <input
                       type="number"
                       id="pullUpCount"
@@ -313,15 +297,11 @@ const VideoSubmissionPage: React.FC = () => {
                       className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
                       required
                     />
-                    <p className="mt-1 text-xs text-gray-400">
-                      Enter the number of consecutive pull-ups you completed in the video.
-                    </p>
+                    <p className="mt-1 text-xs text-gray-400">{t('form.pullUpCountDesc')}</p>
                   </div>
 
                   <div>
-                    <label htmlFor="gender" className="block text-gray-300 font-medium mb-2">
-                      Gender <span className="text-[#9b9b6f]">*</span>
-                    </label>
+                    <label htmlFor="gender" className="block text-gray-300 font-medium mb-2">{t('form.gender')} <span className="text-[#9b9b6f]">*</span></label>
                     <select
                       id="gender"
                       name="gender"
@@ -330,18 +310,16 @@ const VideoSubmissionPage: React.FC = () => {
                       className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
                       required
                     >
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
+                      <option value="Male">{t('form.male')}</option>
+                      <option value="Female">{t('form.female')}</option>
+                      <option value="Other">{t('form.other')}</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="region" className="block text-gray-300 font-medium mb-2">
-                      Region <span className="text-[#9b9b6f]">*</span>
-                    </label>
+                    <label htmlFor="region" className="block text-gray-300 font-medium mb-2">{t('form.region')} <span className="text-[#9b9b6f]">*</span></label>
                     <select
                       id="region"
                       name="region"
@@ -350,16 +328,14 @@ const VideoSubmissionPage: React.FC = () => {
                       className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
                       required
                     >
-                      <option value="">Select your region</option>
+                      <option value="">{t('form.selectRegion')}</option>
                       {regions.map((region) => (
                         <option key={region} value={region}>{region}</option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label htmlFor="clubAffiliation" className="block text-gray-300 font-medium mb-2">
-                      Club Affiliation
-                    </label>
+                    <label htmlFor="clubAffiliation" className="block text-gray-300 font-medium mb-2">{t('form.clubAffiliation')}</label>
                     <select
                       id="clubAffiliation"
                       name="clubAffiliation"
@@ -367,11 +343,11 @@ const VideoSubmissionPage: React.FC = () => {
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
                     >
-                      <option value="">Select a club (optional)</option>
+                      <option value="">{t('form.selectClub')}</option>
                       {clubs.map((club) => (
                         <option key={club} value={club}>{club}</option>
                       ))}
-                      <option value="Other">Other</option>
+                      <option value="Other">{t('form.other')}</option>
                     </select>
                     {formData.clubAffiliation === 'Other' && (
                       <div className="mt-2">
@@ -381,7 +357,7 @@ const VideoSubmissionPage: React.FC = () => {
                           name="otherClubAffiliation"
                           value={formData.otherClubAffiliation || ''}
                           onChange={handleInputChange}
-                          placeholder="Enter your club name"
+                          placeholder={t('form.otherClubPlaceholder')}
                           className="w-full px-4 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
                           required
                         />
@@ -391,36 +367,32 @@ const VideoSubmissionPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="videoUrl" className="block text-gray-300 font-medium mb-2">
-                    Video URL <span className="text-[#9b9b6f]">*</span>
-                  </label>
+                  <label htmlFor="videoUrl" className="block text-gray-300 font-medium mb-2">{t('form.videoUrl')} <span className="text-[#9b9b6f]">*</span></label>
                   <input
                     type="url"
                     id="videoUrl"
                     name="videoUrl"
                     value={formData.videoUrl}
                     onChange={handleInputChange}
-                    placeholder="https://youtube.com/watch?v=..."
+                    placeholder={t('form.videoUrlPlaceholder')}
                     className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
                     required
                   />
                   <div className="mt-1 text-sm text-gray-400 flex items-start">
                     <Info className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
-                    <span>
-                      Please upload your video to YouTube, Instagram, or TikTok and paste the public link here. 
-                      Make sure your video is publicly accessible.
-                    </span>
+                    <span>{t('form.videoUrlDesc')}</span>
                   </div>
                 </div>
 
                 <div className="bg-gray-700 p-4 rounded-lg">
-                  <h3 className="font-medium text-white mb-3">Video Requirements</h3>
+                  <h3 className="font-medium text-white mb-3">{t('form.requirementsTitle')}</h3>
                   <ul className="list-disc list-inside text-gray-300 space-y-1 text-sm ml-1">
-                    <li>Clear, unobstructed view of the full movement</li>
-                    <li>Chin must clear the bar for each rep</li>
-                    <li>Full arm extension at the bottom of each rep</li>
-                    <li>Continuous recording without cuts or edits</li>
-                    <li>Video must be publicly accessible</li>
+                    <li>{t('form.req1')}</li>
+                    <li>{t('form.req2')}</li>
+                    <li>{t('form.req3')}</li>
+                    <li>{t('form.req4')}</li>
+                    <li>{t('form.req5')}</li>
+                    <li>{t('form.req6')}</li>
                   </ul>
                 </div>
 
@@ -435,10 +407,7 @@ const VideoSubmissionPage: React.FC = () => {
                       className="mt-1 h-4 w-4 rounded border-gray-700 text-[#9b9b6f] focus:ring-[#9b9b6f]"
                       required
                     />
-                    <label htmlFor="checkbox1" className="ml-2 block text-sm text-gray-300">
-                      I confirm that my video link is correct and publicly viewable without requiring login or special access. I understand that inaccessible links may lead to disqualification and that submission fees are non-refundable.
-                      <span className="text-[#9b9b6f]">*</span>
-                    </label>
+                    <label htmlFor="checkbox1" className="ml-2 block text-sm text-gray-300">{t('form.checkbox1')}<span className="text-[#9b9b6f]">*</span></label>
                   </div>
                   <div className="flex items-start">
                     <input
@@ -450,10 +419,7 @@ const VideoSubmissionPage: React.FC = () => {
                       className="mt-1 h-4 w-4 rounded border-gray-700 text-[#9b9b6f] focus:ring-[#9b9b6f]"
                       required
                     />
-                    <label htmlFor="checkbox2" className="ml-2 block text-sm text-gray-300">
-                      I confirm this video is authentic and unedited, with no AI or effects used to alter my performance. Any tampering or misrepresentation will result in disqualification and loss of any fees, rankings, or rewards.
-                      <span className="text-[#9b9b6f]">*</span>
-                    </label>
+                    <label htmlFor="checkbox2" className="ml-2 block text-sm text-gray-300">{t('form.checkbox2')}<span className="text-[#9b9b6f]">*</span></label>
                   </div>
                   <div className="flex items-start">
                     <input
@@ -465,10 +431,7 @@ const VideoSubmissionPage: React.FC = () => {
                       className="mt-1 h-4 w-4 rounded border-gray-700 text-[#9b9b6f] focus:ring-[#9b9b6f]"
                       required
                     />
-                    <label htmlFor="checkbox3" className="ml-2 block text-sm text-gray-300">
-                      I grant Pull-Up Club permission to use my submitted videos in current and future marketing efforts—both branded and unbranded—across all platforms, in perpetuity, without limitation or additional compensation.
-                      <span className="text-[#9b9b6f]">*</span>
-                    </label>
+                    <label htmlFor="checkbox3" className="ml-2 block text-sm text-gray-300">{t('form.checkbox3')}<span className="text-[#9b9b6f]">*</span></label>
                   </div>
                   <div className="flex items-start">
                     <input
@@ -480,45 +443,33 @@ const VideoSubmissionPage: React.FC = () => {
                       className="mt-1 h-4 w-4 rounded border-gray-700 text-[#9b9b6f] focus:ring-[#9b9b6f]"
                       required
                     />
-                    <label htmlFor="checkbox4" className="ml-2 block text-sm text-gray-300">
-                      By submitting this form, I agree to be automatically enrolled in Pull-Up Club email and SMS communications. I understand that I can unsubscribe from either channel at any time by following the opt-out instructions included in each message.
-                      <span className="text-[#9b9b6f]">*</span>
-                    </label>
+                    <label htmlFor="checkbox4" className="ml-2 block text-sm text-gray-300">{t('form.checkbox4')}<span className="text-[#9b9b6f]">*</span></label>
                   </div>
                 </div>
 
                 <div className="pt-4 border-t border-gray-700">
-                  <p className="text-sm text-gray-400 mb-4 text-center">
-                    Please allow up to 15 days for our team to review and properly assign your submission to the month it was submitted.
-                  </p>
+                  <p className="text-sm text-gray-400 mb-4 text-center">{t('form.reviewTime')}</p>
                   <Button
                     type="submit"
                     disabled={!isFormValid() || uploading}
                     className="w-full bg-[#9b9b6f] text-black hover:bg-[#a5a575] font-semibold py-3 rounded-lg transition-colors flex items-center justify-center"
                   >
                     {uploading ? (
-                      <>
-                        <Loader2 className="animate-spin mr-2" />
-                        Submitting...
-                      </>
-                    ) : (
-                      'Submit Now'
-                    )}
+                      <><Loader2 className="animate-spin mr-2" />{t('form.submittingButton')}</>
+                    ) : (t('form.submitButton'))}
                   </Button>
                 </div>
               </form>
             </div>
           ) : (
             <div className="bg-gray-800 rounded-lg p-6 text-center">
-              <h3 className="text-xl font-semibold text-white mb-4">Submission Not Available</h3>
-              <p className="text-gray-300 mb-4">
-                You cannot submit a video at this time. Check your eligibility status above.
-              </p>
+              <h3 className="text-xl font-semibold text-white mb-4">{t('eligibility.notAvailable.title')}</h3>
+              <p className="text-gray-300 mb-4">{t('eligibility.notAvailable.message')}</p>
               <Link 
                 href="/leaderboard" 
                 className="inline-block px-6 py-3 bg-[#918f6f] hover:bg-[#a19f7f] text-black font-semibold rounded-lg"
               >
-                View Leaderboard
+                {t('eligibility.notAvailable.viewLeaderboard')}
               </Link>
             </div>
           )}
@@ -526,7 +477,7 @@ const VideoSubmissionPage: React.FC = () => {
           {/* Recent submissions section */}
           {submissions.length > 0 && (
             <div className="mt-12">
-              <h2 className="text-xl font-bold text-white mb-6">Recent Submissions</h2>
+              <h2 className="text-xl font-bold text-white mb-6">{t('recentSubmissions.title')}</h2>
               <div className="space-y-4">
                 {submissions.map((submission: Submission) => (
                   <div key={submission.id} className="bg-gray-800 p-4 rounded-lg">
@@ -536,12 +487,12 @@ const VideoSubmissionPage: React.FC = () => {
                           <span className="font-medium">{submission.pullUpCount} pull-ups</span>
                           {submission.actualPullUpCount !== undefined && submission.pullUpCount !== submission.actualPullUpCount && (
                             <span className="text-gray-400 ml-2">
-                              (Verified: {submission.actualPullUpCount})
+                              ({t('recentSubmissions.verified')}: {submission.actualPullUpCount})
                             </span>
                           )}
                         </p>
                         <p className="text-gray-400 text-sm">
-                          Submitted on {new Date(submission.submittedAt).toLocaleDateString()}
+                          {t('recentSubmissions.submittedOn')} {new Date(submission.submittedAt).toLocaleDateString()}
                         </p>
                       </div>
                       <div>
@@ -561,7 +512,7 @@ const VideoSubmissionPage: React.FC = () => {
                     
                     {submission.notes && (
                       <div className="mt-3 p-3 bg-gray-700 rounded-lg text-sm">
-                        <p className="text-gray-300 font-medium">Review Notes:</p>
+                        <p className="text-gray-300 font-medium">{t('recentSubmissions.reviewNotes')}:</p>
                         <p className="text-white">{submission.notes}</p>
                       </div>
                     )}
@@ -573,7 +524,7 @@ const VideoSubmissionPage: React.FC = () => {
                         rel="noopener noreferrer"
                         className="text-[#9b9b6f] hover:text-[#7a7a58] text-sm flex items-center"
                       >
-                        <Info className="h-3 w-3 mr-1" /> View Video
+                        <Info className="h-3 w-3 mr-1" /> {t('recentSubmissions.viewVideo')}
                       </a>
                     </div>
                   </div>
@@ -586,7 +537,7 @@ const VideoSubmissionPage: React.FC = () => {
                     variant="outline" 
                     size="sm"
                   >
-                    View All Submissions
+                    {t('recentSubmissions.viewAll')}
                   </LinkButton>
                 </div>
               )}
@@ -600,7 +551,7 @@ const VideoSubmissionPage: React.FC = () => {
   return (
     <Layout>
       <div className="bg-black min-h-screen py-16 px-4 sm:px-6 lg:px-8">
-        <div className="text-white text-center py-12">Checking submission eligibility...</div>
+        <div className="text-white text-center py-12">{t('eligibility.checking')}</div>
       </div>
     </Layout>
   );

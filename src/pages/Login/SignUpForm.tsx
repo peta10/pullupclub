@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { CheckCircle2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface SignUpFormProps {
   onToggleForm: () => void;
@@ -15,6 +16,8 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
   const { signUp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation(['auth', 'common']);
+
   const routeState = location.state as {
     from?: string;
     intendedAction?: string;
@@ -37,7 +40,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
 
     try {
       if (!isPasswordValid) {
-        throw new Error("Please ensure your password meets all requirements");
+        throw new Error(t('errors.passwordRequirementsNotMet'));
       }
       await signUp(email, password);
 
@@ -53,11 +56,9 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
         errorMessage.includes("User already registered") ||
         errorMessage.includes("already exists")
       ) {
-        setError(
-          "An account with this email already exists. Try signing in or reset your password."
-        );
+        setError(t('errors.emailInUse'));
       } else if (errorMessage.includes("email")) {
-        setError("Please enter a valid email address.");
+        setError(t('errors.invalidEmail'));
       } else {
         setError(errorMessage);
       }
@@ -86,7 +87,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
     <form onSubmit={handleSubmit} className="flex flex-col w-full gap-4">
       <div className="w-full flex flex-col gap-3">
         <input
-          placeholder="Email"
+          placeholder={t('signup.emailLabel')}
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -94,7 +95,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
           required
         />
         <input
-          placeholder="Password"
+          placeholder={t('signup.passwordLabel')}
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -104,15 +105,15 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
 
         <div className="space-y-2 bg-white/5 p-4 rounded-xl">
           <p className="text-sm font-medium text-gray-300 mb-2">
-            Password Requirements:
+            {t('signup.passwordRequirements')}
           </p>
           <PasswordRequirement
             met={hasMinLength}
-            text="At least 6 characters"
+            text={t('signup.reqMinLength')}
           />
-          <PasswordRequirement met={hasUpperCase} text="One uppercase letter" />
-          <PasswordRequirement met={hasLowerCase} text="One lowercase letter" />
-          <PasswordRequirement met={hasNumber} text="One number" />
+          <PasswordRequirement met={hasUpperCase} text={t('signup.reqUpperCase')} />
+          <PasswordRequirement met={hasLowerCase} text={t('signup.reqLowerCase')} />
+          <PasswordRequirement met={hasNumber} text={t('signup.reqNumber')} />
         </div>
 
         {error && <div className="text-sm text-red-400 text-left">{error}</div>}
@@ -125,21 +126,21 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
           className="w-full bg-white/10 text-white font-medium px-5 py-3 rounded-full shadow hover:bg-white/20 transition mb-3 text-sm"
         >
           {isLoading
-            ? "Processing..."
+            ? t('common:status.loading')
             : intendedPlan
-            ? "Sign Up & Proceed to Payment"
-            : "Sign up"}
+            ? t('signup.signUpAndProceed')
+            : t('signup.submitButton')}
         </button>
 
         <div className="w-full text-center mt-2">
           <span className="text-xs text-gray-400">
-            Already have an account?{" "}
+            {t('signup.hasAccount')}{" "}
             <button
               type="button"
               onClick={onToggleForm}
               className="underline text-white/80 hover:text-white"
             >
-              Sign in
+              {t('login.submitButton')}
             </button>
           </span>
         </div>

@@ -46,7 +46,7 @@ export function useLeaderboardWithCache(filters: LeaderboardFilters = {}) {
         const { data, error } = await supabase
           .from('leaderboard_cache')
           .select('*')
-          .order('rank', { ascending: true });
+          .order('leaderboard_position', { ascending: true });
         if (error) throw error;
         let filtered = data || [];
         // Apply filters client-side

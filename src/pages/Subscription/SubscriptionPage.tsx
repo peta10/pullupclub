@@ -10,6 +10,8 @@ import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import CheckoutSuccess from "./CheckoutSuccess";
 import StripePaymentForm from "./StripePaymentForm";
 import { supabase } from "../../lib/supabase";
+import { useTranslation, Trans } from 'react-i18next';
+import Head from "../../components/Layout/Head";
 
 const SubscriptionPage: React.FC = () => {
   const { user } = useAuth();
@@ -19,6 +21,7 @@ const SubscriptionPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation('subscription');
   
   // Extract information from route state and query parameters
   const routeState = (location.state || {}) as {
@@ -99,6 +102,10 @@ const SubscriptionPage: React.FC = () => {
   if (successParam === "true" || checkoutParam === "completed") {
     return (
       <Layout>
+        <Head>
+          <title>{t('meta.title', 'Subscription | Pull-Up Club')}</title>
+          <meta name='description' content={t('meta.description', 'Choose your subscription plan and join the Pull-Up Club today. Monthly and annual plans available.')} />
+        </Head>
         <div className="bg-black min-h-screen py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
             <CheckoutSuccess 
@@ -117,10 +124,14 @@ const SubscriptionPage: React.FC = () => {
   if (showPaymentForm && !hasSubscription && user) {
     return (
       <Layout>
+        <Head>
+          <title>{t('meta.title', 'Subscription | Pull-Up Club')}</title>
+          <meta name='description' content={t('meta.description', 'Choose your subscription plan and join the Pull-Up Club today. Monthly and annual plans available.')} />
+        </Head>
         <div className="bg-black min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex justify-center items-start">
           <div className="w-full max-w-lg">
             <h1 className="text-2xl font-bold text-white mb-6 text-center">
-              Complete Your {routeState.plan === "annual" ? "Annual" : "Monthly"} Subscription
+              {t('completeSubscriptionTitle')}
             </h1>
             <StripePaymentForm
               onPaymentComplete={() => {
@@ -143,6 +154,10 @@ const SubscriptionPage: React.FC = () => {
 
   return (
     <Layout>
+      <Head>
+        <title>{t('meta.title', 'Subscription | Pull-Up Club')}</title>
+        <meta name='description' content={t('meta.description', 'Choose your subscription plan and join the Pull-Up Club today. Monthly and annual plans available.')} />
+      </Head>
       <div className="bg-black min-h-screen py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
@@ -156,11 +171,11 @@ const SubscriptionPage: React.FC = () => {
                 fetchPriority="high"
               />
               <h1 className="text-3xl font-bold text-white m-0 p-0">
-                Pull-Up Club Membership
+                {t('title', 'Pull-Up Club Membership')}
               </h1>
             </div>
             <p className="text-gray-400 max-w-2xl mx-auto">
-              Join our exclusive pull-up challenge community, track your progress, and compete on the leaderboard.
+              {t('subtitle', 'Join our exclusive pull-up challenge community, track your progress, and compete on the leaderboard.')}
             </p>
           </div>
 
@@ -174,8 +189,7 @@ const SubscriptionPage: React.FC = () => {
                 <div className="bg-yellow-900/20 border border-yellow-800 rounded-lg p-4 mb-8 flex items-center">
                   <CheckCircle2 className="h-5 w-5 text-yellow-500 mr-2 flex-shrink-0" />
                   <p className="text-yellow-200">
-                    Your subscription has been set to cancel at the end of your current billing period.
-                    You'll continue to have access until then.
+                    {t('cancellationNotice')}
                   </p>
                 </div>
               )}
@@ -183,7 +197,7 @@ const SubscriptionPage: React.FC = () => {
               <div className="bg-[#9b9b6f]/20 border border-[#9b9b6f] rounded-lg p-4 mb-8 flex items-center">
                 <CheckCircle2 className="h-5 w-5 text-[#9b9b6f] mr-2 flex-shrink-0" />
                 <p className="text-gray-200">
-                  You have an active membership. Manage your subscription below.
+                  {t('activeNotice')}
                 </p>
               </div>
               
@@ -197,15 +211,15 @@ const SubscriptionPage: React.FC = () => {
               
               <div className="mt-12 text-center text-sm text-gray-500">
                 <p>
-                  By subscribing, you agree to our{' '}
-                  <a href="/terms" className="text-[#9b9b6f] hover:underline">
-                    Terms of Service
-                  </a>{' '}
-                  and{' '}
-                  <a href="/privacy" className="text-[#9b9b6f] hover:underline">
-                    Privacy Policy
-                  </a>
-                  .
+                  <Trans
+                    i18nKey="agreement"
+                    t={t}
+                    defaults="By subscribing, you agree to our <0>Terms of Service</0> and <1>Privacy Policy</1>."
+                    components={[
+                      <a href="/terms" className="text-[#9b9b6f] hover:underline" />,
+                      <a href="/privacy" className="text-[#9b9b6f] hover:underline" />
+                    ]}
+                  />
                 </p>
               </div>
             </>
@@ -213,7 +227,7 @@ const SubscriptionPage: React.FC = () => {
 
           {error && (
             <div className="max-w-2xl mx-auto mt-8 bg-red-900/30 border border-red-800 rounded-lg p-4 text-sm text-red-200 text-center">
-              {error}
+              {error === "Failed to load subscription status" ? t('loadingStatus') : error}
             </div>
           )}
         </div>

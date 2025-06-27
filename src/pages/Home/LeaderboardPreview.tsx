@@ -4,8 +4,10 @@ import { Link } from "../../components/ui/Link";
 import LeaderboardTable from "../../components/Leaderboard/LeaderboardTable";
 import { useLeaderboardWithCache } from '../../hooks/useOptimizedQuery';
 import { useLeaderboard } from '../../hooks/useLeaderboard';
+import { useTranslation } from "react-i18next";
 
 const LeaderboardPreview: React.FC = () => {
+  const { t } = useTranslation('home');
   const { data: cachedData = [], isLoading: cachedLoading } = useLeaderboardWithCache();
   const { leaderboardData: originalData = [], isLoading: originalLoading } = useLeaderboard();
 
@@ -18,11 +20,10 @@ const LeaderboardPreview: React.FC = () => {
     <section className="bg-black py-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-white">Top Performers</h2>
+          <h2 className="text-3xl font-bold text-white">{t('leaderboardPreview.title')}</h2>
           <div className="w-20 h-1 bg-[#9b9b6f] mx-auto mt-4 mb-6"></div>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Check out our current leaderboard champions. Will your name be on
-            this list?
+            {t('leaderboardPreview.subtitle')}
           </p>
         </div>
         {/* Mobile: Card layout */}
@@ -46,9 +47,9 @@ const LeaderboardPreview: React.FC = () => {
           />
         </div>
         <div className="text-center mt-6">
-          <Button variant="secondary" size="lg">
+          <Button variant="secondary" size="lg" className="bg-[#1a1a1a] hover:bg-[#2a2a2a] text-white rounded-full px-8 py-3">
             <Link href="/leaderboard" className="text-white">
-              View Full Leaderboard
+              {t('leaderboardPreview.viewFull')}
             </Link>
           </Button>
         </div>

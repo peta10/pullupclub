@@ -4,6 +4,7 @@ import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 // Live countdown hook with seconds
 const useLiveCountdown = () => {
@@ -36,6 +37,7 @@ const useLiveCountdown = () => {
 const SubmissionDashboard = () => {
   const { user } = useAuth();
   const timeLeft = useLiveCountdown();
+  const { t } = useTranslation('profile');
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(false);
   const [bestPerformance, setBestPerformance] = useState(0);
@@ -128,11 +130,11 @@ const SubmissionDashboard = () => {
         <div className="flex justify-center mb-4">
           <Clock size={48} className="text-[#9b9b6f]" />
         </div>
-        <h3 className="text-xl font-bold text-white mb-2">Monthly Competition</h3>
+        <h3 className="text-xl font-bold text-white mb-2">{t('dashboard.countdown.title')}</h3>
         <p className="text-2xl font-bold text-white mb-1">
           {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
         </p>
-        <p className="text-gray-400">time remaining to submit</p>
+        <p className="text-gray-400">{t('dashboard.countdown.remaining')}</p>
       </div>
 
       {/* Submission Status */}
@@ -141,24 +143,38 @@ const SubmissionDashboard = () => {
           <Target size={48} className="text-[#9b9b6f]" />
         </div>
         <h3 className="text-xl font-bold text-white mb-2">
-          {currentMonthSubmission ? 'Submission Status' : 'Ready to Submit!'}
+          {currentMonthSubmission && currentMonthSubmission.status.toLowerCase() !== 'rejected' 
+            ? t('dashboard.status.title')
+            : t('dashboard.status.ready')}
         </h3>
-        {currentMonthSubmission ? (
+        {currentMonthSubmission && currentMonthSubmission.status.toLowerCase() !== 'rejected' ? (
           <div>
-            <p className="text-gray-400 mb-2">This month's submission</p>
+            <p className="text-gray-400 mb-2">{t('dashboard.status.thisMonth')}</p>
             <p className={`font-semibold mb-2 capitalize ${getStatusColor(currentMonthSubmission.status)}`}> 
               {currentMonthSubmission.status}
             </p>
             <p className="text-2xl font-bold text-white">
-              {currentMonthSubmission.actualPullUpCount ?? currentMonthSubmission.pullUpCount} pull-ups
+              {t('dashboard.status.pullUps', { count: currentMonthSubmission.actualPullUpCount ?? currentMonthSubmission.pullUpCount })}
             </p>
+            {currentMonthSubmission.status.toLowerCase() === 'approved' && (
+              <div className="mt-4 text-sm text-gray-400">
+                <p className="text-green-400">{t('dashboard.status.onLeaderboard')}</p>
+              </div>
+            )}
           </div>
         ) : (
           <div>
-            <p className="text-gray-400 mb-4">Submit your pull-up video to compete this month</p>
+            {currentMonthSubmission?.status.toLowerCase() === 'rejected' ? (
+              <>
+                <p className="text-gray-400 mb-2">{t('dashboard.status.rejected')}</p>
+                <p className="text-red-400 mb-4">{t('dashboard.status.rejectedCTA')}</p>
+              </>
+            ) : (
+              <p className="text-gray-400 mb-4">{t('dashboard.status.competeCTA')}</p>
+            )}
             <Link to="/submit">
               <button className="bg-[#9b9b6f] hover:bg-[#a5a575] text-black font-semibold px-6 py-2 rounded-lg transition-colors">
-                Submit Video
+                {currentMonthSubmission?.status.toLowerCase() === 'rejected' ? t('dashboard.submitNewButton') : t('dashboard.submitButton')}
               </button>
             </Link>
           </div>
@@ -170,12 +186,12 @@ const SubmissionDashboard = () => {
         <div className="flex justify-center mb-4">
           <Trophy size={48} className="text-[#9b9b6f]" />
         </div>
-        <h3 className="text-xl font-bold text-white mb-2">Best Performance</h3>
+        <h3 className="text-xl font-bold text-white mb-2">{t('dashboard.best.title')}</h3>
         <p className="text-2xl font-bold text-white mb-1">{bestPerformance}</p>
-        <p className="text-gray-400">pull-ups</p>
+        <p className="text-gray-400">{t('dashboard.best.unit')}</p>
         {bestPerformance > 0 && (
           <div className="mt-4 text-sm text-gray-400">
-            <p className="text-[#9b9b6f]">On Leaderboard</p>
+            <p className="text-[#9b9b6f]">{t('dashboard.status.onLeaderboard')}</p>
           </div>
         )}
       </div>
@@ -186,18 +202,16 @@ const SubmissionDashboard = () => {
           <div className="flex justify-center mb-4">
             <Calendar size={48} className="text-[#9b9b6f]" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">This Month</h3>
+          <h3 className="text-xl font-bold text-white mb-2">{t('dashboard.thisMonth.title')}</h3>
           <p className="text-2xl font-bold text-white mb-1">
             {currentMonthSubmission.actualPullUpCount ?? currentMonthSubmission.pullUpCount}
           </p>
-          <p className="text-gray-400">pull-ups submitted</p>
+          <p className="text-gray-400">{t('dashboard.thisMonth.submitted')}</p>
           <div className="mt-4 text-sm text-gray-400">
-            <p>Status: <span className={`capitalize ${getStatusColor(currentMonthSubmission.status)}`}>
-              {currentMonthSubmission.status}
-            </span></p>
-            <p>Submitted: {new Date(currentMonthSubmission.submittedAt).toLocaleDateString()}</p>
+            <p>{t('dashboard.thisMonth.status', { status: currentMonthSubmission.status })}</p>
+            <p>{t('dashboard.thisMonth.submittedOn', { date: new Date(currentMonthSubmission.submittedAt).toLocaleDateString() })}</p>
             {currentMonthSubmission.status.toLowerCase() === 'approved' && (
-              <p className="text-green-400 mt-1">✓ On Leaderboard</p>
+              <p className="text-green-400 mt-1">{t('dashboard.status.onLeaderboard')}</p>
             )}
           </div>
         </div>
@@ -210,10 +224,10 @@ const SubmissionDashboard = () => {
         <div className="flex justify-center mb-4">
           <FileText size={48} className="text-[#9b9b6f]" />
         </div>
-        <h3 className="text-xl font-bold text-white mb-4">Submission History</h3>
+        <h3 className="text-xl font-bold text-white mb-4">{t('dashboard.history.title')}</h3>
         
         {loading ? (
-          <p className="text-gray-400">Loading submissions...</p>
+          <p className="text-gray-400">{t('dashboard.history.loading')}</p>
         ) : submissions.length > 0 ? (
           <div className="space-y-3">
             {submissions.slice(0, 5).map((submission) => (
@@ -232,7 +246,7 @@ const SubmissionDashboard = () => {
                 </div>
                 <div className="text-right">
                   <span className="text-white font-bold">
-                    {submission.actualPullUpCount ?? submission.pullUpCount} pull-ups
+                    {t('dashboard.status.pullUps', { count: submission.actualPullUpCount ?? submission.pullUpCount })}
                   </span>
                   {submission.videoUrl && (
                     <div className="mt-1">
@@ -242,7 +256,7 @@ const SubmissionDashboard = () => {
                         rel="noopener noreferrer"
                         className="text-[#9b9b6f] hover:text-[#a5a575] text-xs"
                       >
-                        View Video
+                        {t('dashboard.history.viewVideo')}
                       </a>
                     </div>
                   )}
@@ -250,18 +264,18 @@ const SubmissionDashboard = () => {
               </div>
             ))}
             {submissions.length > 5 && (
-              <p className="text-gray-400 text-sm">And {submissions.length - 5} more submissions...</p>
+              <p className="text-gray-400 text-sm">{t('dashboard.history.andMore', { count: submissions.length - 5 })}</p>
             )}
           </div>
         ) : (
           <div className="text-center py-4">
-            <p className="text-gray-400 mb-4">No submissions yet</p>
+            <p className="text-gray-400 mb-4">{t('dashboard.noSubmissions')}</p>
             <p className="text-gray-500 text-sm mb-4">
-              Your submission history will appear here once you submit your first video.
+              {t('dashboard.noSubmissionsCTA')}
             </p>
             <Link to="/submit">
               <button className="bg-[#9b9b6f] hover:bg-[#a5a575] text-black font-semibold py-2 px-4 rounded-lg transition-colors">
-                Submit Your First Video
+                {t('dashboard.submitFirstButton')}
               </button>
             </Link>
           </div>
