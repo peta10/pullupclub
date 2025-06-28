@@ -195,13 +195,14 @@ const Hero1: React.FC = () => {
           <img
             src="/pullup_header_desktop.webp"
             alt={t('hero.alt_athlete')}
-            className={`w-full h-full object-cover object-right sm:object-center lg:object-left transition-opacity duration-1000 ${imageLoaded ? 'opacity-40' : 'opacity-0'}`}
+            className={`w-full h-full object-cover object-center md:object-right-center transition-opacity duration-1000 ${imageLoaded ? 'opacity-50' : 'opacity-0'}`}
+            style={{ objectPosition: '60% center' }}
             loading="eager"
             fetchPriority="high"
             onLoad={() => setImageLoaded(true)}
           />
         </picture>
-        <div className="absolute inset-0 bg-gradient-to-r from-black to-transparent opacity-90"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent opacity-85"></div>
       </div>
 
       {/* Lazy load activity ticker */}
@@ -242,18 +243,18 @@ const Hero1: React.FC = () => {
           </Button>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8">
+        <div className="mt-16 grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-8">
           <div className="flex flex-col">
-            <span className="text-4xl font-bold text-[#9b9b6f]">{t('hero.price')}</span>
-            <span className="mt-2 text-gray-400">{t('hero.cancelAnytime')}</span>
+            <span className="text-3xl sm:text-4xl font-bold text-[#9b9b6f]">{t('hero.price')}</span>
+            <span className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-400">{t('hero.cancelAnytime')}</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-4xl font-bold text-[#9b9b6f]">{t('hero.global')}</span>
-            <span className="mt-2 text-gray-400">{t('hero.leaderboard')}</span>
+            <span className="text-3xl sm:text-4xl font-bold text-[#9b9b6f]">{t('hero.global')}</span>
+            <span className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-400">{t('hero.leaderboard')}</span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-4xl font-bold text-[#9b9b6f]">5</span>
-            <span className="mt-2 text-gray-400">{t('hero.badgeTypes')}</span>
+          <div className="flex flex-col col-span-2 sm:col-span-1 mt-4 sm:mt-0">
+            <span className="text-3xl sm:text-4xl font-bold text-[#9b9b6f]">5</span>
+            <span className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-400">{t('hero.badgeTypes')}</span>
           </div>
         </div>
 

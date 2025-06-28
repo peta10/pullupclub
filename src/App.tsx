@@ -10,6 +10,8 @@ import DebugConnection from './lib/DebugConnection';
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CacheProvider } from './context/CacheProvider';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 // Lazy-loaded components
 const Home = lazy(() => import("./pages/Home/Home.tsx"));
@@ -264,6 +266,8 @@ function App() {
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>
+            <Analytics />
+            <SpeedInsights />
           </StripeProvider>
         </AuthProvider>
       </CacheProvider>

@@ -41,6 +41,31 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Message event - handle client messages
+self.addEventListener('message', (event) => {
+  // Ensure we respond to all messages
+  if (event.data && event.data.type) {
+    switch (event.data.type) {
+      case 'SKIP_WAITING':
+        self.skipWaiting();
+        break;
+      case 'CACHE_URLS':
+        event.waitUntil(
+          caches.open(CACHE_NAME)
+            .then((cache) => {
+              return cache.addAll(event.data.payload);
+            })
+        );
+        break;
+      default:
+        // Always send a response, even for unknown message types
+        event.ports[0]?.postMessage({ error: 'Unknown message type' });
+    }
+  }
+  // Ensure we complete the message handling
+  event.waitUntil(Promise.resolve());
+});
+
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
@@ -85,6 +110,7 @@ self.addEventListener('fetch', (event) => {
             if (event.request.destination === 'document') {
               return caches.match('/');
             }
+            return new Response('Offline');
           });
       })
   );
