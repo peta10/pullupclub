@@ -15,6 +15,7 @@
     "deploy:auth": "supabase functions deploy auth-trigger && supabase functions deploy check-auth-status"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
     "@radix-ui/react-slot": "^1.2.3",
     "@stripe/react-stripe-js": "^3.7.0",
     "@stripe/stripe-js": "^7.4.0",
@@ -29,7 +30,7 @@
     "clsx": "^2.1.1",
     "cobe": "^0.6.4",
     "date-fns": "^3.3.1",
-    "framer-motion": "^12.18.1",
+    "framer-motion": "^12.19.2",
     "i18next": "^25.2.1",
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-http-backend": "^3.0.2",

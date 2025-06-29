@@ -49,6 +49,14 @@
       "loading": "Loading submissions...",
       "andMore": "And {{count}} more submissions...",
       "viewVideo": "View Video"
+    },
+    "nextToBeat": {
+      "title": "Next to Beat",
+      "loading": "Loading targets...",
+      "leading": "You're Leading!",
+      "keepGoing": "Keep pushing your limits!",
+      "pullUps": "pull-ups",
+      "noTargets": "Start submitting to see your next targets!"
     }
   },
   "settings": {

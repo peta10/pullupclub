@@ -198,7 +198,6 @@ const Hero1: React.FC = () => {
             className={`w-full h-full object-cover object-center md:object-right-center transition-opacity duration-1000 ${imageLoaded ? 'opacity-50' : 'opacity-0'}`}
             style={{ objectPosition: '60% center' }}
             loading="eager"
-            fetchPriority="high"
             onLoad={() => setImageLoaded(true)}
           />
         </picture>

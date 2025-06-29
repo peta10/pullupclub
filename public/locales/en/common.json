@@ -10,7 +10,8 @@
     "login": "Login",
     "logout": "Logout",
     "adminDashboard": "Admin Dashboard",
-    "adminUsers": "Admin Users"
+    "adminUsers": "Admin Users",
+    "toggleMenu": "Toggle Menu"
   },
   "buttons": {
     "submit": "Submit",

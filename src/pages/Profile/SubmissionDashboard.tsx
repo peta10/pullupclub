@@ -1,4 +1,4 @@
-import { Clock, Trophy, Target, FileText, Calendar } from "lucide-react";
+import { Clock, Trophy, Target, FileText, ChevronUp } from "lucide-react";
 import { Submission } from "../../types";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../context/AuthContext";
@@ -32,6 +32,102 @@ const useLiveCountdown = () => {
   }, []);
 
   return timeLeft;
+};
+
+interface NextBeatTarget {
+  fullName: string;
+  clubAffiliation: string;
+  pullUpCount: number;
+}
+
+const NextToBeat = ({ bestScore }: { bestScore: number }) => {
+  const { t } = useTranslation('profile');
+  const [targets, setTargets] = useState<NextBeatTarget[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [isLeading, setIsLeading] = useState(false);
+
+  useEffect(() => {
+    const fetchNextTargets = async () => {
+      if (bestScore === 0) return;
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("leaderboard_cache")
+          .select("actual_pull_up_count, pull_up_count, full_name, club_affiliation")
+          .or(`actual_pull_up_count.gt.${bestScore},pull_up_count.gt.${bestScore}`)
+          .order('actual_pull_up_count', { ascending: true })
+          .order('pull_up_count', { ascending: true })
+          .limit(3);
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          setIsLeading(true);
+          return;
+        }
+
+        const formattedTargets = data.map(target => ({
+          fullName: target.full_name,
+          clubAffiliation: target.club_affiliation || 'Independent',
+          pullUpCount: target.actual_pull_up_count || target.pull_up_count
+        }));
+
+        setTargets(formattedTargets);
+      } catch (err) {
+        console.error("Failed to fetch next targets:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNextTargets();
+  }, [bestScore]);
+
+  return (
+    <div className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105">
+      <div className="flex justify-center mb-4">
+        <ChevronUp size={48} className="text-[#9b9b6f]" />
+      </div>
+      <h3 className="text-xl font-bold text-white mb-4">{t('dashboard.nextToBeat.title', 'Next to Beat')}</h3>
+      
+      {loading ? (
+        <p className="text-gray-400">{t('dashboard.nextToBeat.loading', 'Loading...')}</p>
+      ) : isLeading ? (
+        <div className="text-center">
+          <p className="text-2xl font-bold text-[#9b9b6f] mb-2">
+            {t('dashboard.nextToBeat.leading', "You're Leading!")}
+          </p>
+          <p className="text-gray-400">
+            {t('dashboard.nextToBeat.keepGoing', 'Keep pushing your limits!')}
+          </p>
+        </div>
+      ) : targets.length > 0 ? (
+        <div className="space-y-3">
+          {targets.map((target, index) => (
+            <div key={index} className="text-left bg-gray-800 p-3 rounded">
+              <div className="flex justify-between items-center">
+                <div>
+                  <span className="text-white font-medium">
+                    {target.fullName}
+                  </span>
+                  <span className="text-gray-400 text-sm ml-1">
+                    ({target.clubAffiliation})
+                  </span>
+                </div>
+                <span className="text-[#9b9b6f] font-bold">
+                  {target.pullUpCount} {t('dashboard.nextToBeat.pullUps', 'pull-ups')}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-gray-400">
+          {t('dashboard.nextToBeat.noTargets', 'Start submitting to see your next targets!')}
+        </p>
+      )}
+    </div>
+  );
 };
 
 const SubmissionDashboard = () => {
@@ -196,31 +292,11 @@ const SubmissionDashboard = () => {
         )}
       </div>
 
-      {/* This Month's Details */}
-      {currentMonthSubmission && (
-        <div className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105">
-          <div className="flex justify-center mb-4">
-            <Calendar size={48} className="text-[#9b9b6f]" />
-          </div>
-          <h3 className="text-xl font-bold text-white mb-2">{t('dashboard.thisMonth.title')}</h3>
-          <p className="text-2xl font-bold text-white mb-1">
-            {currentMonthSubmission.actualPullUpCount ?? currentMonthSubmission.pullUpCount}
-          </p>
-          <p className="text-gray-400">{t('dashboard.thisMonth.submitted')}</p>
-          <div className="mt-4 text-sm text-gray-400">
-            <p>{t('dashboard.thisMonth.status', { status: currentMonthSubmission.status })}</p>
-            <p>{t('dashboard.thisMonth.submittedOn', { date: new Date(currentMonthSubmission.submittedAt).toLocaleDateString() })}</p>
-            {currentMonthSubmission.status.toLowerCase() === 'approved' && (
-              <p className="text-green-400 mt-1">{t('dashboard.status.onLeaderboard')}</p>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Next to Beat - Replacing This Month's Details */}
+      <NextToBeat bestScore={bestPerformance} />
 
       {/* Submission History */}
-      <div className={`bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105 ${
-        currentMonthSubmission ? 'md:col-span-2' : 'md:col-span-3'
-      }`}>
+      <div className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105 md:col-span-2">
         <div className="flex justify-center mb-4">
           <FileText size={48} className="text-[#9b9b6f]" />
         </div>

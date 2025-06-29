@@ -26,111 +26,153 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
     return <div className="text-center text-white py-8">Loading...</div>;
   }
 
-  // Enhanced Card layout for mobile
+  // Slim Mobile Card layout - MILITARY STYLE
   if (mobileCardMode) {
     return (
-      <div className="divide-y divide-gray-700">
+      <div className="space-y-4">
         {data.map((submission, index) => {
           const rank = (currentPage - 1) * itemsPerPage + index + 1;
           const badges = getBadgesForSubmission(submission.actualPullUpCount ?? submission.pullUpCount);
           const highestBadge = badges.length > 0 ? badges[badges.length - 1] : null;
-          // Debug logs
-          console.log('Submission data:', submission);
-          console.log('Video URL:', submission.videoUrl);
+          const pullUpCount = submission.actualPullUpCount ?? submission.pullUpCount ?? 0;
+
+          // Enhanced rank styling for top performers
+          const getRankStyling = (rank: number) => {
+            if (rank === 1) return "bg-gradient-to-r from-yellow-600 to-yellow-500 text-black shadow-lg shadow-yellow-500/30";
+            if (rank === 2) return "bg-gradient-to-r from-gray-400 to-gray-300 text-black shadow-lg shadow-gray-400/30";
+            if (rank === 3) return "bg-gradient-to-r from-amber-600 to-amber-500 text-black shadow-lg shadow-amber-500/30";
+            return "bg-[#9b9b6f] text-black";
+          };
+
+          const getCardStyling = (rank: number) => {
+            if (rank <= 3) return "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-l-4 border-l-[#9b9b6f] border border-[#9b9b6f]/30 shadow-xl shadow-[#9b9b6f]/20 rounded-lg";
+            return "bg-gradient-to-br from-gray-900 via-gray-850 to-gray-900 border-l-4 border-l-[#9b9b6f] border border-gray-700 rounded-lg";
+          };
+
           return (
-            <div key={submission.id} className="p-5 bg-gray-900 hover:bg-gray-800 transition-colors rounded-xl mb-4 shadow-lg">
-              {/* Top Row: Rank, Name, Pull-ups */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-[#9b9b6f] rounded-full h-12 w-12 flex items-center justify-center">
-                    <span className="text-xl font-bold text-black">#{rank}</span>
+            <div key={submission.id} className={`${getCardStyling(rank)} p-4 hover:bg-gray-800 hover:border-l-[#918f6f] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1`}>
+              
+              {/* TACTICAL HEADER BAR */}
+              <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-700/50">
+                <div className="flex items-center gap-3">
+                  {/* RANK BADGE - MILITARY STYLE */}
+                  <div className={`${getRankStyling(rank)} px-3 py-1 font-black text-lg font-mono tracking-widest shadow-lg`} 
+                       style={{ clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)' }}>
+                    #{rank.toString().padStart(2, '0')}
                   </div>
+                  
+                  {/* OPERATIVE NAME */}
                   <div>
-                    <div className="text-white font-bold text-lg">{submission.fullName}</div>
-                    <div className="text-sm text-gray-400">
-                      {submission.age} years • {submission.gender}
+                    <div className="text-white font-black text-xl uppercase tracking-wider font-mono">
+                      {submission.fullName}
+                    </div>
+                    <div className="text-[#9b9b6f] text-sm font-mono tracking-widest">
+                      OPERATIVE • ID: {submission.id ? submission.id.toString().slice(-4) : '0000'}
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-[#9b9b6f]">
-                    {submission.actualPullUpCount ?? submission.pullUpCount}
-                  </div>
-                  <div className="text-sm text-gray-400 font-medium">Pull-ups</div>
-                </div>
-              </div>
 
-              {/* Middle Row: Club and Region */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex space-x-6">
-                  <div>
-                    <div className="text-xs text-gray-500 uppercase tracking-wide">Club</div>
-                    <div className="text-white font-medium">{submission.clubAffiliation || 'Independent'}</div>
+                {/* PERFORMANCE METRICS */}
+                <div className="text-right">
+                  <div className="text-4xl font-black text-[#9b9b6f] font-mono leading-none">
+                    {pullUpCount.toString().padStart(2, '0')}
                   </div>
-                  <div>
-                    <div className="text-xs text-gray-500 uppercase tracking-wide">Region</div>
-                    <div className="text-white font-medium">{submission.region}</div>
+                  <div className="text-xs text-gray-400 uppercase tracking-[0.2em] font-mono font-bold">
+                    REPS COMPLETED
                   </div>
                 </div>
               </div>
 
-              {/* Bottom Row: Badge and Video */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div>
-                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Achievement</div>
-                    {highestBadge ? (
-                      <div className="flex items-center space-x-2">
-                        <img
-                          src={highestBadge.imageUrl}
-                          alt={highestBadge.name}
-                          title={highestBadge.name}
-                          className="h-16 w-16 rounded-full object-cover border-2 border-[#9b9b6f]"
-                          onError={(e) => {
-                            console.log('Badge failed to load:', highestBadge.imageUrl);
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
-                        <div>
-                          <div className="text-white font-medium text-sm">{highestBadge.name}</div>
-                          <div className="text-gray-400 text-xs">Badge Earned</div>
-                        </div>
+              {/* MAIN CONTENT GRID */}
+              <div className="grid grid-cols-[auto_1fr] gap-4 items-center">
+                
+                {/* ACHIEVEMENT BADGE - PROMINENT */}
+                <div className="flex flex-col items-center">
+                  {highestBadge ? (
+                    <div className="relative group">
+                      <img
+                        src={highestBadge.imageUrl}
+                        alt={highestBadge.name}
+                        title={highestBadge.name}
+                        className="w-32 h-32 rounded-full object-cover border-4 border-[#9b9b6f] shadow-2xl shadow-[#9b9b6f]/40 group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                      <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#9b9b6f] text-black px-2 py-0.5 rounded-full text-xs font-bold font-mono">
+                        {highestBadge.name.toUpperCase()}
                       </div>
-                    ) : (
-                      <div className="flex items-center space-x-2">
-                        <div className="h-16 w-16 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center">
-                          <span className="text-gray-500 text-xs">No Badge</span>
-                        </div>
-                        <div>
-                          <div className="text-gray-400 text-sm">No Badge Yet</div>
-                          <div className="text-gray-500 text-xs">Keep Training!</div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {/* Video Button */}
-                <div className="text-right">
-                  {submission.videoUrl ? (
-                    <div>
-                      <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Video</div>
-                      <a
-                        href={submission.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center px-2 py-1 text-xs font-medium rounded border border-[#9b9b6f] text-[#9b9b6f] hover:bg-[#9b9b6f] hover:text-black transition-colors"
-                      >
-                        View Video
-                      </a>
                     </div>
                   ) : (
-                    <div>
-                      <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Video</div>
-                      <span className="text-gray-500 text-xs">Not available</span>
+                    <div className="w-32 h-32 rounded-full bg-gray-700 border-4 border-gray-600 flex flex-col items-center justify-center shadow-lg">
+                      <div className="text-gray-500 text-xs font-mono font-bold">NO RANK</div>
+                      <div className="text-gray-600 text-xs font-mono">EARNED</div>
                     </div>
                   )}
                 </div>
+
+                {/* INTEL SECTION */}
+                <div className="space-y-1.5">
+                  
+                  {/* PERSONAL DATA */}
+                  <div className="bg-gray-800/60 border border-gray-600/50 rounded p-1.5">
+                    <div className="text-[#9b9b6f] text-xs font-mono font-bold tracking-widest mb-0.5 uppercase">
+                      PERSONAL DATA
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-900 border border-[#9b9b6f]/40 text-sm text-gray-300 font-mono tracking-wider rounded">
+                        <span className="w-2 h-2 bg-[#9b9b6f] rounded-full animate-pulse"></span>
+                        AGE: {submission.age || 0}Y
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-900 border border-[#9b9b6f]/40 text-sm text-gray-300 font-mono tracking-wider rounded">
+                        <span className="w-2 h-2 bg-[#9b9b6f] rounded-full animate-pulse"></span>
+                        {(submission.gender || 'UNKNOWN').toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* DEPLOYMENT INFO */}
+                  <div className="grid grid-cols-2 gap-1">
+                    <div className="bg-gray-800/40 border border-gray-600/30 rounded p-1">
+                      <div className="text-[#9b9b6f] text-xs font-mono font-bold uppercase tracking-wider mb-0.5">
+                        CLUB
+                      </div>
+                      <div className="text-white text-base font-mono font-bold truncate">
+                        {submission.clubAffiliation || 'INDEPENDENT'}
+                      </div>
+                    </div>
+                    <div className="bg-gray-800/40 border border-gray-600/30 rounded p-1">
+                      <div className="text-[#9b9b6f] text-xs font-mono font-bold uppercase tracking-wider mb-0.5">
+                        REGION
+                      </div>
+                      <div className="text-white text-base font-mono font-bold truncate">
+                        {(submission.region || 'UNKNOWN').toUpperCase()}
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
               </div>
+
+              {/* ACTION BAR */}
+              <div className="mt-4 pt-3 border-t border-gray-700/50 flex justify-end">
+                {submission.videoUrl ? (
+                  <a
+                    href={submission.videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-gradient-to-r from-[#9b9b6f] to-[#918f6f] hover:from-[#918f6f] hover:to-[#7a7a58] text-black px-6 py-2 font-black font-mono uppercase tracking-widest transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                    style={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%)' }}
+                  >
+                    ► REVIEW FOOTAGE
+                  </a>
+                ) : (
+                  <div className="bg-gray-700 text-gray-400 px-6 py-2 font-mono uppercase tracking-widest text-sm">
+                    NO FOOTAGE AVAILABLE
+                  </div>
+                )}
+              </div>
+
             </div>
           );
         })}
@@ -159,9 +201,6 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
             const rank = (currentPage - 1) * itemsPerPage + index + 1;
             const badges = getBadgesForSubmission(submission.actualPullUpCount ?? submission.pullUpCount);
             const highestBadge = badges.length > 0 ? badges[badges.length - 1] : null;
-            // Debug logs
-            console.log('Submission data:', submission);
-            console.log('Video URL:', submission.videoUrl);
             return (
               <tr key={submission.id} className="bg-gray-900 hover:bg-gray-800 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
