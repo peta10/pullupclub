@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { trackEvent } from '../../utils/analytics';
 
-// Payment links
-const STRIPE_PAYMENT_LINKS: Record<'monthly' | 'annual', string> = {
+// Payment links - hardcoded since they are public and don't change between environments
+const PAYMENT_LINKS: Record<'monthly' | 'annual', string> = {
   monthly: "https://buy.stripe.com/dRmdR9dos2kmaQcdHGejK00",
   annual: "https://buy.stripe.com/28EcN5dosf784rO0UUejK01"
 };
@@ -17,7 +17,7 @@ export default function SubscriptionPage() {
       category: 'stripe',
       label: plan,
     });
-    window.location.href = STRIPE_PAYMENT_LINKS[plan];
+    window.location.href = PAYMENT_LINKS[plan];
   };
   
   // Show the subscription plan selection

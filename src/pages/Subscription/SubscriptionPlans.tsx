@@ -10,20 +10,17 @@ import { trackEvent } from "../../utils/analytics";
 import { useTranslation } from "react-i18next";
 import Head from "../../components/Layout/Head";
 
-// Payment links - NOTE: Update these in Stripe Dashboard to point to /signup-access?session_id={CHECKOUT_SESSION_ID}
-const STRIPE_PAYMENT_LINKS = {
-  monthly: "https://buy.stripe.com/test_dRmdR9dos2kmaQcdHGejK00",
-  annual: "https://buy.stripe.com/test_28EcN5dosf784rO0UUejK01"
+// Payment links - hardcoded since they are public and don't change between environments
+const PAYMENT_LINKS = {
+  monthly: "https://buy.stripe.com/dRmdR9dos2kmaQcdHGejK00",
+  annual: "https://buy.stripe.com/28EcN5dosf784rO0UUejK01"
 };
 
 const SubscriptionPlans: React.FC = () => {
   const { t } = useTranslation('subscription');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "annual">(
-    "monthly"
-  );
-
+  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "annual">("monthly");
 
   const handleSubscribe = async () => {
     setError(null);
@@ -39,10 +36,8 @@ const SubscriptionPlans: React.FC = () => {
 
       console.log(`Redirecting to Stripe payment link for ${selectedPlan} plan`);
       
-      // Redirect to the appropriate payment link based on the selected plan
-      const paymentLink = selectedPlan === "monthly" 
-        ? STRIPE_PAYMENT_LINKS.monthly 
-        : STRIPE_PAYMENT_LINKS.annual;
+      // Use the appropriate payment link based on the selected plan
+      const paymentLink = PAYMENT_LINKS[selectedPlan];
       
       trackEvent({
         action: 'stripe_checkout_redirect',
