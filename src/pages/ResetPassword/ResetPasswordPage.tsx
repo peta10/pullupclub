@@ -10,8 +10,6 @@ import PasswordChangeForm from "../../components/Auth/PasswordChangeForm";
 const ResetPasswordPage = () => {
   // Debug logging at component load
   console.log('ResetPasswordPage loaded');
-  console.log('Current URL:', window.location.href);
-  console.log('Search params:', window.location.search);
 
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -23,32 +21,55 @@ const ResetPasswordPage = () => {
   const { /* removing signIn */ } = useAuth();
   const navigate = useNavigate();
 
-  // Simplified token detection
+  // Optimized token handling for high-scale usage
   const handleTokensInUrl = useCallback(async () => {
-    console.log('handleTokensInUrl called');
-    console.log('Full URL:', window.location.href);
-    
     const searchParams = new URLSearchParams(window.location.search);
     const accessToken = searchParams.get('access_token');
+    const refreshToken = searchParams.get('refresh_token');
     const type = searchParams.get('type');
     
-    console.log('Parsed tokens:', { accessToken: !!accessToken, type });
-    
-    if (accessToken && type === 'recovery') {
-      console.log('✅ Valid reset tokens found, entering reset mode');
-      setIsResetMode(true);
-      setHashVerified(true); // Skip session verification for now
+    // Early exit if not a recovery request
+    if (!accessToken || type !== 'recovery') {
       return;
     }
+
+    console.log('🔐 Processing password reset tokens...');
     
-    console.log('❌ No valid tokens found');
+    try {
+      // Use both tokens if available, fallback to access token only
+      const sessionData = refreshToken 
+        ? { access_token: accessToken, refresh_token: refreshToken }
+        : { access_token: accessToken, refresh_token: accessToken };
+
+      const { data, error } = await supabase.auth.setSession(sessionData);
+      
+      if (error) {
+        console.error('Session setup failed:', error.message);
+        setError('Invalid or expired password reset link. Please request a new one.');
+        return;
+      }
+
+      if (data.session?.user) {
+        console.log('✅ Password reset session established');
+        setIsResetMode(true);
+        setHashVerified(true);
+        setEmail(data.session.user.email || '');
+        
+        // Clean URL to prevent token reuse (security best practice)
+        window.history.replaceState({}, '', '/reset-password');
+      }
+    } catch (err) {
+      console.error('Token processing error:', err);
+      setError('Failed to process reset link. Please try again or request a new one.');
+      setHashVerified(false);
+      setIsResetMode(false);
+    }
   }, []);
 
   // Fixed useEffect dependencies
   useEffect(() => {
-    console.log('useEffect triggered for token detection');
     handleTokensInUrl();
-  }, []); // Remove problematic dependencies
+  }, [handleTokensInUrl]);
 
   // Handle password reset request (send email)
   const handleRequestReset = async (e: React.FormEvent) => {
