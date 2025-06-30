@@ -37,15 +37,45 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({ onSuccess }) =>
     setError("");
 
     try {
+      console.log('Starting password update...');
+      
+      // Check current session first
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('Current session:', { 
+        hasSession: !!session, 
+        sessionError: sessionError ? {
+          message: sessionError.message,
+          status: sessionError.status,
+          details: sessionError
+        } : null 
+      });
+      
+      if (!session) {
+        throw new Error('No valid session found. Please try the reset link again.');
+      }
+
+      // Log user details (safely)
+      console.log('User details:', {
+        id: session.user?.id,
+        email: session.user?.email,
+        lastSignIn: session.user?.last_sign_in_at,
+      });
+      
       // Update password using Supabase Auth
       const { error: updateError } = await supabase.auth.updateUser({ 
         password: password 
       });
 
       if (updateError) {
-        console.error('Password update error:', updateError);
+        console.error('Password update error details:', {
+          message: updateError.message,
+          status: updateError.status,
+          details: updateError
+        });
         throw updateError;
       }
+
+      console.log('Password updated successfully');
 
       // Show success toast
       toast.success(t('passwordChange.success'), {
@@ -63,6 +93,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({ onSuccess }) =>
 
       // Sign out the user after password change
       await supabase.auth.signOut();
+      console.log('User signed out successfully');
 
       if (onSuccess) {
         onSuccess();
@@ -74,7 +105,16 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({ onSuccess }) =>
       console.error('Password change error:', err);
       const errorMessage = err instanceof Error ? err.message : "An error occurred";
       setError(t('errors.updateFailed', { message: errorMessage }));
-      toast.error(t('errors.updateFailed'));
+      
+      // More detailed error toast
+      toast.error(errorMessage, {
+        duration: 6000, // Longer duration for error messages
+        style: {
+          background: '#1f2937',
+          color: '#ffffff',
+          border: '1px solid #ef4444',
+        },
+      });
     } finally {
       setIsLoading(false);
     }
