@@ -242,7 +242,7 @@ const Hero1: React.FC = () => {
           </Button>
         </div>
 
-        <div className="mt-16 grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-8">
+        <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8">
           <div className="flex flex-col">
             <span className="text-3xl sm:text-4xl font-bold text-[#9b9b6f]">{t('hero.price')}</span>
             <span className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-400">{t('hero.cancelAnytime')}</span>
@@ -251,7 +251,7 @@ const Hero1: React.FC = () => {
             <span className="text-3xl sm:text-4xl font-bold text-[#9b9b6f]">{t('hero.global')}</span>
             <span className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-400">{t('hero.leaderboard')}</span>
           </div>
-          <div className="flex flex-col col-span-2 sm:col-span-1 mt-4 sm:mt-0">
+          <div className="flex flex-col">
             <span className="text-3xl sm:text-4xl font-bold text-[#9b9b6f]">5</span>
             <span className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-400">{t('hero.badgeTypes')}</span>
           </div>
