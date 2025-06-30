@@ -37,12 +37,17 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({ onSuccess }) =>
     setError("");
 
     try {
-      const { error } = await supabase.auth.updateUser({ 
+      // Update password using Supabase Auth
+      const { error: updateError } = await supabase.auth.updateUser({ 
         password: password 
       });
 
-      if (error) throw error;
+      if (updateError) {
+        console.error('Password update error:', updateError);
+        throw updateError;
+      }
 
+      // Show success toast
       toast.success(t('passwordChange.success'), {
         duration: 4000,
         style: {
@@ -56,15 +61,19 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({ onSuccess }) =>
         },
       });
 
+      // Sign out the user after password change
+      await supabase.auth.signOut();
+
       if (onSuccess) {
         onSuccess();
       } else {
-        // Default behavior: redirect to profile after 1.5s
-        setTimeout(() => navigate("/profile"), 1500);
+        // Default behavior: redirect to login after 1.5s
+        setTimeout(() => navigate("/login"), 1500);
       }
     } catch (err) {
+      console.error('Password change error:', err);
       const errorMessage = err instanceof Error ? err.message : "An error occurred";
-      setError(errorMessage);
+      setError(t('errors.updateFailed', { message: errorMessage }));
       toast.error(t('errors.updateFailed'));
     } finally {
       setIsLoading(false);

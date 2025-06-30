@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../components/Layout/Layout";
 import { useAuth } from "../../context/AuthContext";
@@ -18,42 +18,61 @@ const ResetPasswordPage = () => {
   const { /* removing signIn */ } = useAuth();
   const navigate = useNavigate();
 
-  // Check if we have reset tokens in URL query parameters or hash
-  useEffect(() => {
-    // Check both query parameters (?) and hash parameters (#) for reset tokens
+  // Handle tokens found in URL
+  const handleTokensInUrl = useCallback(async () => {
+    console.log('Checking URL for reset tokens:', window.location.href);
+    
     const searchParams = new URLSearchParams(window.location.search);
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
 
-    // Check query parameters first (Supabase format), then hash as fallback
     const accessToken = searchParams.get('access_token') || hashParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token') || hashParams.get('refresh_token');
     const type = searchParams.get('type') || hashParams.get('type');
+    
+    console.log('Token detection:', {
+      hasAccessToken: !!accessToken,
+      type,
+      shouldEnterResetMode: !!(accessToken && type === 'recovery')
+    });
 
-    if (accessToken && refreshToken && type === 'recovery') {
+    if (accessToken && type === 'recovery') {
+      console.log('Entering reset mode...');
       setIsResetMode(true);
-      verifyResetSession();
+      
+      try {
+        // First try to set the session with the token
+        const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: accessToken // Use access token as refresh token for this case
+        });
+
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          setError("Invalid or expired password reset link. Please request a new one.");
+          setIsResetMode(false);
+          return;
+        }
+
+        if (sessionData.session?.user) {
+          console.log('Valid session established');
+          setHashVerified(true);
+          if (sessionData.session.user.email) {
+            setEmail(sessionData.session.user.email);
+          }
+        }
+      } catch (err) {
+        console.error('Error handling reset tokens:', err);
+        setError("Something went wrong. Please try again.");
+        setIsResetMode(false);
+      }
+    } else {
+      console.log('Not entering reset mode - missing tokens or wrong type');
     }
   }, []);
 
-  const verifyResetSession = async () => {
-    try {
-      const { data, error } = await supabase.auth.getSession();
-      if (error) {
-        setError("Invalid or expired password reset link. Please request a new one.");
-        return;
-      }
-      if (data.session?.user) {
-        setHashVerified(true);
-        if (data.session.user.email) {
-          setEmail(data.session.user.email);
-        }
-      } else {
-        setError("You must use the link from your email to reset your password.");
-      }
-    } catch (err) {
-      setError("Something went wrong. Please try again.");
-    }
-  };
+  // Update useEffect to run when URL changes
+  useEffect(() => {
+    handleTokensInUrl();
+  }, [handleTokensInUrl, window.location.search, window.location.hash]);
 
   // Handle password reset request (send email)
   const handleRequestReset = async (e: React.FormEvent) => {
@@ -100,8 +119,8 @@ const ResetPasswordPage = () => {
 
   const handlePasswordChangeSuccess = () => {
     setSuccess(true);
-    // Navigate to profile - user will need to sign in with new password
-    navigate("/profile");
+    // Navigate to login - user will need to sign in with new password
+    setTimeout(() => navigate("/login"), 1500);
   };
 
   // Success view
