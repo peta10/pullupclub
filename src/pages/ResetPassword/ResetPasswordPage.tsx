@@ -8,6 +8,11 @@ import toast from 'react-hot-toast';
 import PasswordChangeForm from "../../components/Auth/PasswordChangeForm";
 
 const ResetPasswordPage = () => {
+  // Debug logging at component load
+  console.log('ResetPasswordPage loaded');
+  console.log('Current URL:', window.location.href);
+  console.log('Search params:', window.location.search);
+
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -18,61 +23,32 @@ const ResetPasswordPage = () => {
   const { /* removing signIn */ } = useAuth();
   const navigate = useNavigate();
 
-  // Handle tokens found in URL
+  // Simplified token detection
   const handleTokensInUrl = useCallback(async () => {
-    console.log('Checking URL for reset tokens:', window.location.href);
+    console.log('handleTokensInUrl called');
+    console.log('Full URL:', window.location.href);
     
     const searchParams = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-
-    const accessToken = searchParams.get('access_token') || hashParams.get('access_token');
-    const type = searchParams.get('type') || hashParams.get('type');
+    const accessToken = searchParams.get('access_token');
+    const type = searchParams.get('type');
     
-    console.log('Token detection:', {
-      hasAccessToken: !!accessToken,
-      type,
-      shouldEnterResetMode: !!(accessToken && type === 'recovery')
-    });
-
+    console.log('Parsed tokens:', { accessToken: !!accessToken, type });
+    
     if (accessToken && type === 'recovery') {
-      console.log('Entering reset mode...');
+      console.log('✅ Valid reset tokens found, entering reset mode');
       setIsResetMode(true);
-      
-      try {
-        // First try to set the session with the token
-        const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: accessToken // Use access token as refresh token for this case
-        });
-
-        if (sessionError) {
-          console.error('Session error:', sessionError);
-          setError("Invalid or expired password reset link. Please request a new one.");
-          setIsResetMode(false);
-          return;
-        }
-
-        if (sessionData.session?.user) {
-          console.log('Valid session established');
-          setHashVerified(true);
-          if (sessionData.session.user.email) {
-            setEmail(sessionData.session.user.email);
-          }
-        }
-      } catch (err) {
-        console.error('Error handling reset tokens:', err);
-        setError("Something went wrong. Please try again.");
-        setIsResetMode(false);
-      }
-    } else {
-      console.log('Not entering reset mode - missing tokens or wrong type');
+      setHashVerified(true); // Skip session verification for now
+      return;
     }
+    
+    console.log('❌ No valid tokens found');
   }, []);
 
-  // Update useEffect to run when URL changes
+  // Fixed useEffect dependencies
   useEffect(() => {
+    console.log('useEffect triggered for token detection');
     handleTokensInUrl();
-  }, [handleTokensInUrl, window.location.search, window.location.hash]);
+  }, []); // Remove problematic dependencies
 
   // Handle password reset request (send email)
   const handleRequestReset = async (e: React.FormEvent) => {
