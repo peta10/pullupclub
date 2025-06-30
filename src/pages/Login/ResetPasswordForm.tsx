@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useTranslation } from "react-i18next";
-import { supabase } from "../../lib/supabase";
 
 interface ResetPasswordFormProps {
   onBackToLogin: () => void;

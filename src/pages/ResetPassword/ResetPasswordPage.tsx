@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Layout from "../../components/Layout/Layout";
 import { useAuth } from "../../context/AuthContext";
 import { CheckCircle2, Lock, Mail, ArrowLeft } from "lucide-react";
@@ -15,7 +15,7 @@ const ResetPasswordPage = () => {
   const [hashVerified, setHashVerified] = useState(false);
   const [isResetMode, setIsResetMode] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const { signIn } = useAuth();
+  const { /* removing signIn */ } = useAuth();
   const navigate = useNavigate();
 
   // Check if we have reset tokens in URL hash
