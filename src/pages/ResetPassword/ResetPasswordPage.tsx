@@ -21,48 +21,71 @@ const ResetPasswordPage = () => {
   const { /* removing signIn */ } = useAuth();
   const navigate = useNavigate();
 
-  // Optimized token handling for high-scale usage
+  // Fixed token handling using verifyOtp for password reset tokens
   const handleTokensInUrl = useCallback(async () => {
     const searchParams = new URLSearchParams(window.location.search);
     const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
     const type = searchParams.get('type');
+    
+    console.log('Token detection:', { hasAccessToken: !!accessToken, type });
     
     // Early exit if not a recovery request
     if (!accessToken || type !== 'recovery') {
+      console.log('❌ No reset tokens found');
       return;
     }
 
-    console.log('🔐 Processing password reset tokens...');
+    console.log('🔐 Processing password reset token...');
     
     try {
-      // Use both tokens if available, fallback to access token only
-      const sessionData = refreshToken 
-        ? { access_token: accessToken, refresh_token: refreshToken }
-        : { access_token: accessToken, refresh_token: accessToken };
-
-      const { data, error } = await supabase.auth.setSession(sessionData);
+      // First check if we already have a valid session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        console.log('✅ Existing session found, using it for password reset');
+        setIsResetMode(true);
+        setHashVerified(true);
+        setEmail(session.user.email || '');
+        
+        // Clean URL immediately to prevent reuse attempts
+        window.history.replaceState({}, '', '/reset-password');
+        return;
+      }
+      
+      console.log('No existing session, verifying reset token...');
+      
+      // For password reset, use verifyOtp with the token hash
+      const { data, error } = await supabase.auth.verifyOtp({
+        token_hash: accessToken,
+        type: 'recovery'
+      });
       
       if (error) {
-        console.error('Session setup failed:', error.message);
-        setError('Invalid or expired password reset link. Please request a new one.');
+        console.error('Token verification failed:', error.message);
+        if (error.message.includes('expired') || error.message.includes('invalid') || error.message.includes('not found')) {
+          setError('This reset link has expired or been used. Please request a new one.');
+        } else {
+          setError('Unable to verify reset link. Please try again or request a new one.');
+        }
         return;
       }
 
       if (data.session?.user) {
-        console.log('✅ Password reset session established');
+        console.log('✅ Password reset token verified successfully');
         setIsResetMode(true);
         setHashVerified(true);
         setEmail(data.session.user.email || '');
         
-        // Clean URL to prevent token reuse (security best practice)
+        // Clean URL to prevent reuse
         window.history.replaceState({}, '', '/reset-password');
+      } else {
+        console.error('No session created from token verification');
+        setError('Unable to establish reset session. Please request a new reset link.');
       }
+      
     } catch (err) {
       console.error('Token processing error:', err);
-      setError('Failed to process reset link. Please try again or request a new one.');
-      setHashVerified(false);
-      setIsResetMode(false);
+      setError('Failed to process reset link. Please request a new one.');
     }
   }, []);
 
@@ -84,9 +107,20 @@ const ResetPasswordPage = () => {
     setError("");
 
     try {
+      // Determine redirect URL based on environment
+      const isLocalhost = window.location.hostname === 'localhost' || 
+                         window.location.hostname === '127.0.0.1' ||
+                         window.location.hostname.includes('localhost');
+      
+      const redirectUrl = isLocalhost 
+        ? `http://localhost:5173/reset-password`  // Local development
+        : `${window.location.origin}/reset-password`; // Production
+      
+      console.log('🔗 Sending reset email with redirect URL:', redirectUrl);
+      
       // Request password reset from Supabase (sends branded email via SMTP)
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: redirectUrl,
       });
 
       if (error) throw error;
