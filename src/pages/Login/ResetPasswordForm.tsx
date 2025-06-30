@@ -29,19 +29,8 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
     setError("");
 
     try {
-      // Step 1: Supabase auth reset (creates secure tokens)
+      // Supabase auth reset (creates secure tokens and sends branded email via SMTP)
       await resetPassword(email);
-      
-      // Step 2: Custom branded email (NO AUTH NEEDED)
-      const { error: emailError } = await supabase.functions.invoke('send-reset-email', {
-        body: { email }
-      });
-      
-      if (emailError) {
-        console.error('Custom email error:', emailError);
-        // Don't throw - user still gets Supabase's basic email as fallback
-      }
-      
       onResetSent(email);
     } catch (err) {
       const errorMessage =

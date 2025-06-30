@@ -5,10 +5,9 @@ import { useAuth } from "../../context/AuthContext";
 import { CheckCircle2, Lock, Mail, ArrowLeft } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import toast from 'react-hot-toast';
+import PasswordChangeForm from "../../components/Auth/PasswordChangeForm";
 
 const ResetPasswordPage = () => {
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -16,29 +15,25 @@ const ResetPasswordPage = () => {
   const [hashVerified, setHashVerified] = useState(false);
   const [isResetMode, setIsResetMode] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const { updatePassword, signIn } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
-  // Check if we have reset tokens in URL
+  // Check if we have reset tokens in URL hash
   useEffect(() => {
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    const type = searchParams.get('type');
+    const hash = window.location.hash.substring(1); // Remove the # symbol
+    const params = new URLSearchParams(hash);
+    
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
+    const type = params.get('type');
 
     if (accessToken && refreshToken && type === 'recovery') {
       setIsResetMode(true);
       verifyResetSession();
     }
-  }, [searchParams]);
+  }, []);
 
-  // Password validation
-  const hasMinLength = password.length >= 6;
-  const hasUpperCase = /[A-Z]/.test(password);
-  const hasLowerCase = /[a-z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
-  const passwordsMatch = password === confirmPassword;
-  const isPasswordValid = hasMinLength && hasUpperCase && hasLowerCase && hasNumber && passwordsMatch;
+
 
   const verifyResetSession = async () => {
     try {
@@ -73,22 +68,12 @@ const ResetPasswordPage = () => {
     setError("");
 
     try {
-      // Step 1: Request password reset from Supabase (creates the reset tokens)
+      // Request password reset from Supabase (sends branded email via SMTP)
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) throw error;
-
-      // Step 2: Send custom branded email via Edge Function (NO AUTH NEEDED)
-      const { error: emailError } = await supabase.functions.invoke('send-reset-email', {
-        body: { email }
-      });
-
-      if (emailError) {
-        console.error('Custom email error:', emailError);
-        // Don't throw - user still gets Supabase's basic email as fallback
-      }
 
       setEmailSent(true);
       toast.success('Password reset instructions sent to your email', {
@@ -113,49 +98,13 @@ const ResetPasswordPage = () => {
     }
   };
 
-  // Handle setting new password
-  const handleSetNewPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!isPasswordValid) {
-      setError("Please ensure your password meets all requirements and that both passwords match.");
-      return;
-    }
-
-    setIsLoading(true);
-    setError("");
-
-    try {
-      await updatePassword(password);
-      setSuccess(true);
-      toast.success('Password updated successfully!');
-
-      // Auto sign in after 1.5 seconds
-      if (email) {
-        setTimeout(async () => {
-          try {
-            await signIn(email, password);
-            navigate("/profile");
-          } catch (signInError) {
-            console.error("Error signing in after password reset:", signInError);
-          }
-        }, 1500);
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "An error occurred";
-      setError(`Failed to update password: ${errorMessage}`);
-      toast.error('Failed to update password');
-    } finally {
-      setIsLoading(false);
-    }
+  const handlePasswordChangeSuccess = () => {
+    setSuccess(true);
+    // Navigate to profile - user will need to sign in with new password
+    navigate("/profile");
   };
 
-  const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
-    <div className="flex items-center space-x-2 text-sm">
-      <CheckCircle2 size={16} className={met ? "text-green-500" : "text-gray-500"} />
-      <span className={met ? "text-green-500" : "text-gray-500"}>{text}</span>
-    </div>
-  );
+
 
   // Success view
   if (success) {
@@ -260,47 +209,16 @@ const ResetPasswordPage = () => {
                 <p className="text-sm text-white">{error || "Verifying your reset link..."}</p>
               </div>
             ) : (
-              <form onSubmit={handleSetNewPassword} className="flex flex-col w-full gap-4">
-                <input
-                  type="password"
-                  placeholder="New Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
-                  required
-                />
-                <input
-                  type="password"
-                  placeholder="Confirm Password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
-                  required
-                />
-                <div className="space-y-2 bg-white/5 p-4 rounded-xl">
-                  <p className="text-sm font-medium text-gray-300 mb-2">Password Requirements:</p>
-                  <PasswordRequirement met={hasMinLength} text="At least 6 characters" />
-                  <PasswordRequirement met={hasUpperCase} text="One uppercase letter" />
-                  <PasswordRequirement met={hasLowerCase} text="One lowercase letter" />
-                  <PasswordRequirement met={hasNumber} text="One number" />
-                  <PasswordRequirement met={passwordsMatch} text="Passwords match" />
-                </div>
-                {error && <div className="text-sm text-red-400">{error}</div>}
-                <button
-                  type="submit"
-                  disabled={!isPasswordValid || isLoading}
-                  className="w-full bg-[#9b9b6f] text-black font-medium px-5 py-3 rounded-full hover:bg-[#7a7a58] transition disabled:opacity-50"
-                >
-                  {isLoading ? "Updating..." : "Update Password"}
-                </button>
+              <div className="w-full">
+                <PasswordChangeForm onSuccess={handlePasswordChangeSuccess} />
                 <button
                   type="button"
                   onClick={() => navigate("/login")}
-                  className="text-xs text-gray-400 hover:text-white underline"
+                  className="text-xs text-gray-400 hover:text-white underline mt-4 text-center w-full"
                 >
                   Back to Sign In
                 </button>
-              </form>
+              </div>
             )
           ) : (
             <form onSubmit={handleRequestReset} className="flex flex-col w-full gap-4">
