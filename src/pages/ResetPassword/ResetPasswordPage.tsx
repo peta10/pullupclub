@@ -18,22 +18,22 @@ const ResetPasswordPage = () => {
   const { /* removing signIn */ } = useAuth();
   const navigate = useNavigate();
 
-  // Check if we have reset tokens in URL hash
+  // Check if we have reset tokens in URL query parameters or hash
   useEffect(() => {
-    const hash = window.location.hash.substring(1); // Remove the # symbol
-    const params = new URLSearchParams(hash);
-    
-    const accessToken = params.get('access_token');
-    const refreshToken = params.get('refresh_token');
-    const type = params.get('type');
+    // Check both query parameters (?) and hash parameters (#) for reset tokens
+    const searchParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+
+    // Check query parameters first (Supabase format), then hash as fallback
+    const accessToken = searchParams.get('access_token') || hashParams.get('access_token');
+    const refreshToken = searchParams.get('refresh_token') || hashParams.get('refresh_token');
+    const type = searchParams.get('type') || hashParams.get('type');
 
     if (accessToken && refreshToken && type === 'recovery') {
       setIsResetMode(true);
       verifyResetSession();
     }
   }, []);
-
-
 
   const verifyResetSession = async () => {
     try {
@@ -103,8 +103,6 @@ const ResetPasswordPage = () => {
     // Navigate to profile - user will need to sign in with new password
     navigate("/profile");
   };
-
-
 
   // Success view
   if (success) {
