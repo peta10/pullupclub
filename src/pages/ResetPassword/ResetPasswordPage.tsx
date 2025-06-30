@@ -73,23 +73,21 @@ const ResetPasswordPage = () => {
     setError("");
 
     try {
-      // Step 1: Request password reset from Supabase
+      // Step 1: Request password reset from Supabase (creates the reset tokens)
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) throw error;
 
-      // Step 2: Send custom branded email via Edge Function
+      // Step 2: Send custom branded email via Edge Function (NO AUTH NEEDED)
       const { error: emailError } = await supabase.functions.invoke('send-reset-email', {
-        body: { 
-          email,
-          resetUrl: `${window.location.origin}/reset-password?email=${encodeURIComponent(email)}`
-        }
+        body: { email }
       });
 
       if (emailError) {
         console.error('Custom email error:', emailError);
+        // Don't throw - user still gets Supabase's basic email as fallback
       }
 
       setEmailSent(true);
