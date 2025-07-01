@@ -15,6 +15,13 @@ interface LeaderboardTableProps {
 
 const PAGE_SIZE = 20;
 
+// Helper function for gender-based badge image selection
+const getBadgeImageUrl = (badgeName: string, gender: string): string => {
+  const genderPath = gender === "Female" ? "women" : "men";
+  // The badge IDs are already in the correct format (recruit, proven, etc.)
+  return `/badge-${badgeName.toLowerCase()}-${genderPath}-256.webp`;
+};
+
 const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
   data,
   loading = false,
@@ -90,15 +97,18 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                 <div className="flex flex-col items-center">
                   {highestBadge ? (
                     <div className="relative group">
-                      <img
-                        src={highestBadge.imageUrl}
-                        alt={highestBadge.name}
-                        title={highestBadge.name}
-                        className="w-32 h-32 rounded-full object-cover border-4 border-[#9b9b6f] shadow-2xl shadow-[#9b9b6f]/40 group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
+                      <div className="w-32 h-32 rounded-full border-4 border-[#9b9b6f] shadow-2xl shadow-[#9b9b6f]/40 overflow-hidden bg-gray-900/90 group-hover:scale-105 transition-transform duration-300">
+                        <img
+                          src={getBadgeImageUrl(highestBadge.id, submission.gender)}
+                          alt={highestBadge.name}
+                          title={highestBadge.name}
+                          className="w-full h-full scale-125 object-contain p-1"
+                          onError={(e) => {
+                            console.error('Badge image failed to load:', e.currentTarget.src);
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
                       <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#9b9b6f] text-black px-2 py-0.5 rounded-full text-xs font-bold font-mono">
                         {highestBadge.name.toUpperCase()}
                       </div>
@@ -230,10 +240,14 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                     {highestBadge ? (
                       <img
                         key={highestBadge.id}
-                        src={highestBadge.imageUrl}
+                        src={getBadgeImageUrl(highestBadge.id, submission.gender)}
                         alt={highestBadge.name}
                         title={highestBadge.name}
-                        className="h-24 w-24 rounded-full object-cover"
+                        className="h-24 w-24 object-contain"
+                        onError={(e) => {
+                          console.error('Badge image failed to load:', e.currentTarget.src);
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     ) : (
                       <span className="text-gray-500">-</span>

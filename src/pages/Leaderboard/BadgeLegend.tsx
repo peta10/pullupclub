@@ -19,9 +19,9 @@ const BadgeLegend: React.FC = () => {
             className="flex flex-col items-center text-center"
           >
             <img
-              src={badge.imageUrl}
+              src={`/badge-${badge.id.toLowerCase()}-men-256.webp`}
               alt={badge.name}
-              className="h-24 w-24 rounded-full mb-2"
+              className="w-32 h-32 mb-2 object-contain"
             />
             <h4 className="text-[#9b9b6f] font-bold">{badge.name}</h4>
             <div className="font-bold text-white">
