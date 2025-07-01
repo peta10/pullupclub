@@ -109,6 +109,12 @@ function App() {
 
   // NEW: Add deployment detection useEffect
   useEffect(() => {
+    // Skip deployment detection in development
+    if (import.meta.env.DEV) {
+      console.log('🛠️ Development mode - skipping deployment detection');
+      return;
+    }
+
     const APP_VERSION = import.meta.env.VITE_VERCEL_GIT_COMMIT_SHA || 
                        import.meta.env.VITE_APP_VERSION || 
                        Date.now().toString();

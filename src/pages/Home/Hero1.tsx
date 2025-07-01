@@ -153,7 +153,7 @@ const Hero1: React.FC = () => {
   useEffect(() => {
     if (isVisible) {
       let start = 0;
-      const end = 1200;
+      const end = 27;
       const duration = 1800; // ms, slower
       const stepTime = 30;
       const steps = Math.ceil(duration / stepTime);
