@@ -40,6 +40,7 @@
       "approve": "批准",
       "reject": "拒绝",
       "feature": "推荐",
+      "unfeature": "取消推荐",
       "watchVideo": "观看视频",
       "infoTitle": "提交信息",
       "claimed": "声称：",

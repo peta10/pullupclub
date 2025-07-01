@@ -40,6 +40,7 @@
       "approve": "承認",
       "reject": "拒否",
       "feature": "特集",
+      "unfeature": "特集を解除",
       "watchVideo": "ビデオを見る",
       "infoTitle": "提出情報",
       "claimed": "申告：",

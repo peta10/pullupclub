@@ -40,6 +40,7 @@
       "approve": "승인",
       "reject": "거절",
       "feature": "추천",
+      "unfeature": "추천 해제",
       "watchVideo": "비디오 보기",
       "infoTitle": "제출 정보",
       "claimed": "주장:",

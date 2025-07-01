@@ -40,6 +40,7 @@
       "approve": "Aprobar",
       "reject": "Rechazar",
       "feature": "Destacar",
+      "unfeature": "Quitar Destacado",
       "watchVideo": "Ver Video",
       "infoTitle": "Información del Envío",
       "claimed": "Reclamado:",

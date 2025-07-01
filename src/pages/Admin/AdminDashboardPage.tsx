@@ -15,11 +15,9 @@ const STATUS_MAP: Record<string, { label: string; variant: string; icon?: string
   'pending': { label: "Pending", variant: "warning" },
   'approved': { label: "Approved", variant: "success" },
   'rejected': { label: "Rejected", variant: "danger" },
-  'featured': { label: "Featured", variant: "default" },
   'Pending': { label: "Pending", variant: "warning" },
   'Approved': { label: "Approved", variant: "success" },
   'Rejected': { label: "Rejected", variant: "danger" },
-  'Featured': { label: "Featured", variant: "default" },
 };
 
 const ITEMS_PER_PAGE = 50;
@@ -72,6 +70,7 @@ const AdminDashboardPage: React.FC = () => {
         submittedAt: submission.created_at,
         submissionDate: new Date(submission.created_at).toLocaleDateString(),
         status: submission.status,
+        featured: submission.featured || false,
         pullUpCount: submission.pull_up_count,
         claimedCount: submission.pull_up_count,
         verifiedCount: submission.actual_pull_up_count,
@@ -104,7 +103,7 @@ const AdminDashboardPage: React.FC = () => {
         const filterStatus = filters.status.toLowerCase();
         // Handle "Featured ⭐" filter
         if (filterStatus.includes('featured') || filterStatus.includes('⭐')) {
-          return subStatus === 'featured';
+          return sub.featured === true;
         }
         return subStatus === filterStatus || 
                STATUS_MAP[subStatus]?.label.toLowerCase().includes(filterStatus) ||
@@ -218,10 +217,10 @@ The Pull-Up Club Team`,
     }
   };
 
-  // Update handleStatusChange to use sendRejectionEmail
+  // Update handleStatusChange to handle featured separately
   const handleStatusChange = async (
     submissionId: string,
-    newStatus: 'Approved' | 'Rejected' | 'Featured',
+    newStatus: 'Approved' | 'Rejected',
     verifiedCount?: number
   ) => {
     setIsLoading(true);
@@ -230,29 +229,31 @@ The Pull-Up Club Team`,
       let updateObj: any = {
         updated_at: new Date().toISOString()
       };
+      
       // Handle different status updates
       if (newStatus === 'Approved') {
         updateObj.status = 'approved';
         updateObj.actual_pull_up_count = verifiedCount;
-      } else if (newStatus === 'Featured') {
-        updateObj.status = 'featured';
-        updateObj.actual_pull_up_count = verifiedCount || submission?.pullUpCount;
       } else if (newStatus === 'Rejected') {
         updateObj.status = 'rejected';
       }
+      
       console.log('Updating submission with:', updateObj); // Debug log
       const { error } = await supabase
         .from('submissions')
         .update(updateObj)
         .eq('id', submissionId);
+      
       if (error) {
         console.error('Database update error:', error);
         throw error;
       }
+      
       // Send rejection email if status is rejected
       if (newStatus === 'Rejected' && submission) {
         await sendRejectionEmail(submission);
       }
+      
       await fetchSubmissions();
       console.log(`Submission ${newStatus.toLowerCase()} successfully`);
     } catch (error) {
@@ -263,20 +264,50 @@ The Pull-Up Club Team`,
     }
   };
 
+  // Add toggleFeatured function
+  const toggleFeatured = async (submissionId: string) => {
+    setIsLoading(true);
+    try {
+      const submission = submissions.find(s => s.id === submissionId);
+      if (!submission) throw new Error('Submission not found');
+
+      const updateObj = {
+        featured: !submission.featured,
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('submissions')
+        .update(updateObj)
+        .eq('id', submissionId);
+
+      if (error) throw error;
+      await fetchSubmissions();
+      console.log(`Submission featured status toggled successfully`);
+    } catch (error) {
+      console.error('Error toggling featured status:', error);
+      setError(error instanceof Error ? error.message : 'Failed to toggle featured status');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Helper for status badge
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, featured: boolean) => {
     const statusKey = status.toLowerCase();
     const map = STATUS_MAP[statusKey] || STATUS_MAP[status] || { label: status, variant: 'default' };
-    // Add star icon only for featured status, but keep it subtle
-    if (statusKey === 'featured') {
-      return (
-        <Badge variant="default" className="bg-amber-100 text-amber-800 border-amber-300">
-          <Star className="h-3 w-3 mr-1" />
-          {map.label}
-        </Badge>
-      );
-    }
-    return <Badge variant={map.variant as any}>{map.label}</Badge>;
+    
+    return (
+      <div className="flex items-center gap-2">
+        <Badge variant={map.variant as any}>{map.label}</Badge>
+        {featured && (
+          <Badge variant="default" className="bg-amber-100 text-amber-800 border-amber-300">
+            <Star className="h-3 w-3 mr-1" />
+            Featured
+          </Badge>
+        )}
+      </div>
+    );
   };
 
   // Unique filter options
@@ -292,7 +323,7 @@ The Pull-Up Club Team`,
     "Pending",
     "Approved", 
     "Rejected",
-    "Featured"
+    "Featured ⭐"
   ];
 
   // Count of new submissions
@@ -419,7 +450,7 @@ The Pull-Up Club Team`,
                           {new Date(submission.submittedAt || submission.submissionDate).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {getStatusBadge(submission.status)}
+                          {getStatusBadge(submission.status, submission.featured)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <Button variant="outline" size="sm" onClick={e => { e.stopPropagation(); window.open(submission.videoUrl, '_blank'); }}>
@@ -443,7 +474,7 @@ The Pull-Up Club Team`,
                                   <div className="flex justify-between items-center mb-2">
                                     <span className="text-[#9a9871]">{t('submissions.actions.claimed')}</span>
                                     <span className="text-[#ededed] font-bold">{submission.pullUpCount}</span>
-                                      </div>
+                                  </div>
                                   <div className="flex justify-between items-center">
                                     <span className="text-[#9a9871]">{t('submissions.actions.verified')}</span>
                                     <span className={`font-bold ${submission.verifiedCount ? 'text-green-400' : 'text-yellow-400'}`}>{submission.verifiedCount || t('submissions.actions.pending')}</span>
@@ -452,51 +483,47 @@ The Pull-Up Club Team`,
                               </div>
                               {/* Compact actions */}
                               <div className="flex items-center gap-2 flex-wrap">
-                                    <input
-                                      type="number"
+                                <input
+                                  type="number"
                                   placeholder={t('submissions.actions.countPlaceholder')}
                                   className="w-20 px-2 py-1 border border-[#23231f] rounded text-sm bg-black text-[#ededed]"
-                                      id={`verify-${submission.id}`}
-                                      defaultValue={submission.verifiedCount || submission.pullUpCount}
-                                    />
-                                    <Button
+                                  id={`verify-${submission.id}`}
+                                  defaultValue={submission.verifiedCount || submission.pullUpCount}
+                                />
+                                <Button
                                   variant="secondary"
-                                      size="sm"
-                                      onClick={() => {
-                                        const input = document.getElementById(`verify-${submission.id}`) as HTMLInputElement;
-                                        const verifiedCount = parseInt(input.value) || submission.pullUpCount;
-                                        handleStatusChange(submission.id, 'Approved', verifiedCount);
-                                      }}
-                                      disabled={isLoading}
+                                  size="sm"
+                                  onClick={() => {
+                                    const input = document.getElementById(`verify-${submission.id}`) as HTMLInputElement;
+                                    const verifiedCount = parseInt(input.value) || submission.pullUpCount;
+                                    handleStatusChange(submission.id, 'Approved', verifiedCount);
+                                  }}
+                                  disabled={isLoading}
                                   className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1"
-                                    >
+                                >
                                   <CheckCircle className="h-3 w-3 mr-1" />
                                   {t('submissions.actions.approve')}
-                                    </Button>
-                                    <Button
-                                      variant="secondary"
-                                      size="sm"
-                                      onClick={() => {
-                                        const input = document.getElementById(`verify-${submission.id}`) as HTMLInputElement;
-                                        const verifiedCount = parseInt(input.value) || submission.pullUpCount;
-                                        handleStatusChange(submission.id, 'Featured', verifiedCount);
-                                      }}
-                                      disabled={isLoading}
-                                  className="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1"
-                                    >
-                                  <Star className="h-3 w-3 mr-1" />
-                                      {t('submissions.actions.feature')}
-                                    </Button>
-                                    <Button
+                                </Button>
+                                <Button
                                   variant="secondary"
-                                      size="sm"
-                                      onClick={() => handleStatusChange(submission.id, 'Rejected')}
-                                      disabled={isLoading}
+                                  size="sm"
+                                  onClick={() => toggleFeatured(submission.id)}
+                                  disabled={isLoading}
+                                  className={`${submission.featured ? 'bg-amber-700' : 'bg-amber-600'} hover:bg-amber-700 text-white text-xs px-3 py-1`}
+                                >
+                                  <Star className="h-3 w-3 mr-1" />
+                                  {submission.featured ? t('submissions.actions.unfeature') : t('submissions.actions.feature')}
+                                </Button>
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => handleStatusChange(submission.id, 'Rejected')}
+                                  disabled={isLoading}
                                   className="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1"
-                                    >
+                                >
                                   <XCircle className="h-3 w-3 mr-1" />
-                                      {t('submissions.actions.reject')}
-                                    </Button>
+                                  {t('submissions.actions.reject')}
+                                </Button>
                                 <button
                                   onClick={() => window.open(submission.videoUrl, '_blank')}
                                   className="bg-[#9a9871] hover:bg-[#a5a575] text-black px-3 py-1 rounded text-xs font-semibold"
