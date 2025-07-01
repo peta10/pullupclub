@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CacheProvider } from './context/CacheProvider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import toast from 'react-hot-toast';
 
 // Lazy-loaded components
 const Home = lazy(() => import("./pages/Home/Home.tsx"));
@@ -104,6 +105,62 @@ function App() {
     return () => {
       authListener.subscription.unsubscribe();
     };
+  }, []);
+
+  // NEW: Add deployment detection useEffect
+  useEffect(() => {
+    const APP_VERSION = import.meta.env.VITE_VERCEL_GIT_COMMIT_SHA || 
+                       import.meta.env.VITE_APP_VERSION || 
+                       Date.now().toString();
+    const storedVersion = localStorage.getItem('app_version');
+    
+    // Only run this check if we have a stored version (not first visit)
+    if (storedVersion && storedVersion !== APP_VERSION) {
+      console.log('🚀 New deployment detected, clearing session data...');
+      
+      // Clear authentication state
+      supabase.auth.signOut({ scope: 'local' });
+      
+      // Clear all cookies
+      document.cookie.split(";").forEach(cookie => {
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+      });
+      
+      // Clear browser storage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Set new version
+      localStorage.setItem('app_version', APP_VERSION);
+      
+      // Show user-friendly message with existing toast
+      toast.success('🎉 Pull-Up Club has been updated! Refreshing with latest features...', {
+        duration: 2000,
+        style: {
+          background: '#1f2937',
+          color: '#ffffff',
+          border: '1px solid #9b9b6f',
+        },
+        iconTheme: {
+          primary: '#9b9b6f',
+          secondary: '#ffffff',
+        },
+      });
+      
+      // Refresh after a moment
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+      return;
+    }
+    
+    // Set version on first visit
+    if (!storedVersion) {
+      localStorage.setItem('app_version', APP_VERSION);
+    }
   }, []);
 
   // Check database connection

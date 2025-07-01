@@ -135,6 +135,34 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => clearTimeout(timeout);
   }, [isLoading]);
 
+  // NEW: Add session validation useEffect
+  useEffect(() => {
+    const validateSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          // Test if session is actually valid with a simple query
+          const { error: testError } = await supabase
+            .from('profiles')
+            .select('id')
+            .limit(1);
+            
+          if (testError && (testError.message.includes('JWT') || testError.message.includes('expired'))) {
+            console.log('🔄 Invalid session detected, signing out...');
+            await supabase.auth.signOut();
+          }
+        }
+      } catch (error) {
+        console.log('🔄 Session validation failed, signing out...');
+        await supabase.auth.signOut();
+      }
+    };
+
+    // Only validate on mount, not on every auth state change
+    validateSession();
+  }, []); // Empty dependency array - only run once
+
   const handlePostAuthSubscription = async (
     authedUser: User,
     plan: "monthly" | "annual"
