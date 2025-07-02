@@ -8,6 +8,10 @@ export default defineConfig(({ mode }) => {
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), '');
   
+  const buildTimestamp = Date.now().toString();
+  const gitCommitSha = process.env.VERCEL_GIT_COMMIT_SHA || process.env.VITE_VERCEL_GIT_COMMIT_SHA || 'dev-' + buildTimestamp;
+  const appVersion = gitCommitSha.substring(0, 8);
+  
   return {
     plugins: [
       react({
@@ -68,6 +72,9 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxbmlrZ3VwaWFnaGdqdHNheXByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5NDIzMDMsImV4cCI6MjA2MzUxODMwM30.3rR9EyNlWSLZAoYqlCa3MOJobHH7RHjak0m_3mI6YZs'),
       'import.meta.env.VITE_GA_MEASUREMENT_ID': JSON.stringify(env.VITE_GA_MEASUREMENT_ID || 'G-PLACEHOLDER'),
       'import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY': JSON.stringify(env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_live_51RLYUyGaHiDfsUfBuCJ8wlW6vrQA50vyhiBi5v3lnfm3byAQpYzkqqX1ElIYEb0Alxi4IXFR2ozxmMlRKSdOKNTH00mdn1920o'),
+      'import.meta.env.VITE_APP_VERSION': JSON.stringify(appVersion),
+      'import.meta.env.VITE_BUILD_TIMESTAMP': JSON.stringify(buildTimestamp),
+      'import.meta.env.VITE_VERCEL_GIT_COMMIT_SHA': JSON.stringify(gitCommitSha),
     },
   };
 });

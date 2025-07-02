@@ -36,7 +36,7 @@ const EthosPage: React.FC = () => {
               {t("legend.title")}
             </h2>
             <div className="text-lg md:text-xl text-gray-400 mb-6 font-semibold tracking-wide text-left md:text-left">
-              (Battle Bunker Official Lore)
+              (Battle Bunker Official Loree)
             </div>
             <div className="text-lg md:text-xl text-gray-300 leading-relaxed md:leading-relaxed font-serif space-y-4" style={{lineHeight:1.7}}>
               <p>

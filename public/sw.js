@@ -1,7 +1,7 @@
 // Simple service worker for caching optimization
 const CACHE_NAME = 'pull-up-club-v1';
 const STATIC_ASSETS = [
-  '/',
+  // HTML shell deliberately excluded to always fetch latest version
   '/pullup_header_desktop.webp',
   '/pullup_header-tablet.webp',
   '/pullup_header-mobile.webp',
@@ -71,6 +71,12 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') {
     return;
+  }
+
+  // Never cache index.html or the root route – always fetch from network
+  if (event.request.url.includes('/index.html') ||
+      event.request.url === new URL('/', self.location).href) {
+    return; // bypass service worker for the app shell
   }
 
   // Skip API calls and external requests
