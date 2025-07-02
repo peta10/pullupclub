@@ -106,36 +106,90 @@ function App() {
     };
   }, []);
 
-  // Deployment detection – lightweight refresh preserving auth
+  // Enhanced deployment detection with comprehensive cache clearing
   useEffect(() => {
     if (import.meta.env.DEV) {
       console.log('🛠️ Development mode - skipping deployment detection');
       return;
     }
 
-    const APP_VERSION = import.meta.env.VITE_VERCEL_GIT_COMMIT_SHA ||
-                        import.meta.env.VITE_APP_VERSION ||
-                        Date.now().toString();
+    try {
+      const APP_VERSION = import.meta.env.VITE_VERCEL_GIT_COMMIT_SHA ||
+                          import.meta.env.VITE_APP_VERSION ||
+                          Date.now().toString();
 
-    const storedVersion = localStorage.getItem('app_version');
+      const storedVersion = localStorage.getItem('app_version');
 
-    if (storedVersion && storedVersion !== APP_VERSION) {
-      console.log('🚀 New deployment detected, refreshing app...');
-
-      const keysToPreserve = ['supabase.auth.token', 'sb-auth-token'];
-      Object.keys(localStorage).forEach((key) => {
-        if (!keysToPreserve.some((p) => key.includes(p))) {
-          localStorage.removeItem(key);
-        }
+      console.log('🔍 Deployment check:', {
+        current: APP_VERSION,
+        stored: storedVersion,
+        timestamp: new Date().toISOString(),
       });
 
-      localStorage.setItem('app_version', APP_VERSION);
-      window.location.reload();
-      return;
-    }
+      if (storedVersion && storedVersion !== APP_VERSION) {
+        console.log('🚀 NEW DEPLOYMENT DETECTED - Clearing caches and reloading...');
 
-    if (!storedVersion) {
-      localStorage.setItem('app_version', APP_VERSION);
+        // Clear service worker caches
+        if ('serviceWorker' in navigator && 'caches' in window) {
+          caches
+            .keys()
+            .then((cacheNames) => {
+              return Promise.all(
+                cacheNames.map((cacheName) => {
+                  console.log('🗑️ Deleting cache:', cacheName);
+                  return caches.delete(cacheName);
+                })
+              );
+            })
+            .catch((error) => {
+              console.log('Cache deletion error:', error);
+            });
+        }
+
+        // Auth keys to preserve
+        const authKeysToPreserve = [
+          'supabase.auth.token',
+          'sb-auth-token',
+          'sb-',
+          'auth-',
+          'supabase-auth-token',
+        ];
+
+        // Clear localStorage except auth keys & version
+        Object.keys(localStorage).forEach((key) => {
+          const preserve = authKeysToPreserve.some((p) => key.includes(p));
+          if (!preserve && key !== 'app_version') {
+            localStorage.removeItem(key);
+            console.log('🗑️ Removed localStorage key:', key);
+          }
+        });
+
+        // Clear sessionStorage except auth keys
+        Object.keys(sessionStorage).forEach((key) => {
+          const preserve = authKeysToPreserve.some((p) => key.includes(p));
+          if (!preserve) {
+            sessionStorage.removeItem(key);
+            console.log('🗑️ Removed sessionStorage key:', key);
+          }
+        });
+
+        localStorage.setItem('app_version', APP_VERSION);
+
+        console.log('✅ Cache clearing complete, reloading in 100ms...');
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+        return;
+      }
+
+      if (!storedVersion) {
+        localStorage.setItem('app_version', APP_VERSION);
+        console.log('✅ First visit - version stored:', APP_VERSION);
+      } else {
+        console.log('✅ Version match - no reload needed');
+      }
+    } catch (error) {
+      console.error('❌ Deployment detection error:', error);
     }
   }, []);
 
