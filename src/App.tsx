@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CacheProvider } from './context/CacheProvider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { initializeGA, trackPageView } from './utils/analytics';
 
 // Lazy-loaded components
 const Home = lazy(() => import("./pages/Home/Home.tsx"));
@@ -60,6 +61,16 @@ function App() {
   >("initializing");
   const [retryCount, setRetryCount] = useState(0);
   const location = useLocation();
+
+  useEffect(() => {
+    // Initialize Google Analytics
+    initializeGA();
+  }, []);
+
+  useEffect(() => {
+    // Track page views on route changes
+    trackPageView();
+  }, [location]);
 
   useEffect(() => {
     // Give the app time to initialize before checking connection
