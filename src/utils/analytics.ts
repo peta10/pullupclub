@@ -7,6 +7,13 @@ import ReactGA from 'react-ga4';
 const MEASUREMENT_ID = "G-5NV54P8K1L";
 let isInitialized = false;
 
+interface AnalyticsEventParams {
+  category: string;
+  action: string;
+  label?: string;
+  value?: number;
+}
+
 /**
  * Initializes Google Analytics. This should be called once when the app starts.
  */
@@ -31,12 +38,30 @@ export const trackPageView = () => {
 
 /**
  * Tracks a custom event in Google Analytics.
+ * Supports both object-style and parameter-style calls for backward compatibility.
  */
-export const trackEvent = (category: string, action: string, label?: string, value?: number) => {
-  if (isInitialized) {
+export const trackEvent = (
+  categoryOrParams: string | AnalyticsEventParams,
+  action?: string,
+  label?: string,
+  value?: number
+) => {
+  if (!isInitialized) return;
+
+  if (typeof categoryOrParams === 'object') {
+    // Handle object-style call
+    const params = categoryOrParams;
     ReactGA.event({
-      category,
-      action,
+      category: params.category,
+      action: params.action,
+      label: params.label,
+      value: params.value
+    });
+  } else {
+    // Handle parameter-style call
+    ReactGA.event({
+      category: categoryOrParams,
+      action: action || '',
       label,
       value
     });
@@ -46,16 +71,12 @@ export const trackEvent = (category: string, action: string, label?: string, val
 /**
  * Tracks exceptions/errors in Google Analytics.
  */
-export const trackException = (description: string, fatal: boolean = false) => {
+export const trackException = (description: string) => {
   if (isInitialized) {
     ReactGA.event({
-      action: 'exception',
-      category: 'Errors',
-      label: description,
-      // 'value' could be used to indicate if it was fatal, e.g., 1 for true.
-      // However, the standard GA event doesn't have a 'fatal' field.
-      // We can send it as a custom dimension if needed, but for now, we'll log it in the label.
-      // A common practice is to just send the description.
+      category: 'Error',
+      action: 'Exception',
+      label: description
     });
   }
 };
