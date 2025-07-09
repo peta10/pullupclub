@@ -13,6 +13,8 @@ interface UserEarning {
   paid_out: boolean;
   paid_out_date: string | null;
   created_at: string;
+  competition_id?: string;
+  is_competition_payout?: boolean;
 }
 
 interface PayoutRequest {
@@ -21,6 +23,12 @@ interface PayoutRequest {
   status: string;
   created_at: string;
   processed_at: string | null;
+}
+
+interface PatchProgress {
+  daysRemaining: number;
+  progressPercentage: number;
+  currentCycle: number;
 }
 
 const SubscriptionRewards: React.FC = () => {
@@ -32,6 +40,85 @@ const SubscriptionRewards: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRequestingPayout, setIsRequestingPayout] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [patchProgress, setPatchProgress] = useState<PatchProgress>({
+    daysRemaining: 90,
+    progressPercentage: 0,
+    currentCycle: 1
+  });
+
+  // Function to check if we're at the end of the month
+  const isEndOfMonth = () => {
+    const now = new Date();
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    return now.getDate() >= lastDay - 2; // Allow requests 2 days before month end
+  };
+
+  // Calculate total available earnings (not paid out)
+  const calculateAvailableEarnings = () => {
+    return earnings.reduce((total, earning) => {
+      if (!earning.paid_out) {
+        return total + earning.amount_cents;
+      }
+      return total;
+    }, 0);
+  };
+
+  // Calculate on-hold earnings (competition payouts that can't be withdrawn yet)
+  const calculateOnHoldEarnings = () => {
+    if (!isEndOfMonth()) {
+      return earnings.reduce((total, earning) => {
+        if (!earning.paid_out && earning.is_competition_payout) {
+          return total + earning.amount_cents;
+        }
+        return total;
+      }, 0);
+    }
+    return 0;
+  };
+
+  // Calculate immediately available earnings (non-competition or end of month)
+  const calculateImmediatelyAvailable = () => {
+    return calculateAvailableEarnings() - calculateOnHoldEarnings();
+  };
+
+  const formatAmount = (cents: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(cents / 100);
+  };
+
+  const calculatePatchProgress = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('created_at')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+
+      if (data?.created_at) {
+        const signupDate = new Date(data.created_at);
+        const daysSinceSignup = Math.floor((Date.now() - signupDate.getTime()) / (1000 * 60 * 60 * 24));
+        const currentCycle = Math.floor(daysSinceSignup / 90) + 1;
+        const daysInCurrentCycle = daysSinceSignup - ((currentCycle - 1) * 90);
+        const daysRemaining = 90 - daysInCurrentCycle;
+        const progressPercentage = Math.round((daysInCurrentCycle / 90) * 100);
+
+        setPatchProgress({
+          daysRemaining,
+          progressPercentage,
+          currentCycle
+        });
+      }
+    } catch (err) {
+      console.error('Error calculating patch progress:', err);
+      // Don't show this error to the user as it's not critical
+    }
+  };
 
   const fetchEarnings = async () => {
     if (!user?.id) return;
@@ -76,6 +163,7 @@ const SubscriptionRewards: React.FC = () => {
 
   useEffect(() => {
     fetchEarnings();
+    calculatePatchProgress();
   }, [user?.id]);
 
   const handleRequestPayout = async () => {
@@ -160,6 +248,36 @@ const SubscriptionRewards: React.FC = () => {
     }
   };
 
+  const handlePayoutRequest = async () => {
+    if (!user?.id || isRequestingPayout) return; // Use isRequestingPayout from original state
+    
+    try {
+      setIsRequestingPayout(true);
+      
+      // Only allow payout of immediately available funds
+      const amount = calculateImmediatelyAvailable();
+      if (amount <= 0) return;
+
+      const { error } = await supabase.functions.invoke('request-payout', {
+        body: { amount_cents: amount }
+      });
+
+      if (error) throw error;
+
+      toast.success(t('rewards.payoutSuccess', { 
+        amount: formatAmount(amount) 
+      }));
+      
+      // Refresh earnings and payout requests
+      await fetchEarnings();
+    } catch (error) {
+      console.error('Error requesting payout:', error);
+      toast.error(t('common:errors.requestFailed'));
+    } finally {
+      setIsRequestingPayout(false);
+    }
+  };
+
   const formatCurrency = (cents: number) => {
     return (cents / 100).toFixed(2);
   };
@@ -175,6 +293,72 @@ const SubscriptionRewards: React.FC = () => {
   };
 
   const hasPendingRequest = payoutRequests.some(req => req.status === 'pending');
+
+  // Render competition payouts box
+  const renderCompetitionPayouts = () => {
+    if (isLoading) {
+      return <div>{t('profile:rewards.payouts.loading')}</div>;
+    }
+
+    const onHoldAmount = calculateOnHoldEarnings();
+    const availableAmount = calculateImmediatelyAvailable();
+    const hasPendingRequest = payoutRequests.some(req => req.status === 'pending');
+
+    return (
+      <div className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105">
+        <div className="flex justify-center mb-4">
+          <DollarSign size={48} className="text-[#9b9b6f]" />
+        </div>
+        <h3 className="text-xl font-bold text-white mb-2">{t('profile:rewards.payouts.title')}</h3>
+        <p className="text-gray-400 mb-4">{t('profile:rewards.payouts.subtitle')}</p>
+
+        {onHoldAmount > 0 && (
+          <div className="border-l-4 border-yellow-400 pl-3">
+            <p className="text-sm text-gray-400">
+              {t('profile:rewards.payouts.onHold')}
+            </p>
+            <p className="text-2xl font-bold text-white mb-1">
+              {formatAmount(onHoldAmount)}
+            </p>
+          </div>
+        )}
+
+        {availableAmount > 0 && (
+          <div className="border-l-4 border-green-400 pl-3">
+            <p className="text-sm text-gray-400">
+              {t('rewards.payouts.available')}
+            </p>
+            <p className="text-2xl font-bold text-white mb-1">
+              {formatAmount(availableAmount)}
+            </p>
+          </div>
+        )}
+
+        {availableAmount === 0 && onHoldAmount === 0 && (
+          <p className="text-gray-400">
+            {t('rewards.payouts.noEarnings')}
+          </p>
+        )}
+
+        {availableAmount > 0 && !hasPendingRequest && (
+          <button
+            onClick={handlePayoutRequest}
+            disabled={isRequestingPayout || isLoading}
+            className="bg-gray-800 hover:bg-gray-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition-colors w-full"
+          >
+            {isRequestingPayout ? t('rewards.payouts.processing') : 
+             availableAmount === 0 ? t('rewards.payouts.noEarnings') : t('rewards.payouts.requestButton')}
+          </button>
+        )}
+
+        {hasPendingRequest && (
+          <div className="bg-yellow-900/20 border border-yellow-700 rounded px-4 py-2">
+            <span className="text-yellow-400 text-sm font-medium">{t('rewards.payouts.pending')}</span>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-8">
@@ -235,12 +419,21 @@ const SubscriptionRewards: React.FC = () => {
             <h3 className="text-xl font-bold text-white mb-2">{t('rewards.progress.title')}</h3>
             <div className="mb-4">
               <div className="w-full bg-gray-800 rounded-full h-2 mb-2">
-                <div className="bg-[#9b9b6f] h-2 rounded-full" style={{ width: '14%' }} />
+                <div 
+                  className="bg-[#9b9b6f] h-2 rounded-full transition-all duration-500" 
+                  style={{ width: `${patchProgress.progressPercentage}%` }} 
+                />
               </div>
-              <p className="text-sm text-gray-400">{t('rewards.progress.progress', { percent: 14 })}</p>
+              <p className="text-sm text-gray-400">
+                {t('rewards.progress.progress', { percent: patchProgress.progressPercentage })}
+              </p>
             </div>
-            <p className="text-2xl font-bold text-white mb-1">{t('rewards.progress.remaining', { days: 77 })}</p>
-            <p className="text-gray-400">{t('rewards.progress.untilNext')}</p>
+            <p className="text-2xl font-bold text-white mb-1">
+              {t('rewards.progress.remaining', { days: patchProgress.daysRemaining })}
+            </p>
+            <p className="text-gray-400">
+              {t('rewards.progress.untilNext')} (Cycle {patchProgress.currentCycle})
+            </p>
           </div>
         </div>
 
@@ -264,35 +457,7 @@ const SubscriptionRewards: React.FC = () => {
           </div>
 
           {/* Payouts */}
-          <div className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105">
-            <div className="flex justify-center mb-4">
-              <DollarSign size={48} className="text-[#9b9b6f]" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2">{t('rewards.payouts.title')}</h3>
-            {isLoading ? (
-              <p className="text-gray-400 mb-4">{t('rewards.payouts.loading')}</p>
-            ) : (
-              <>
-                <p className="text-2xl font-bold text-white mb-1">${formatCurrency(availableBalance)}</p>
-                <p className="text-gray-400 mb-4">{t('rewards.payouts.available')}</p>
-              </>
-            )}
-            
-            {hasPendingRequest ? (
-              <div className="bg-yellow-900/20 border border-yellow-700 rounded px-4 py-2">
-                <span className="text-yellow-400 text-sm font-medium">{t('rewards.payouts.pending')}</span>
-              </div>
-            ) : (
-              <button
-                onClick={handleRequestPayout}
-                disabled={availableBalance < 100 || isRequestingPayout || isLoading}
-                className="bg-gray-800 hover:bg-gray-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition-colors w-full"
-              >
-                {isRequestingPayout ? t('rewards.payouts.processing') : 
-                 availableBalance < 100 ? t('rewards.payouts.noEarnings') : t('rewards.payouts.requestButton')}
-              </button>
-            )}
-          </div>
+          {renderCompetitionPayouts()}
         </div>
       </div>
 

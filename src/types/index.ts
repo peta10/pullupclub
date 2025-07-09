@@ -15,6 +15,7 @@ export interface Submission {
   submittedAt: string;
   approvedAt?: string;
   notes?: string;
+  adminNotes?: string;
   featured?: boolean;
   socialHandle?: string;
 }

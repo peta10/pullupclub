@@ -105,7 +105,7 @@
     "invoice": "Invoice"
   },
   "rewards": {
-    "shippingNotice": "US shipping only. International users are not eligible for the patch or physical rewards at this time.",
+    "shippingNotice": "US shipping only. International users are not currently eligible for patch or physical rewards.",
     "subscription": {
       "title": "Subscription",
       "subtitle": "Manage your monthly subscription",
@@ -113,12 +113,12 @@
     },
     "patch": {
       "title": "Claim Your Patch",
-      "subtitle": "Get your earned patch delivered",
-      "button": "Claim Your Patch"
+      "subtitle": "Get your earned patch",
+      "button": "Claim Patch"
     },
     "progress": {
       "title": "Next Patch Progress",
-      "progress": "{{percent}}% Progress",
+      "progress": "{{percent}}% progress",
       "remaining": "{{days}} days",
       "untilNext": "until next patch ships"
     },
@@ -129,29 +129,33 @@
     },
     "payouts": {
       "title": "Competition Payouts",
+      "subtitle": "Track your competition earnings",
       "loading": "Loading...",
-      "available": "Available to withdraw",
+      "available": "Available for Payout",
+      "onHold": "On Hold Until End of Month",
       "pending": "Request Pending",
-      "noEarnings": "No Earnings Yet",
+      "noEarnings": "No earnings yet",
       "requestButton": "Request Payout",
-      "processing": "Processing..."
+      "processing": "Processing...",
+      "waitForPeriod": "Available for payout at end of month"
     },
     "earningsHistory": {
       "title": "Earnings History",
-      "andMore": "And {{count}} more earnings...",
+      "andMore": "and {{count}} more earnings...",
       "paid": "Paid",
-      "available": "Available"
+      "available": "Available",
+      "onHold": "On Hold"
     },
     "payoutHistory": {
       "title": "Payout Requests",
-      "request": "{{amount}} payout request",
-      "requestedOn": "Requested: {{date}}",
-      "processedOn": "Processed: {{date}}"
+      "request": "Payout request for {{amount}}",
+      "requestedOn": "Requested on: {{date}}",
+      "processedOn": "Processed on: {{date}}"
     },
     "noEarnings": {
       "title": "No Earnings Yet",
-      "description": "Participate in competitions to start earning money! Check back after monthly winners are announced."
+      "description": "Participate in competitions to start earning! Check back after winners are announced monthly."
     },
-    "payoutSuccess": "Payout request for {{amount}} submitted successfully!"
+    "payoutSuccess": "Successfully submitted payout request for {{amount}}!"
   }
 } 

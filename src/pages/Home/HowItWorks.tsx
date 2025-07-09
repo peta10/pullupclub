@@ -1,6 +1,8 @@
 import React from 'react';
 import { Camera, Award, Medal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import YouTubeEmbed from '../../components/ui/YouTubeEmbed';
+import YouTubeErrorBoundary from '../../components/ui/YouTubeErrorBoundary';
 
 const HowItWorks: React.FC = () => {
   const { t } = useTranslation('home');
@@ -34,19 +36,31 @@ const HowItWorks: React.FC = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {steps.map((step, index) => (
-            <div 
-              key={index} 
-              className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105"
-            >
-              <div className="flex justify-center mb-4">
-                {step.icon}
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">{step.title}</h3>
-              <p className="text-gray-400">{step.description}</p>
+        <div className="flex flex-col lg:flex-row gap-12 items-center">
+          {/* YouTube Video */}
+          <div className="w-full lg:w-1/2 order-last lg:order-first">
+            <YouTubeErrorBoundary>
+              <YouTubeEmbed embedId="5kzE2RRL3HI" autoplayOnScroll={true} />
+            </YouTubeErrorBoundary>
+          </div>
+
+          {/* Steps */}
+          <div className="w-full lg:w-1/2">
+            <div className="grid grid-cols-1 gap-8">
+              {steps.map((step, index) => (
+                <div 
+                  key={index} 
+                  className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105"
+                >
+                  <div className="flex justify-center mb-4">
+                    {step.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">{step.title}</h3>
+                  <p className="text-gray-400">{step.description}</p>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </section>

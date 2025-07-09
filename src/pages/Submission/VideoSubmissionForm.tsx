@@ -6,6 +6,7 @@ import { AlertTriangle, Loader2 } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { clubs, regions } from '../../data/mockData';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 interface VideoSubmissionFormProps {
   onSubmissionComplete?: () => void;
@@ -14,6 +15,7 @@ interface VideoSubmissionFormProps {
 const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
   onSubmissionComplete,
 }) => {
+  const { t } = useTranslation('submission');
   const { user } = useAuth();
   const [pullUpCount, setPullUpCount] = useState<number>(0);
   const [videoLink, setVideoLink] = useState("");
@@ -144,7 +146,7 @@ const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
 
           <div>
             <label htmlFor="clubAffiliation" className="block text-white mb-1">
-              Club Affiliation
+              {t('form.club')}
             </label>
             <select
               id="clubAffiliation"
@@ -152,11 +154,12 @@ const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
               onChange={e => setClubAffiliation(e.target.value)}
               className="w-full px-4 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
             >
-              <option value="">Select a club (optional)</option>
+              <option value="">{t('form.selectClub')}</option>
               {clubs.map((club) => (
                 <option key={club} value={club}>{club}</option>
               ))}
-              <option value="Other">Other</option>
+              <option value="Other">{t('form.otherClub')}</option>
+              <option value="None">{t('form.none')}</option>
             </select>
             {clubAffiliation === 'Other' && (
               <div className="mt-2">
@@ -165,7 +168,7 @@ const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
                   id="otherClubAffiliation"
                   value={otherClubAffiliation}
                   onChange={e => setOtherClubAffiliation(e.target.value)}
-                  placeholder="Enter your club name"
+                  placeholder={t('form.otherClubPlaceholder')}
                   className="w-full px-4 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
                   required
                 />

@@ -3,7 +3,7 @@ import Layout from "../../components/Layout/Layout";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { LoadingState, ErrorState } from "../../components/ui/LoadingState";
-import { Eye, CheckCircle, XCircle, Star, Filter, Search, ChevronDown } from "lucide-react";
+import { Eye, CheckCircle, XCircle, Star, Filter, Search, ChevronDown, Save, MessageSquare } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { useTranslation } from 'react-i18next';
 import Head from "../../components/Layout/Head";
@@ -30,6 +30,9 @@ const AdminDashboardPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [editingNotes, setEditingNotes] = useState<string | null>(null);
+  const [notesText, setNotesText] = useState<string>("");
+  const [savingNotes, setSavingNotes] = useState(false);
   const [filters, setFilters] = useState({
     month: "All Months",
     status: "All Status",
@@ -76,6 +79,7 @@ const AdminDashboardPage: React.FC = () => {
         verifiedCount: submission.actual_pull_up_count,
         videoUrl: submission.video_url,
         notes: submission.notes,
+        adminNotes: submission.admin_notes || '',
         profiles: submission.profiles
       }));
       console.log('Formatted submissions:', formattedSubmissions); // Debug log
@@ -135,6 +139,50 @@ const AdminDashboardPage: React.FC = () => {
 
   const totalPages = Math.ceil(filteredSubmissions.length / ITEMS_PER_PAGE);
 
+  // Save notes function
+  const saveNotes = async (submissionId: string, notes: string) => {
+    setSavingNotes(true);
+    try {
+      const { error } = await supabase
+        .from('submissions')
+        .update({ 
+          admin_notes: notes,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', submissionId);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setSubmissions(prev => prev.map(sub => 
+        sub.id === submissionId 
+          ? { ...sub, adminNotes: notes }
+          : sub
+      ));
+      
+      setEditingNotes(null);
+      setNotesText("");
+      console.log('Notes saved successfully');
+    } catch (error) {
+      console.error('Error saving notes:', error);
+      setError(error instanceof Error ? error.message : 'Failed to save notes');
+    } finally {
+      setSavingNotes(false);
+    }
+  };
+
+  // Start editing notes
+  const startEditingNotes = (submissionId: string, currentNotes: string) => {
+    setEditingNotes(submissionId);
+    setNotesText(currentNotes);
+  };
+
+  // Cancel editing notes
+  const cancelEditingNotes = () => {
+    setEditingNotes(null);
+    setNotesText("");
+  };
+
   // Add sendRejectionEmail function
   const sendRejectionEmail = async (submission: any) => {
     try {
@@ -158,7 +206,7 @@ const AdminDashboardPage: React.FC = () => {
         return;
       }
 
-      // Insert email notification record - only create ONE notification per rejection
+      // Insert email notification record - the edge function will handle including admin notes
       const { error: emailError } = await supabase
         .from('email_notifications')
         .insert({
@@ -199,6 +247,7 @@ The Pull-Up Club Team`,
       }
 
       // Trigger the edge function with proper authentication
+      // The edge function will automatically include admin notes from the database
       const { error: functionError } = await supabase.functions.invoke('send-rejection-email', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -209,7 +258,7 @@ The Pull-Up Club Team`,
       if (functionError) {
         console.error('Error triggering email function:', functionError);
       } else {
-        console.log('Email function triggered successfully');
+        console.log('Email function triggered successfully - admin notes will be included automatically');
       }
 
     } catch (err) {
@@ -247,6 +296,28 @@ The Pull-Up Club Team`,
       if (error) {
         console.error('Database update error:', error);
         throw error;
+      }
+      
+      // Process earnings for approved submissions
+      if (newStatus === 'Approved' && submission && verifiedCount) {
+        try {
+          console.log('Processing earnings for approved submission:', submissionId);
+          const { data: earningsResult, error: earningsError } = await supabase.rpc('process_submission_earnings', {
+            p_submission_id: submissionId,
+            p_user_id: submission.userId,
+            p_pull_up_count: verifiedCount
+          });
+          
+          if (earningsError) {
+            console.error('Error processing earnings:', earningsError);
+            // Don't fail the approval if earnings processing fails
+          } else if (earningsResult?.success) {
+            console.log('Earnings processed successfully:', earningsResult);
+          }
+        } catch (earningsErr) {
+          console.error('Error processing earnings:', earningsErr);
+          // Don't fail the approval if earnings processing fails
+        }
       }
       
       // Send rejection email if status is rejected
@@ -433,6 +504,7 @@ The Pull-Up Club Team`,
                     <th className="px-6 py-3 text-left text-xs font-medium text-[#ededed] uppercase tracking-wider">{t('submissions.table.user')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-[#ededed] uppercase tracking-wider">{t('submissions.table.date')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-[#ededed] uppercase tracking-wider">{t('submissions.table.status')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#ededed] uppercase tracking-wider">Notes</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-[#ededed] uppercase tracking-wider">{t('submissions.table.actions')}</th>
                   </tr>
                 </thead>
@@ -452,6 +524,18 @@ The Pull-Up Club Team`,
                         <td className="px-6 py-4 whitespace-nowrap">
                           {getStatusBadge(submission.status, submission.featured)}
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#ededed]">
+                          {submission.adminNotes ? (
+                            <div className="flex items-center">
+                              <MessageSquare className="h-4 w-4 text-[#9a9871] mr-1" />
+                              <span className="text-xs text-[#9a9871] truncate max-w-[100px]">
+                                {submission.adminNotes.substring(0, 20)}{submission.adminNotes.length > 20 ? '...' : ''}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-500 text-xs">No notes</span>
+                          )}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <Button variant="outline" size="sm" onClick={e => { e.stopPropagation(); window.open(submission.videoUrl, '_blank'); }}>
                             <Eye className="h-4 w-4 mr-1" />
@@ -462,11 +546,11 @@ The Pull-Up Club Team`,
                           </Button>
                         </td>
                       </tr>
-                      {/* Replace the expandable details section with this compact version */}
+                      {/* Expandable details section with notes */}
                       {selectedSubmission?.id === submission.id && (
                         <tr>
-                          <td colSpan={4} className="px-6 py-3 bg-[#1a1a17]">
-                            <div className="max-w-2xl w-full">
+                          <td colSpan={5} className="px-6 py-3 bg-[#1a1a17]">
+                            <div className="max-w-4xl w-full">
                               {/* Compact submission info */}
                               <div className="mb-3">
                                 <h5 className="font-medium text-[#ededed] mb-2 text-sm">{t('submissions.actions.infoTitle')}</h5>
@@ -481,6 +565,74 @@ The Pull-Up Club Team`,
                                   </div>
                                 </div>
                               </div>
+
+                              {/* Notes Section */}
+                              <div className="mb-4">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h5 className="font-medium text-[#ededed] text-sm flex items-center">
+                                    <MessageSquare className="h-4 w-4 mr-2" />
+                                    Admin Notes
+                                  </h5>
+                                  {editingNotes !== submission.id && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => startEditingNotes(submission.id, submission.adminNotes)}
+                                      className="text-xs"
+                                    >
+                                      {submission.adminNotes ? 'Edit Notes' : 'Add Notes'}
+                                    </Button>
+                                  )}
+                                </div>
+                                
+                                {editingNotes === submission.id ? (
+                                  <div className="space-y-2">
+                                    <textarea
+                                      value={notesText}
+                                      onChange={(e) => setNotesText(e.target.value)}
+                                      placeholder="Add notes about this submission (visible to other admins and included in rejection emails)..."
+                                      className="w-full p-3 border border-[#23231f] rounded bg-black text-[#ededed] text-sm min-h-[80px] resize-vertical"
+                                      rows={3}
+                                    />
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        variant="secondary"
+                                        size="sm"
+                                        onClick={() => saveNotes(submission.id, notesText)}
+                                        disabled={savingNotes}
+                                        className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1"
+                                      >
+                                        {savingNotes ? (
+                                          <>Saving...</>
+                                        ) : (
+                                          <>
+                                            <Save className="h-3 w-3 mr-1" />
+                                            Save Notes
+                                          </>
+                                        )}
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={cancelEditingNotes}
+                                        disabled={savingNotes}
+                                        className="text-xs px-3 py-1"
+                                      >
+                                        Cancel
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="bg-[#23231f] p-3 rounded text-sm">
+                                    {submission.adminNotes ? (
+                                      <p className="text-[#ededed] whitespace-pre-wrap">{submission.adminNotes}</p>
+                                    ) : (
+                                      <p className="text-gray-500 italic">No notes added yet</p>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+
                               {/* Compact actions */}
                               <div className="flex items-center gap-2 flex-wrap">
                                 <input

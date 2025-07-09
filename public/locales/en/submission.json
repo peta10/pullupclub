@@ -48,6 +48,7 @@
     "selectRegion": "Select your region",
     "club": "Club Affiliation",
     "selectClub": "Select a club (optional)",
+    "none": "None",
     "otherClub": "Other",
     "otherClubPlaceholder": "Enter your club name",
     "videoUrl": "Video URL",

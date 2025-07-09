@@ -335,7 +335,7 @@ const VideoSubmissionPage: React.FC = () => {
                     </select>
                   </div>
                   <div>
-                    <label htmlFor="clubAffiliation" className="block text-gray-300 font-medium mb-2">{t('form.clubAffiliation')}</label>
+                    <label htmlFor="clubAffiliation" className="block text-gray-300 font-medium mb-2">{t('form.club')}</label>
                     <select
                       id="clubAffiliation"
                       name="clubAffiliation"

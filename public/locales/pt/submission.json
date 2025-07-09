@@ -48,6 +48,7 @@
     "selectRegion": "Selecione sua região",
     "club": "Afiliação a Clube",
     "selectClub": "Selecione um clube (opcional)",
+    "none": "Nenhum",
     "otherClub": "Outro",
     "otherClubPlaceholder": "Digite o nome do seu clube",
     "videoUrl": "URL do Vídeo",

@@ -57,6 +57,7 @@ const AdminDashboard: React.FC = () => {
           submittedAt: submission.created_at,
           approvedAt: submission.approved_at || undefined,
           notes: submission.notes || undefined,
+          adminNotes: submission.admin_notes || undefined,
           featured: submission.status === 'approved',
           socialHandle: submission.social_handle
         }));

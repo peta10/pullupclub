@@ -3,6 +3,7 @@ import Layout from "../../components/Layout/Layout";
 import BadgeLegend from "./BadgeLegend";
 import LeaderboardTable from "../../components/Leaderboard/LeaderboardTable";
 import LeaderboardFilters from "./LeaderboardFilters";
+import PUCBankBanner from "../../components/PUCBank/PUCBankBanner";
 import { LeaderboardFilters as FiltersType } from "../../types";
 import { LoadingState, ErrorState } from '../../components/ui/LoadingState';
 import { useTranslation } from 'react-i18next';
@@ -173,10 +174,19 @@ const LeaderboardPage: React.FC = () => {
               </div>
             </div>
           )}
-          <div className="flex items-center justify-center mb-8">
+          <div className="flex items-center justify-center mb-4">
             <img src="/PUClogo-optimized.webp" alt={t('common:misc.logoAlt')} className="h-10 w-auto mr-3" />
             <h1 className="text-3xl font-bold text-white">{t('title')}</h1>
           </div>
+          
+          {/* P.U.C Bank Banner - Right under title */}
+          <div className="flex flex-col items-center mb-2">
+            <PUCBankBanner />
+            <p className="text-xs text-gray-400 mt-1 text-center">
+              All payouts happen at month end
+            </p>
+          </div>
+          
           <div className="text-center mb-8">
             <p className="mt-2 text-gray-400 max-w-2xl mx-auto">
               {t('subtitle')}

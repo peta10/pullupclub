@@ -7,7 +7,7 @@
   },
   "hero": {
     "title": "Bienvenue au Pull-Up Club",
-    "subtitle": "Règle n°1 : On ne parle pas du Pull-Up Club, mais vos répétitions parleront d'elles-mêmes.",
+    "subtitle": "Gagnez 1$ par répétition. Première Soumission gratuite.",
     "cta": "Inscrivez-vous Maintenant",
     "secondaryCta": "Voir le Classement",
     "liveActivity": "<0>{{name}}</0> de {{location}} a complété <1>{{pullUps}}</1> tractions",

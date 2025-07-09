@@ -48,6 +48,7 @@
     "selectRegion": "地域を選択してください",
     "club": "クラブ所属",
     "selectClub": "クラブを選択（任意）",
+    "none": "なし",
     "otherClub": "その他",
     "otherClubPlaceholder": "クラブ名を入力してください",
     "videoUrl": "ビデオURL",

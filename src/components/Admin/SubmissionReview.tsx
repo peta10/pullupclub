@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Submission } from '../../types';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
-import { User, MapPin, Building, Calendar, ExternalLink, Check, X, Loader2 } from 'lucide-react';
+import { User, MapPin, Building, Calendar, ExternalLink, Check, X, Loader2, MessageSquare } from 'lucide-react';
 
 interface SubmissionReviewProps {
   submission: Submission;
@@ -196,9 +196,22 @@ const SubmissionReview: React.FC<SubmissionReviewProps> = ({
                 
                 {submission.notes && (
                   <div>
-                    <span className="text-[#8f8e6e] block mb-1">Admin Notes:</span>
+                    <span className="text-[#8f8e6e] block mb-1">User Notes:</span>
                     <div className="bg-gray-700 p-3 rounded text-white text-sm">
                       {submission.notes}
+                    </div>
+                  </div>
+                )}
+
+                {/* Display existing admin notes */}
+                {submission.adminNotes && (
+                  <div>
+                    <span className="text-[#8f8e6e] block mb-1 flex items-center">
+                      <MessageSquare size={14} className="mr-1" />
+                      Previous Admin Notes:
+                    </span>
+                    <div className="bg-yellow-900/20 border border-yellow-800 p-3 rounded text-yellow-200 text-sm">
+                      {submission.adminNotes}
                     </div>
                   </div>
                 )}
@@ -272,7 +285,7 @@ const SubmissionReview: React.FC<SubmissionReviewProps> = ({
                     <textarea
                       value={adminNotes}
                       onChange={(e) => setAdminNotes(e.target.value)}
-                      placeholder="Please provide a clear reason for rejection..."
+                      placeholder="Please provide a clear reason for rejection (will be included in email to user)..."
                       rows={3}
                       className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white focus:border-red-500 focus:outline-none resize-none"
                     />

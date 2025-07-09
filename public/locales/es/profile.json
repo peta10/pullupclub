@@ -120,19 +120,23 @@
       "button": "Comprar Equipo"
     },
     "payouts": {
-      "title": "Pagos de la Competición",
+      "title": "Pagos de Competición",
+      "subtitle": "Seguimiento de ganancias de competición",
       "loading": "Cargando...",
-      "available": "Disponible para retirar",
+      "available": "Disponible para Pago",
+      "onHold": "En Espera Hasta Fin de Mes",
       "pending": "Solicitud Pendiente",
-      "noEarnings": "Aún no hay ganancias",
+      "noEarnings": "Sin ganancias aún",
       "requestButton": "Solicitar Pago",
-      "processing": "Procesando..."
+      "processing": "Procesando...",
+      "waitForPeriod": "Disponible para pago al final del mes"
     },
     "earningsHistory": {
       "title": "Historial de Ganancias",
-      "andMore": "Y {{count}} ganancias más...",
+      "andMore": "y {{count}} más...",
       "paid": "Pagado",
-      "available": "Disponible"
+      "available": "Disponible",
+      "onHold": "En Espera"
     },
     "payoutHistory": {
       "title": "Solicitudes de Pago",

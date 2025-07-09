@@ -120,19 +120,23 @@
       "button": "Acheter de l'Équipement"
     },
     "payouts": {
-      "title": "Paiements de la Compétition",
+      "title": "Gains de Compétition",
+      "subtitle": "Suivez vos gains de compétition",
       "loading": "Chargement...",
-      "available": "Disponible pour le retrait",
-      "pending": "Demande en Attente",
-      "noEarnings": "Aucun gain pour le moment",
-      "requestButton": "Demander un Paiement",
-      "processing": "Traitement en cours..."
+      "available": "Disponible pour Paiement",
+      "onHold": "En Attente Jusqu'à Fin du Mois",
+      "pending": "Demande en Cours",
+      "noEarnings": "Pas encore de gains",
+      "requestButton": "Demander le Paiement",
+      "processing": "Traitement en cours...",
+      "waitForPeriod": "Disponible pour paiement en fin de mois"
     },
     "earningsHistory": {
       "title": "Historique des Gains",
-      "andMore": "Et {{count}} autres gains...",
+      "andMore": "et {{count}} de plus...",
       "paid": "Payé",
-      "available": "Disponible"
+      "available": "Disponible",
+      "onHold": "En Attente"
     },
     "payoutHistory": {
       "title": "Demandes de Paiement",

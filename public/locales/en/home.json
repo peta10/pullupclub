@@ -7,7 +7,7 @@
   },
   "hero": {
     "title": "Welcome to Pull-Up Club",
-    "subtitle": "Rule #1: You don't talk about Pull-Up Club, but your reps will speak for themselves.",
+    "subtitle": "Earn $1 per rep. First Submission is free.",
     "cta": "Sign Up Now",
     "secondaryCta": "View Leaderboard",
     "liveActivity": "<0>{{name}}</0> from {{location}} completed <1>{{pullUps}}</1> pull-ups",
