@@ -186,7 +186,6 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ embedId, autoplayOnScroll =
           width="100%" 
           height="315"
           frameBorder="0"
-          allowFullScreen
           title="Pull-Up Demo"
           allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
           referrerPolicy="strict-origin-when-cross-origin"
