@@ -106,7 +106,7 @@ const PUCBankBanner: React.FC = () => {
         <div className="bg-gray-900/50 border border-[#9b9b6f]/30 rounded-full px-4 py-1 shadow-lg shadow-[#9b9b6f]/10">
           <div className="flex items-center space-x-3 text-sm">
             <div className="flex items-center space-x-1.5">
-              <span>💰</span>
+              <span>🏦</span>
               <span className="text-[#9b9b6f] font-medium">P.U.C Bank</span>
             </div>
             
