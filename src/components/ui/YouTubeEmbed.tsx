@@ -157,13 +157,7 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ embedId, autoplayOnScroll =
     return `https://www.youtube-nocookie.com/embed/${embedId}?${params.toString()}`;
   }, [platform, embedId, userInteracted, isMobile]);
 
-  const getThumbnailUrl = useCallback(() => {
-    if (platform === 'vimeo') {
-      // Multiple fallback URLs for better reliability
-      return `https://i.vimeocdn.com/video/${embedId}_640x360.jpg`;
-    }
-    return `https://img.youtube.com/vi/${embedId}/maxresdefault.jpg`;
-  }, [platform, embedId]);
+
 
   // Error state
   if (error) {

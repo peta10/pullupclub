@@ -36,7 +36,6 @@ const SubscriptionRewards: React.FC = () => {
   const { t } = useTranslation('profile');
   const [earnings, setEarnings] = useState<UserEarning[]>([]);
   const [payoutRequests, setPayoutRequests] = useState<PayoutRequest[]>([]);
-  const [availableBalance, setAvailableBalance] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isRequestingPayout, setIsRequestingPayout] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -147,11 +146,6 @@ const SubscriptionRewards: React.FC = () => {
 
       setEarnings(earningsData || []);
       setPayoutRequests(payoutData || []);
-
-      // Calculate balances
-      const available = (earningsData || []).filter(e => !e.paid_out).reduce((sum, earning) => sum + earning.amount_cents, 0);
-      
-      setAvailableBalance(available);
       
     } catch (err) {
       console.error('Error fetching earnings:', err);
@@ -166,87 +160,7 @@ const SubscriptionRewards: React.FC = () => {
     calculatePatchProgress();
   }, [user?.id]);
 
-  const handleRequestPayout = async () => {
-    if (!user?.id || availableBalance < 100) return; // Minimum $1.00
 
-    try {
-      setIsRequestingPayout(true);
-      setError(null);
-
-      // Get current session for auth
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError || !session) {
-        throw new Error('Authentication required');
-      }
-
-      // Construct the function URL using Vite environment variables
-      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/request-payout`;
-      const requestBody = { amount_cents: availableBalance };
-      
-      console.log('Making payout request:', {
-        url: functionUrl,
-        body: requestBody,
-        userId: user.id,
-        hasSession: !!session,
-        hasToken: !!session.access_token
-      });
-
-      const response = await fetch(functionUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
-        },
-        body: JSON.stringify(requestBody)
-      });
-
-      console.log('Response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Function response error:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData
-        });
-        throw new Error(`Request failed (${response.status}): ${errorData}`);
-      }
-
-      const data = await response.json();
-      console.log('Payout request successful:', {
-        responseData: data,
-        amount: availableBalance
-      });
-
-      toast.success(t('rewards.payoutSuccess', { amount: `$${(availableBalance / 100).toFixed(2)}` }));
-
-      // Refresh data
-      await fetchEarnings();
-
-    } catch (err) {
-      console.error('Error requesting payout:', {
-        error: err,
-        message: err instanceof Error ? err.message : 'Unknown error',
-        userId: user?.id,
-        amount: availableBalance
-      });
-      
-      const errorMessage = err instanceof Error ? err.message : 'Failed to request payout';
-      setError(errorMessage);
-      toast.error(errorMessage, {
-        duration: 4000,
-        style: {
-          background: '#1f2937',
-          color: '#ffffff',
-          border: '1px solid #ef4444',
-        },
-      });
-    } finally {
-      setIsRequestingPayout(false);
-    }
-  };
 
   const handlePayoutRequest = async () => {
     if (!user?.id || isRequestingPayout) return; // Use isRequestingPayout from original state
@@ -291,8 +205,6 @@ const SubscriptionRewards: React.FC = () => {
       default: return 'text-gray-400 bg-gray-900/20';
     }
   };
-
-  const hasPendingRequest = payoutRequests.some(req => req.status === 'pending');
 
   // Render competition payouts box
   const renderCompetitionPayouts = () => {
