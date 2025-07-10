@@ -2,7 +2,7 @@ import React from 'react';
 import { Camera, Award, Medal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import YouTubeEmbed from '../../components/ui/YouTubeEmbed';
-import YouTubeErrorBoundary from '../../components/ui/YouTubeErrorBoundary';
+import VideoErrorBoundary from '../../components/ui/YouTubeErrorBoundary';
 
 const HowItWorks: React.FC = () => {
   const { t } = useTranslation('home');
@@ -39,9 +39,9 @@ const HowItWorks: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-12 items-center">
           {/* YouTube Video */}
           <div className="w-full lg:w-1/2 order-last lg:order-first">
-            <YouTubeErrorBoundary>
-              <YouTubeEmbed embedId="5kzE2RRL3HI" autoplayOnScroll={true} />
-            </YouTubeErrorBoundary>
+            <VideoErrorBoundary>
+              <YouTubeEmbed embedId="1099844021" platform="vimeo" autoplayOnScroll={true} />
+            </VideoErrorBoundary>
           </div>
 
           {/* Steps */}

@@ -64,7 +64,7 @@ export default defineConfig(({ mode }) => {
         'X-Frame-Options': 'DENY',
         'X-Content-Type-Options': 'nosniff',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://r.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: https://i.ytimg.com https://img.youtube.com; connect-src 'self' https://*.supabase.co https://api.stripe.com https://r.stripe.com; frame-src https://js.stripe.com https://www.youtube.com https://youtube.com; font-src 'self' data:;",
+        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://r.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: https://i.ytimg.com https://img.youtube.com https://i.vimeocdn.com; connect-src 'self' https://*.supabase.co https://api.stripe.com https://r.stripe.com; frame-src https://js.stripe.com https://www.youtube.com https://youtube.com https://player.vimeo.com; font-src 'self' data:;",
       },
     },
     // Make all environment variables available to the client

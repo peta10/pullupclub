@@ -10,7 +10,7 @@ interface State {
   error?: Error;
 }
 
-class YouTubeErrorBoundary extends Component<Props, State> {
+class VideoErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false
   };
@@ -21,18 +21,20 @@ class YouTubeErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Silently catch YouTube-related errors (third-party cookies, etc.)
+    // Silently catch video embed-related errors (third-party cookies, etc.)
     if (
       error.message.includes('youtube') ||
+      error.message.includes('vimeo') ||
       error.message.includes('google') ||
       error.message.includes('cookie') ||
+      error.message.includes('iframe') ||
       (errorInfo.componentStack && errorInfo.componentStack.includes('iframe'))
     ) {
-      console.warn('YouTube embed error (normal for third-party cookies):', error.message);
+      console.warn('Video embed error (normal for third-party cookies/blocking):', error.message);
       return;
     }
     
-    console.error('Uncaught error in YouTube component:', error, errorInfo);
+    console.error('Uncaught error in video component:', error, errorInfo);
   }
 
   public render() {
@@ -56,4 +58,4 @@ class YouTubeErrorBoundary extends Component<Props, State> {
   }
 }
 
-export default YouTubeErrorBoundary; 
+export default VideoErrorBoundary; 
