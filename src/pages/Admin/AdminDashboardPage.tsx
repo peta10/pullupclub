@@ -7,6 +7,7 @@ import { Eye, CheckCircle, XCircle, Star, Filter, Search, ChevronDown, Save, Mes
 import { supabase } from "../../lib/supabase";
 import { useTranslation } from 'react-i18next';
 import Head from "../../components/Layout/Head";
+import toast from 'react-hot-toast';
 
 const LOGO_PATH = "/PUClogo-optimized.webp";
 
@@ -163,6 +164,20 @@ const AdminDashboardPage: React.FC = () => {
       setEditingNotes(null);
       setNotesText("");
       console.log('Notes saved successfully');
+      
+      // Show success toast
+      toast.success('Admin notes saved successfully', {
+        duration: 3000,
+        style: {
+          background: '#1f2937',
+          color: '#ffffff',
+          border: '1px solid #9b9b6f',
+        },
+        iconTheme: {
+          primary: '#9b9b6f',
+          secondary: '#ffffff',
+        },
+      });
     } catch (error) {
       console.error('Error saving notes:', error);
       setError(error instanceof Error ? error.message : 'Failed to save notes');
@@ -206,15 +221,13 @@ const AdminDashboardPage: React.FC = () => {
         return;
       }
 
-      // Insert email notification record - the edge function will handle including admin notes
-      const { error: emailError } = await supabase
-        .from('email_notifications')
-        .insert({
-          user_id: submission.userId,
-          email_type: 'rejection',
-          recipient_email: recipientEmail,
-          subject: 'Your Pull-Up Club Submission - Resubmission Available',
-          message: `Hi ${submission.fullName || 'there'},
+      // 🆕 Include admin notes directly in the email notification
+      const emailData = {
+        user_id: submission.userId,
+        email_type: 'rejection',
+        recipient_email: recipientEmail,
+        subject: 'Your Pull-Up Club Submission - Resubmission Available',
+        message: `Hi ${submission.fullName || 'there'},
 
 Unfortunately, your recent pull-up submission was not approved.
 
@@ -228,8 +241,18 @@ Ready to try again? Log in and submit your new video at: https://pullupclub.com/
 
 Keep pushing your limits!
 The Pull-Up Club Team`,
-          created_at: new Date().toISOString()
-        });
+        // 🆕 Add admin notes as metadata so edge function can use them
+        metadata: {
+          admin_notes: submission.adminNotes || null,
+          submission_id: submission.id
+        },
+        created_at: new Date().toISOString()
+      };
+
+      // Insert email notification record
+      const { error: emailError } = await supabase
+        .from('email_notifications')
+        .insert(emailData);
 
       if (emailError) {
         console.error('Error creating email notification:', emailError);
@@ -247,7 +270,6 @@ The Pull-Up Club Team`,
       }
 
       // Trigger the edge function with proper authentication
-      // The edge function will automatically include admin notes from the database
       const { error: functionError } = await supabase.functions.invoke('send-rejection-email', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -258,7 +280,7 @@ The Pull-Up Club Team`,
       if (functionError) {
         console.error('Error triggering email function:', functionError);
       } else {
-        console.log('Email function triggered successfully - admin notes will be included automatically');
+        console.log('Email function triggered successfully - admin notes included via metadata');
       }
 
     } catch (err) {

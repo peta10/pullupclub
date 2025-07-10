@@ -42,21 +42,23 @@ interface NextBeatTarget {
 
 const NextToBeat = ({ bestScore }: { bestScore: number }) => {
   const { t } = useTranslation('profile');
+  const { user } = useAuth();
   const [targets, setTargets] = useState<NextBeatTarget[]>([]);
   const [loading, setLoading] = useState(false);
   const [isLeading, setIsLeading] = useState(false);
 
   useEffect(() => {
     const fetchNextTargets = async () => {
-      if (bestScore === 0) return;
+      if (bestScore === 0 || !user) return;
       setLoading(true);
       try {
+        // Query user_best_submissions to get only each user's best submission
         const { data, error } = await supabase
-          .from("leaderboard_cache")
-          .select("actual_pull_up_count, pull_up_count, full_name, club_affiliation")
-          .or(`actual_pull_up_count.gt.${bestScore},pull_up_count.gt.${bestScore}`)
+          .from("user_best_submissions")
+          .select("actual_pull_up_count, full_name, organization")
+          .gt('actual_pull_up_count', bestScore)
+          .neq('user_id', user.id) // Exclude current user
           .order('actual_pull_up_count', { ascending: true })
-          .order('pull_up_count', { ascending: true })
           .limit(3);
 
         if (error) throw error;
@@ -68,8 +70,8 @@ const NextToBeat = ({ bestScore }: { bestScore: number }) => {
 
         const formattedTargets = data.map(target => ({
           fullName: target.full_name,
-          clubAffiliation: target.club_affiliation || 'Independent',
-          pullUpCount: target.actual_pull_up_count || target.pull_up_count
+          clubAffiliation: target.organization || 'Independent',
+          pullUpCount: target.actual_pull_up_count
         }));
 
         setTargets(formattedTargets);
@@ -81,7 +83,7 @@ const NextToBeat = ({ bestScore }: { bestScore: number }) => {
     };
 
     fetchNextTargets();
-  }, [bestScore]);
+  }, [bestScore, user]);
 
   return (
     <div className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105">
