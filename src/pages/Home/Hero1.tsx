@@ -213,16 +213,16 @@ const Hero1: React.FC = () => {
 
           {/* CTA Buttons - matching original style */}
           <div className="flex flex-col space-y-3 w-full max-w-xs mx-auto">
-            <Button size="lg" className="w-full bg-[#9b9b6f] hover:bg-[#8f8f66] text-white font-bold rounded-full px-8 py-4 text-lg transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
-              <Link href="/subscription" className="text-white">
+            <Link href="/subscription" className="block w-full">
+              <Button size="lg" className="w-full bg-[#9b9b6f] hover:bg-[#8f8f66] text-white font-bold rounded-full px-8 py-4 text-lg transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
                 Sign Up Now
-              </Link>
-            </Button>
-            <Button variant="outline" size="lg" className="w-full bg-[#1a1a1a] hover:bg-[#2a2a2a] text-white rounded-full px-8 py-4 text-lg font-semibold transform transition-all duration-200 hover:scale-[1.02]">
-              <Link href="/leaderboard" className="text-white">
+              </Button>
+            </Link>
+            <Link href="/leaderboard" className="block w-full">
+              <Button variant="outline" size="lg" className="w-full bg-[#1a1a1a] hover:bg-[#2a2a2a] text-white rounded-full px-8 py-4 text-lg font-semibold transform transition-all duration-200 hover:scale-[1.02]">
                 View Leaderboard
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -253,16 +253,16 @@ const Hero1: React.FC = () => {
         </div>
 
         <div className="mb-14 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-          <Button size="lg" className="bg-[#a5a676] hover:bg-[#8f8f66] text-white rounded-full px-8 py-3">
-            <Link href="/subscription" className="text-white">
+          <Link href="/subscription" className="block">
+            <Button size="lg" className="bg-[#a5a676] hover:bg-[#8f8f66] text-white rounded-full px-8 py-3">
               {t('hero.cta')}
-            </Link>
-          </Button>
-          <Button variant="secondary" size="lg" className="bg-[#1a1a1a] hover:bg-[#2a2a2a] text-white rounded-full px-8 py-3">
-            <Link href="/leaderboard" className="text-white">
+            </Button>
+          </Link>
+          <Link href="/leaderboard" className="block">
+            <Button variant="secondary" size="lg" className="bg-[#1a1a1a] hover:bg-[#2a2a2a] text-white rounded-full px-8 py-3">
               {t('hero.secondaryCta')}
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
 
         <div className="mb-10 flex space-x-12">

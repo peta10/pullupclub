@@ -11,6 +11,30 @@ body {
   color: #fff;
 }
 
+/* Safari iOS fixes for orange hue and viewport issues */
+@supports (-webkit-touch-callout: none) {
+  /* Safari-specific styles */
+  html {
+    background-color: #000000 !important;
+  }
+  
+  body {
+    background-color: #000000 !important;
+    /* Prevent Safari from adding its own background */
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+  }
+  
+  /* Fix for Safari's safe area */
+  #root {
+    background-color: #000000 !important;
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
 .video-responsive {
   overflow: hidden;
   padding-bottom: 56.25%;

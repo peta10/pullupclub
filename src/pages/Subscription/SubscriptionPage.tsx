@@ -161,16 +161,16 @@ const SubscriptionPage: React.FC = () => {
       <div className="bg-black min-h-screen py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <div className="flex items-center justify-center mb-3 gap-4">
+            <div className="flex items-center justify-center mb-3 gap-2 sm:gap-4">
               <img
                 src="/PUClogo (1).webp"
                 alt="Pull-Up Club Logo"
-                className="h-12 w-12 md:h-16 md:w-16 object-contain inline-block"
+                className="h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 object-contain inline-block"
                 style={{ background: 'transparent' }}
                 loading="eager"
                 fetchPriority="high"
               />
-              <h1 className="text-3xl font-bold text-white m-0 p-0">
+              <h1 className="text-xl sm:text-3xl font-bold text-white m-0 p-0">
                 {t('title', 'Pull-Up Club Membership')}
               </h1>
             </div>
