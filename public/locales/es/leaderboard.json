@@ -69,6 +69,12 @@
     "showFilters": "Filtrar Resultados",
     "hideFilters": "Ocultar Filtros"
   },
+  "pucBank": {
+    "title": "P.U.C Bank",
+    "drain": "Vacíe el banco — se repone semanalmente.",
+    "payouts": "Todos los pagos se realizan a fin de mes.",
+    "poolDepleted": "Fondo agotado"
+  },
   "dev": {
     "cacheDebug": "Información de depuración de caché",
     "cacheSize": "Tamaño de caché: {{size}}KB",

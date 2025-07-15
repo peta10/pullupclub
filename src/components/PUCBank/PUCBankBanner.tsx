@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { useTranslation } from 'react-i18next';
 
 interface PoolData {
   remaining_dollars: string;
@@ -13,6 +14,7 @@ const PUCBankBanner: React.FC = () => {
   const [poolData, setPoolData] = useState<PoolData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation('leaderboard');
 
   const fetchPoolStatus = async () => {
     try {
@@ -92,7 +94,7 @@ const PUCBankBanner: React.FC = () => {
         <div className="bg-gray-900/50 border border-red-500/30 rounded-full px-6 py-2 shadow-lg shadow-red-500/10">
           <div className="flex items-center space-x-3 text-base">
             <span className="text-red-400 text-xl">💸</span>
-            <span className="text-red-400 font-bold text-xl">Pool Depleted</span>
+            <span className="text-red-400 font-bold text-xl">{t('pucBank.poolDepleted')}</span>
           </div>
         </div>
       ) : (
@@ -101,7 +103,7 @@ const PUCBankBanner: React.FC = () => {
           <div className="flex items-center space-x-4 text-base">
             <div className="flex items-center space-x-2">
               <span className="text-xl">🏦</span>
-              <span className="text-[#9b9b6f] font-bold text-2xl">P.U.C Bank</span>
+              <span className="text-[#9b9b6f] font-bold text-2xl">{t('pucBank.title')}</span>
             </div>
             
             <div className="flex items-center space-x-2">

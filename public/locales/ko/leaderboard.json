@@ -69,6 +69,12 @@
     "showFilters": "결과 필터링",
     "hideFilters": "필터 숨기기"
   },
+  "pucBank": {
+    "title": "P.U.C 은행",
+    "drain": "은행을 비우세요 — 매주 보충됩니다.",
+    "payouts": "모든 지급은 월말에 이루어집니다.",
+    "poolDepleted": "풀 고갈됨"
+  },
   "dev": {
     "cacheDebug": "캐시 디버그 정보",
     "cacheSize": "캐시 크기: {{size}}KB",

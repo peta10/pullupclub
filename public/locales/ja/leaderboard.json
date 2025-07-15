@@ -64,6 +64,12 @@
     "showFilters": "結果を絞り込む",
     "hideFilters": "フィルターを非表示"
   },
+  "pucBank": {
+    "title": "P.U.C Bank",
+    "drain": "バンクを空にしろ — 毎週補充されます。",
+    "payouts": "すべての支払いは月末に行われます。",
+    "poolDepleted": "プールが枯渇しました"
+  },
   "dev": {
     "cacheDebug": "キャッシュデバッグ情報",
     "cacheSize": "キャッシュサイズ: {{size}}KB",

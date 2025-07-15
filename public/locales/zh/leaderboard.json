@@ -69,6 +69,12 @@
     "showFilters": "筛选结果",
     "hideFilters": "隐藏筛选"
   },
+  "pucBank": {
+    "title": "P.U.C银行",
+    "drain": "清空银行——每周补充。",
+    "payouts": "所有支付均在月底进行。",
+    "poolDepleted": "奖金池已耗尽"
+  },
   "dev": {
     "cacheDebug": "缓存调试信息",
     "cacheSize": "缓存大小: {{size}}KB",
