@@ -119,7 +119,7 @@ export const mockSubmissions: Submission[] = [
   },
 ];
 
-const badges: Badge[] = [
+const maleBadges: Badge[] = [
   {
     id: 'recruit',
     name: 'Recruit',
@@ -172,31 +172,86 @@ const badges: Badge[] = [
   }
 ];
 
-export function getBadgeImageUrl(badgeId: string): string {
+const femaleBadges: Badge[] = [
+  {
+    id: 'recruit',
+    name: 'Recruit',
+    description: 'Completed 3 pull-ups',
+    imageUrl: '/Female-Badges/Recruit_-_Female.webp',
+    criteria: {
+      type: 'pullUps',
+      value: 3
+    }
+  },
+  {
+    id: 'proven',
+    name: 'Proven',
+    description: 'Completed 7 pull-ups',
+    imageUrl: '/Female-Badges/Proven_-_Female.webp',
+    criteria: {
+      type: 'pullUps',
+      value: 7
+    }
+  },
+  {
+    id: 'hardened',
+    name: 'Hardened',
+    description: 'Completed 12 pull-ups',
+    imageUrl: '/Female-Badges/Hardened_1_-_Female.webp',
+    criteria: {
+      type: 'pullUps',
+      value: 12
+    }
+  },
+  {
+    id: 'operator',
+    name: 'Operator',
+    description: 'Completed 15 pull-ups',
+    imageUrl: '/Female-Badges/Operator_-_Female.webp',
+    criteria: {
+      type: 'pullUps',
+      value: 15
+    }
+  },
+  {
+    id: 'elite',
+    name: 'Elite',
+    description: 'Completed 20 pull-ups',
+    imageUrl: '/Female-Badges/Elite_Female.webp',
+    criteria: {
+      type: 'pullUps',
+      value: 20
+    }
+  }
+];
+
+export function getBadgeImageUrl(badgeId: string, gender: string = 'Male'): string {
+  const isFemale = gender === 'Female';
   switch (badgeId) {
     case 'recruit':
-      return '/Male-Badges/Recruit.webp';
+      return isFemale ? '/Female-Badges/Recruit_-_Female.webp' : '/Male-Badges/Recruit.webp';
     case 'proven':
-      return '/Male-Badges/Proven.webp';
+      return isFemale ? '/Female-Badges/Proven_-_Female.webp' : '/Male-Badges/Proven.webp';
     case 'hardened':
-      return '/Male-Badges/Hardened.webp';
+      return isFemale ? '/Female-Badges/Hardened_1_-_Female.webp' : '/Male-Badges/Hardened.webp';
     case 'operator':
-      return '/Male-Badges/Operator.webp';
+      return isFemale ? '/Female-Badges/Operator_-_Female.webp' : '/Male-Badges/Operator.webp';
     case 'elite':
-      return '/Male-Badges/Elite.webp';
+      return isFemale ? '/Female-Badges/Elite_Female.webp' : '/Male-Badges/Elite.webp';
     default:
-      return '/Male-Badges/Recruit.webp';
+      return isFemale ? '/Female-Badges/Recruit_-_Female.webp' : '/Male-Badges/Recruit.webp';
   }
 }
 
-export const getBadgesForSubmission = (pullUpCount: number): Badge[] => {
-  return badges.filter(badge => badge.criteria.value <= pullUpCount).map(badge => ({
+export const getBadgesForSubmission = (pullUpCount: number, gender: string = 'Male'): Badge[] => {
+  const badgeSet = gender === 'Female' ? femaleBadges : maleBadges;
+  return badgeSet.filter(badge => badge.criteria.value <= pullUpCount).map(badge => ({
     ...badge,
-    imageUrl: getBadgeImageUrl(badge.id)
+    imageUrl: getBadgeImageUrl(badge.id, gender)
   }));
 };
 
-export default badges;
+export default maleBadges;
 
 export const getStatusInfo = (status: string) => {
   switch (status.toLowerCase()) {

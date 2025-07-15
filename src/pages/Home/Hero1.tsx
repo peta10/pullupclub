@@ -3,6 +3,7 @@ import { Button } from '../../components/ui/Button';
 import { Link } from '../../components/ui/Link';
 import { Zap } from 'lucide-react';
 import { useTranslation, Trans } from 'react-i18next';
+import { supabase } from '../../lib/supabase';
 
 // Lazy load non-critical features
 const LazyActivityTicker = memo(() => {
@@ -70,11 +71,32 @@ const Hero1: React.FC = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [displayedActiveUsers, setDisplayedActiveUsers] = useState(0);
   const [currentPullUps] = useState(368);
+  const [totalSubmissions, setTotalSubmissions] = useState(0);
   
   const heroRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [headlineVisible, setHeadlineVisible] = useState(false);
   const [subtitleVisible, setSubtitleVisible] = useState(false);
+
+  // Fetch total approved submissions count
+  useEffect(() => {
+    const fetchSubmissionCount = async () => {
+      try {
+        const { count } = await supabase
+          .from('submissions')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'approved');
+        
+        if (count !== null) {
+          setTotalSubmissions(count);
+        }
+      } catch (error) {
+        console.error('Error fetching submission count:', error);
+      }
+    };
+    
+    fetchSubmissionCount();
+  }, []);
 
   // Intersection Observer for animations
   useEffect(() => {
@@ -120,17 +142,18 @@ const Hero1: React.FC = () => {
     };
   }, []);
 
-  // Slower, smooth animated counter for Warriors Joined
+  // Updated counter animation to animate from 0 to real total
   useEffect(() => {
-    if (isVisible) {
-      let start = 0;
-      const end = 27;
+    if (isVisible && totalSubmissions > 0) {
+      let start = 0; // Start from 0
+      const end = totalSubmissions; // Go to real count
       const duration = 1800;
       const stepTime = 30;
       const steps = Math.ceil(duration / stepTime);
       const increment = Math.max(1, Math.round((end - start) / steps));
       let current = start;
       setDisplayedActiveUsers(start);
+      
       const interval = setInterval(() => {
         current += increment;
         if (current >= end) {
@@ -140,9 +163,10 @@ const Hero1: React.FC = () => {
           setDisplayedActiveUsers(current);
         }
       }, stepTime);
+      
       return () => clearInterval(interval);
     }
-  }, [isVisible]);
+  }, [isVisible, totalSubmissions]);
 
   return (
     <div ref={heroRef} className="relative bg-gray-900 text-white overflow-hidden" style={{ minHeight: '70vh' }}>

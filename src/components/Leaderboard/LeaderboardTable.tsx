@@ -17,9 +17,13 @@ const PAGE_SIZE = 20;
 
 // Helper function for gender-based badge image selection
 const getBadgeImageUrl = (badgeName: string, gender: string): string => {
-  const genderPath = gender === "Female" ? "women" : "men";
-  // The badge IDs are already in the correct format (recruit, proven, etc.)
-  return `/badge-${badgeName.toLowerCase()}-${genderPath}-256.webp`;
+  if (gender === "Female") {
+    // Use new female badge paths
+    return `/${badgeName.toLowerCase()}femalebadge.webp`;
+  } else {
+    // Keep the same male badge paths
+    return `/badge-${badgeName.toLowerCase()}-men-256.webp`;
+  }
 };
 
 const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
@@ -39,7 +43,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
       <div className="space-y-4">
         {data.map((submission, index) => {
           const rank = (currentPage - 1) * itemsPerPage + index + 1;
-          const badges = getBadgesForSubmission(submission.actualPullUpCount ?? submission.pullUpCount);
+          const badges = getBadgesForSubmission(submission.actualPullUpCount ?? submission.pullUpCount, submission.gender);
           const highestBadge = badges.length > 0 ? badges[badges.length - 1] : null;
           const pullUpCount = submission.actualPullUpCount ?? submission.pullUpCount ?? 0;
 
@@ -209,7 +213,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
         <tbody className="divide-y divide-gray-800">
           {data.map((submission, index) => {
             const rank = (currentPage - 1) * itemsPerPage + index + 1;
-            const badges = getBadgesForSubmission(submission.actualPullUpCount ?? submission.pullUpCount);
+            const badges = getBadgesForSubmission(submission.actualPullUpCount ?? submission.pullUpCount, submission.gender);
             const highestBadge = badges.length > 0 ? badges[badges.length - 1] : null;
             return (
               <tr key={submission.id} className="bg-gray-900 hover:bg-gray-800 transition-colors">

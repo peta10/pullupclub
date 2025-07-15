@@ -91,46 +91,33 @@ const PUCBankBanner: React.FC = () => {
   return (
     <div className="flex justify-center mb-6">
       {poolData?.is_depleted ? (
-        // DEPLETED State - Compact pill
-        <div className="bg-gray-900/50 border border-red-500/30 rounded-full px-4 py-1 shadow-lg shadow-red-500/10">
-          <div className="flex items-center space-x-2 text-sm">
-            <span className="text-red-400">💸</span>
-            <span className="text-red-400 font-medium">Pool Depleted</span>
-            <div className="w-12 bg-gray-800 rounded-full h-1.5 border border-red-500/30">
-              <div className="bg-red-500 h-full w-full rounded-full"></div>
-            </div>
+        // DEPLETED State - Larger pill
+        <div className="bg-gray-900/50 border border-red-500/30 rounded-full px-6 py-2 shadow-lg shadow-red-500/10">
+          <div className="flex items-center space-x-3 text-base">
+            <span className="text-red-400 text-xl">💸</span>
+            <span className="text-red-400 font-bold text-xl">Pool Depleted</span>
           </div>
         </div>
       ) : (
-        // ACTIVE State - Compact pill
-        <div className="bg-gray-900/50 border border-[#9b9b6f]/30 rounded-full px-4 py-1 shadow-lg shadow-[#9b9b6f]/10">
-          <div className="flex items-center space-x-3 text-sm">
-            <div className="flex items-center space-x-1.5">
-              <span>🏦</span>
-              <span className="text-[#9b9b6f] font-medium">P.U.C Bank</span>
+        // ACTIVE State - Larger pill
+        <div className="bg-gray-900/50 border-2 border-[#9b9b6f]/30 rounded-full px-6 py-2 shadow-lg shadow-[#9b9b6f]/10">
+          <div className="flex items-center space-x-4 text-base">
+            <div className="flex items-center space-x-2">
+              <span className="text-xl">🏦</span>
+              <span className="text-[#9b9b6f] font-bold text-2xl">P.U.C Bank</span>
             </div>
             
-            <div className="flex items-center space-x-1.5">
-              <span className="text-white font-medium">
+            <div className="flex items-center space-x-2">
+              <span className="text-white font-bold text-xl">
                 ${poolData?.remaining_dollars}
               </span>
               <span className="text-gray-400">/</span>
-              <span className="text-gray-400 text-xs">
+              <span className="text-[#9b9b6f] text-xl">
                 ${poolData?.total_dollars}
               </span>
             </div>
 
-            <div className="flex items-center space-x-1.5">
-              <div className="w-12 bg-gray-800 rounded-full h-1.5 border border-[#9b9b6f]/30">
-                <div 
-                  className="bg-[#9b9b6f] h-full transition-all duration-500 ease-out rounded-full"
-                  style={{ width: `${remainingPercentage}%` }}
-                ></div>
-              </div>
-              <span className="text-[#9b9b6f] text-xs font-medium">
-                {remainingPercentage.toFixed(0)}%
-              </span>
-            </div>
+
           </div>
         </div>
       )}

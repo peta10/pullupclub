@@ -182,8 +182,11 @@ const LeaderboardPage: React.FC = () => {
           {/* P.U.C Bank Banner - Right under title */}
           <div className="flex flex-col items-center mb-2">
             <PUCBankBanner />
-            <p className="text-xs text-gray-400 mt-1 text-center">
-              All payouts happen at month end
+            <p className="text-sm text-[#9b9b6f] font-medium mt-1 text-center">
+              Drain the bank — replenished weekly.
+            </p>
+            <p className="text-xs text-gray-400 mt-0.5 text-center">
+              All payouts happen at month end.
             </p>
           </div>
           
