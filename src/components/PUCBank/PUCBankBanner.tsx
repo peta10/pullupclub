@@ -85,9 +85,6 @@ const PUCBankBanner: React.FC = () => {
     return null; // Fail silently for better UX
   }
 
-  // Calculate remaining percentage for display
-  const remainingPercentage = poolData ? 100 - poolData.progress_percentage : 100;
-
   return (
     <div className="flex justify-center mb-6">
       {poolData?.is_depleted ? (
