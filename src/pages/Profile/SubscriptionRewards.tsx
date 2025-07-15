@@ -3,7 +3,6 @@ import { CreditCard, Package, Shield, ShoppingBag, DollarSign, ExternalLink } fr
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
-import { useTranslation } from 'react-i18next';
 
 interface WeeklyEarning {
   id: string;
@@ -31,7 +30,6 @@ interface PatchProgress {
 
 const SubscriptionRewards: React.FC = () => {
   const { user } = useAuth();
-  const { t } = useTranslation('profile');
   const [weeklyEarnings, setWeeklyEarnings] = useState<WeeklyEarning[]>([]);
   const [payoutRequests, setPayoutRequests] = useState<PayoutRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
