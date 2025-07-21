@@ -12,6 +12,8 @@ const Head: React.FC<HeadProps> = ({ children }) => (
     <meta property="og:image" content="/NewWebp-Pics/pullup_header.webp" />
     <meta property="og:title" content="Pull-Up Club | Battle Bunker" />
     <meta property="og:description" content="Compete globally, earn badges, and climb the leaderboard." />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
     <link rel="canonical" href="https://yourdomain.com/" />
     {children}
   </Helmet>

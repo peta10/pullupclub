@@ -1,26 +1,11 @@
-import React, { ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { initMetaPixel } from '../../utils/meta-pixel';
 
-interface AnalyticsWrapperProps {
-  children: ReactNode;
-  pageName?: string;
+export default function AnalyticsWrapper({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    // Initialize Meta Pixel
+    initMetaPixel(import.meta.env.VITE_META_PIXEL_ID || '1512318086417813');
+  }, []);
+
+  return <>{children}</>;
 }
-
-/**
- * Wrapper component to automatically track page views and provide analytics context
- * to child components
- */
-const AnalyticsWrapper: React.FC<AnalyticsWrapperProps> = ({ 
-  children, 
-  pageName 
-}) => {
-  const location = useLocation();
-  
-  return (
-    <div data-page={pageName || location.pathname}>
-      {children}
-    </div>
-  );
-};
-
-export default AnalyticsWrapper;

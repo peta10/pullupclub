@@ -7,7 +7,7 @@ import { useTranslation, Trans } from "react-i18next";
 const EthosPage: React.FC = () => {
   const { t } = useTranslation("ethos");
   return (
-    <Layout pageName={t("hero.title")}>
+    <Layout>
       <Head>
         <title>{t("hero.title")} | Pull-Up Club</title>
         <meta name="description" content={t("cta.subtitle")}/>

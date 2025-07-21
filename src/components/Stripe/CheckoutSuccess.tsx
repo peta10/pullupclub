@@ -1,22 +1,66 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CheckCircle, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useMetaTracking } from '../../hooks/useMetaTracking';
 
 interface CheckoutSuccessProps {
   subscriptionType?: 'monthly' | 'annual';
   customerName?: string;
   redirectTo?: string;
   redirectLabel?: string;
+  session?: {
+    customer_details?: {
+      email?: string;
+    };
+    subscription?: string;
+    line_items?: Array<{
+      price?: {
+        product?: string;
+      };
+    }>;
+  };
+  user?: {
+    id?: string;
+  };
 }
 
 const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({ 
   subscriptionType = 'monthly',
   customerName,
   redirectTo = '/profile',
-  redirectLabel = 'Go to Dashboard'
+  redirectLabel = 'Go to Dashboard',
+  session,
+  user
 }) => {
+  const { trackPurchase } = useMetaTracking();
   const planType = subscriptionType === 'annual' ? 'Annual' : 'Monthly';
   
+  useEffect(() => {
+    const handleSuccess = async () => {
+      try {
+        // Track purchase
+        if (session?.customer_details?.email) {
+          await trackPurchase(
+            {
+              email: session.customer_details.email,
+              externalId: user?.id
+            },
+            9.99, // Monthly subscription price
+            'USD',
+            {
+              subscription_id: session.subscription,
+              product_id: session.line_items?.[0]?.price?.product
+            }
+          );
+        }
+      } catch (error) {
+        console.error('Checkout success error:', error);
+      }
+    };
+
+    handleSuccess();
+  }, [session, user, trackPurchase]);
+
   return (
     <div className="max-w-lg mx-auto text-center">
       <div className="mb-6 flex justify-center">

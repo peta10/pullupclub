@@ -13,6 +13,8 @@ import { useCache } from '../../context/CacheProvider';
 import CacheManager from '../../utils/cacheManager';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { getBadgesForSubmission } from '../../data/mockData';
+import { useMetaTracking } from '../../hooks/useMetaTracking';
+import { useAuth } from '../../context/AuthContext';
 
 // PaginationControls component
 const PaginationControls: React.FC<{
@@ -81,6 +83,8 @@ const LeaderboardPage: React.FC = () => {
   const { data: cachedData = [], isLoading: cachedLoading, error: cachedError } = useLeaderboardWithCache(filters);
   const { leaderboardData: originalData = [], isLoading: originalLoading, error: originalError } = useLeaderboard();
   const { cacheInfo, clearAllCaches } = useCache();
+  const { trackViewContent } = useMetaTracking();
+  const { user } = useAuth();
 
   // Use fresh data if available, fall back to cached data
   const finalData = originalData?.length > 0 ? originalData : cachedData;
@@ -151,6 +155,21 @@ const LeaderboardPage: React.FC = () => {
     setFilters(newFilters);
     setCurrentPage(1); // Reset to first page when filters change
   };
+
+  useEffect(() => {
+    // Track leaderboard view
+    trackViewContent(
+      {
+        email: user?.email,
+        externalId: user?.id
+      },
+      {
+        name: 'PUC Leaderboard',
+        category: 'leaderboard',
+        type: 'page'
+      }
+    ).catch(console.error);
+  }, []);
 
   if (finalLoading) return <LoadingState message={t('table.loading')} />;
   if (finalError) return <ErrorState message={typeof finalError === 'string' ? finalError : t('common:errors.generic')} />;

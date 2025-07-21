@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Head from "../../components/Layout/Head";
 import Layout from "../../components/Layout/Layout";
 import Hero1 from "./Hero1";
@@ -8,9 +8,22 @@ import LeaderboardPreview from "./LeaderboardPreview";
 import TestimonialSection from "./TestimonialSection";
 import CTASection from "./CTASection";
 import { useTranslation } from "react-i18next";
+import { useMetaTracking } from "../../hooks/useMetaTracking";
 
 const Home: React.FC = () => {
   const { t } = useTranslation("home");
+  const { trackEvent } = useMetaTracking();
+
+  useEffect(() => {
+    // Test Meta Pixel tracking
+    trackEvent('TestEvent', {
+      externalId: 'test-user-id'
+    }, {
+      testProperty: 'test-value',
+      timestamp: new Date().toISOString()
+    });
+  }, [trackEvent]);
+
   return (
     <>
       <Head>

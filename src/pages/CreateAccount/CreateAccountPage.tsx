@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { CheckCircle2, AlertTriangle, User, Building, Globe, Calendar, Users } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { Button } from "../../components/ui/Button";
+import { useMetaTracking } from '../../hooks/useMetaTracking';
 
 const REGION_OPTIONS = [
   "North America",
@@ -34,6 +35,7 @@ const CreateAccountPage: React.FC = () => {
   const { signUp, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { trackRegistration } = useMetaTracking();
 
   useEffect(() => {
     if (user) {
@@ -104,6 +106,15 @@ const CreateAccountPage: React.FC = () => {
       setSuccess("Account created and profile completed!");
       localStorage.removeItem("checkoutEmail");
       navigate("/profile", { replace: true, state: { success: "Account created and profile completed!" } });
+
+      // Track registration
+      await trackRegistration({
+        email: formData.email,
+        firstName: formData.fullName.split(" ")[0], // Assuming first name is the first word
+        lastName: formData.fullName.split(" ").slice(1).join(" "), // Assuming last name is everything after the first word
+        externalId: newUser.id
+      });
+
     } catch (err: any) {
       setError(err?.message || "An error occurred during sign up");
     } finally {

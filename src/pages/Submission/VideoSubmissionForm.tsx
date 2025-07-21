@@ -7,6 +7,7 @@ import { supabase } from "../../lib/supabase";
 import { clubs, regions } from '../../data/mockData';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { useMetaTracking } from '../../hooks/useMetaTracking';
 
 interface VideoSubmissionFormProps {
   onSubmissionComplete?: () => void;
@@ -17,6 +18,7 @@ const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
 }) => {
   const { t } = useTranslation('submission');
   const { user } = useAuth();
+  const { trackEvent } = useMetaTracking();
   const [pullUpCount, setPullUpCount] = useState<number>(0);
   const [videoLink, setVideoLink] = useState("");
   const [videoConfirmed, setVideoConfirmed] = useState(false);
@@ -51,6 +53,20 @@ const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
       if (submissionError) {
         throw submissionError;
       }
+
+      // Track video submission
+      await trackEvent(
+        'VideoSubmission',
+        {
+          email: user?.email,
+          externalId: user?.id
+        },
+        {
+          pull_up_count: pullUpCount,
+          video_duration: 0, // Placeholder, actual duration would need to be fetched or passed
+          platform: 'web' // Placeholder, could be 'mobile', 'desktop'
+        }
+      );
 
       if (onSubmissionComplete) {
         toast.success('Video submitted successfully!', {

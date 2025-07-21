@@ -3,6 +3,7 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "../../lib/utils"
+import { useInteractionTracking } from '../../hooks/useInteractionTracking';
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
@@ -36,21 +37,41 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+  asChild?: boolean;
+  trackingName?: string;
+  trackingData?: Record<string, any>;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
+  ({ className, variant, size, asChild = false, trackingName, trackingData, onClick, ...props }, ref) => {
+    const { trackButtonClick } = useInteractionTracking();
+    const Comp = asChild ? Slot : "button";
+
+    const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
+      // Track the button click if tracking name is provided
+      if (trackingName) {
+        await trackButtonClick(trackingName, {
+          variant,
+          size,
+          ...trackingData
+        });
+      }
+
+      // Call the original onClick handler if provided
+      onClick?.(event);
+    };
+
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        onClick={handleClick}
         {...props}
       />
-    )
-  },
-)
-Button.displayName = "Button"
+    );
+  }
+);
 
-export { Button, buttonVariants }
+Button.displayName = "Button";
+
+export { Button, buttonVariants };

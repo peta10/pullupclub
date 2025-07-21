@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, UNSAFE_DataRouterStateContext } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import ProtectedRoute from "./components/Layout/ProtectedRoute.tsx";
 import AdminRoute from "./components/Layout/AdminRoute.tsx";
@@ -13,6 +13,8 @@ import { CacheProvider } from './context/CacheProvider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { initializeGA, trackPageView } from './utils/analytics';
+import { useMetaTracking } from './hooks/useMetaTracking';
+import { useAuth } from './context/AuthContext';
 
 // Lazy-loaded components
 const Home = lazy(() => import("./pages/Home/Home.tsx"));
@@ -56,11 +58,13 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  const { user } = useAuth();
+  const location = useLocation();
+  const { trackViewContent } = useMetaTracking();
   const [connectionStatus, setConnectionStatus] = useState<
     "initializing" | "connecting" | "connected" | "error"
   >("initializing");
   const [retryCount, setRetryCount] = useState(0);
-  const location = useLocation();
 
   useEffect(() => {
     // Initialize Google Analytics
@@ -203,6 +207,37 @@ function App() {
       console.error('❌ Deployment detection error:', error);
     }
   }, []);
+
+  // Track page views
+  useEffect(() => {
+    // Initialize Google Analytics
+    initializeGA();
+
+    // Track page view in GA
+    trackPageView();
+
+    // Track page view in Meta
+    const path = location.pathname;
+    const pageName = path === '/' ? 'Home' : path.substring(1).split('/').map(s => 
+      s.charAt(0).toUpperCase() + s.slice(1)
+    ).join(' ');
+
+    trackViewContent(
+      user ? {
+        email: user.email,
+        externalId: user.id
+      } : {},
+      {
+        name: pageName,
+        category: path.split('/')[1] || 'home',
+        type: 'page',
+        path: path,
+        title: document.title
+      }
+    ).catch(error => {
+      console.error('Failed to track page view:', error);
+    });
+  }, [location, user, trackViewContent]);
 
   // Check database connection
   const checkConnection = async () => {
@@ -373,9 +408,15 @@ function App() {
   );
 }
 
+// Router future flags
+const routerFutureConfig = {
+  v7_startTransition: true,
+  v7_relativeSplatPath: true
+};
+
 // Wrap App with Router for useLocation to work
 const AppWrapper = () => (
-  <Router>
+  <Router future={routerFutureConfig}>
     <App />
   </Router>
 );
