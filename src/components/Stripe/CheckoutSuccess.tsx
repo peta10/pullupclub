@@ -45,9 +45,9 @@ const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({
               email: session.customer_details.email,
               externalId: user?.id
             },
-            9.99, // Monthly subscription price
-            'USD',
             {
+              value: 9.99,
+              currency: 'USD',
               subscription_id: session.subscription,
               product_id: session.line_items?.[0]?.price?.product
             }
