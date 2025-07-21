@@ -15,10 +15,27 @@ export interface TrackEventRequest {
 }
 
 export default async function handler(request: Request): Promise<Response> {
+  // Handle CORS preflight
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Max-Age': '86400'
+      }
+    });
+  }
+
+  // Only allow POST
   if (request.method !== 'POST') {
     return new Response(JSON.stringify({ message: 'Method not allowed' }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' }
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
     });
   }
 
@@ -29,12 +46,15 @@ export default async function handler(request: Request): Promise<Response> {
     if (!eventName) {
       return new Response(JSON.stringify({ error: 'eventName is required' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
       });
     }
 
     // In development, just log the event
-    if (import.meta.env.DEV) {
+    if (process.env.NODE_ENV === 'development') {
       console.log('🔍 Meta Pixel Event (Development):', {
         eventName,
         userData,
@@ -53,7 +73,10 @@ export default async function handler(request: Request): Promise<Response> {
         }
       }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
       });
     }
 
@@ -74,7 +97,10 @@ export default async function handler(request: Request): Promise<Response> {
       eventId: event.event_id 
     }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
     });
   } catch (error) {
     console.error('Track event error:', error);
@@ -83,7 +109,10 @@ export default async function handler(request: Request): Promise<Response> {
       details: error instanceof Error ? error.message : 'Unknown error'
     }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
     });
   }
 } 

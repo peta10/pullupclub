@@ -224,7 +224,7 @@ export class MetaConversionsAPI {
     this.pixelId = process.env.META_PIXEL_ID!;
     this.accessToken = process.env.META_ACCESS_TOKEN!;
     this.apiVersion = process.env.META_API_VERSION || 'v21.0';
-    this.baseUrl = `https://graph.facebook.com/${this.apiVersion}`;
+    this.baseUrl = 'https://graph.facebook.com';
   }
 
   private hashData(data: string): string | null {
@@ -239,12 +239,19 @@ export class MetaConversionsAPI {
 
   async sendEvents(events: any[]): Promise<any> {
     try {
-      const url = `${this.baseUrl}/${this.pixelId}/events`;
+      const url = `${this.baseUrl}/${this.apiVersion}/${this.pixelId}/events`;
       
       const payload = {
         data: events,
         access_token: this.accessToken
       };
+
+      console.log('🔍 Meta API called from:', typeof window !== 'undefined' ? window.navigator.userAgent : 'Server');
+      console.log('📤 Sending to Meta:', {
+        eventName: events[0]?.event_name,
+        pixelId: this.pixelId,
+        hasUserData: !!events[0]?.user_data
+      });
 
       const response = await fetch(url, {
         method: 'POST',
