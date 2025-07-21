@@ -1,22 +1,12 @@
-import { MetaConversionsAPI } from '../../../lib/meta-conversions';
+export const config = {
+  runtime: 'edge',
+};
 
-export interface TrackEventRequest {
-  eventName: string;
-  userData?: {
-    email?: string;
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-    externalId?: string;
-    fbp?: string;
-  };
-  customData?: Record<string, unknown>;
-  eventSourceUrl?: string;
-}
+import { MetaConversionsAPI } from './_meta-api.js';
 
-export default async function handler(request: Request): Promise<Response> {
+export default async function handler(req) {
   // Handle CORS preflight
-  if (request.method === 'OPTIONS') {
+  if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
       headers: {
@@ -29,7 +19,7 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   // Only allow POST
-  if (request.method !== 'POST') {
+  if (req.method !== 'POST') {
     return new Response(JSON.stringify({ message: 'Method not allowed' }), {
       status: 405,
       headers: {
@@ -40,7 +30,7 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   try {
-    const body = await request.json() as TrackEventRequest;
+    const body = await req.json();
     const { eventName, userData = {}, customData = {}, eventSourceUrl } = body;
 
     if (!eventName) {
@@ -53,38 +43,21 @@ export default async function handler(request: Request): Promise<Response> {
       });
     }
 
-    // In development, just log the event
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Meta Pixel Event (Development):', {
-        eventName,
-        userData,
-        customData,
-        eventSourceUrl
-      });
-      
-      return new Response(JSON.stringify({ 
-        success: true,
-        development: true,
-        event: {
-          eventName,
-          userData,
-          customData,
-          eventSourceUrl
-        }
-      }), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        }
-      });
-    }
+    console.log('🔍 Meta API called from:', req.headers.get('user-agent'));
+    console.log('📤 Sending to Meta:', {
+      eventName,
+      pixelId: process.env.META_PIXEL_ID,
+      hasUserData: !!Object.keys(userData).length
+    });
 
-    // In production, send to Meta
     const meta = new MetaConversionsAPI();
-    const event = meta.createEvent({
+    const event = await meta.createEvent({
       eventName,
       eventSourceUrl,
+      userAgent: req.headers.get('user-agent'),
+      ipAddress: req.headers.get('x-forwarded-for') || 
+                req.headers.get('x-real-ip') || 
+                '127.0.0.1',
       userData,
       customData
     });
@@ -103,7 +76,7 @@ export default async function handler(request: Request): Promise<Response> {
       }
     });
   } catch (error) {
-    console.error('Track event error:', error);
+    console.error('❌ Meta API Error:', error);
     return new Response(JSON.stringify({ 
       error: 'Failed to track event',
       details: error instanceof Error ? error.message : 'Unknown error'

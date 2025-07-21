@@ -3,12 +3,12 @@ export class MetaConversionsAPI {
     this.pixelId = process.env.META_PIXEL_ID;
     this.accessToken = process.env.META_ACCESS_TOKEN;
     this.apiVersion = process.env.META_API_VERSION || 'v21.0';
-    this.baseUrl = `https://graph.facebook.com/${this.apiVersion}`;
+    this.baseUrl = 'https://graph.facebook.com';
   }
 
   async sendEvents(events) {
     try {
-      const url = `${this.baseUrl}/${this.pixelId}/events`;
+      const url = `${this.baseUrl}/${this.apiVersion}/${this.pixelId}/events`;
       
       const payload = {
         data: events,
