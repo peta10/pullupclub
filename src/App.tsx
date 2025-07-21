@@ -15,6 +15,7 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import { initializeGA, trackPageView } from './utils/analytics';
 import { useMetaTracking } from './hooks/useMetaTracking';
 import { useAuth } from './context/AuthContext';
+import { useRef } from "react";
 
 // Lazy-loaded components
 const Home = lazy(() => import("./pages/Home/Home.tsx"));
@@ -65,6 +66,7 @@ function App() {
     "initializing" | "connecting" | "connected" | "error"
   >("initializing");
   const [retryCount, setRetryCount] = useState(0);
+  const hasTracked = useRef(false);
 
   useEffect(() => {
     // Initialize Google Analytics
@@ -217,26 +219,29 @@ function App() {
     trackPageView();
 
     // Track page view in Meta
-    const path = location.pathname;
-    const pageName = path === '/' ? 'Home' : path.substring(1).split('/').map(s => 
-      s.charAt(0).toUpperCase() + s.slice(1)
-    ).join(' ');
+    if (!hasTracked.current) {
+      hasTracked.current = true;
+      const path = location.pathname;
+      const pageName = path === '/' ? 'Home' : path.substring(1).split('/').map(s => 
+        s.charAt(0).toUpperCase() + s.slice(1)
+      ).join(' ');
 
-    trackViewContent(
-      user ? {
-        email: user.email,
-        externalId: user.id
-      } : {},
-      {
-        name: pageName,
-        category: path.split('/')[1] || 'home',
-        type: 'page',
-        path: path,
-        title: document.title
-      }
-    ).catch(error => {
-      console.error('Failed to track page view:', error);
-    });
+      trackViewContent(
+        user ? {
+          email: user.email,
+          externalId: user.id
+        } : {},
+        {
+          name: pageName,
+          category: path.split('/')[1] || 'home',
+          type: 'page',
+          path: path,
+          title: document.title
+        }
+      ).catch(error => {
+        console.error('Failed to track page view:', error);
+      });
+    }
   }, [location, user, trackViewContent]);
 
   // Check database connection

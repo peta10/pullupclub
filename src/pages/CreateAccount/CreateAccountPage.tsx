@@ -35,7 +35,7 @@ const CreateAccountPage: React.FC = () => {
   const { signUp, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { trackRegistration } = useMetaTracking();
+  const { trackEvent } = useMetaTracking();
 
   useEffect(() => {
     if (user) {
@@ -108,7 +108,7 @@ const CreateAccountPage: React.FC = () => {
       navigate("/profile", { replace: true, state: { success: "Account created and profile completed!" } });
 
       // Track registration
-      await trackRegistration({
+      await trackEvent('Registration', {
         email: formData.email,
         firstName: formData.fullName.split(" ")[0], // Assuming first name is the first word
         lastName: formData.fullName.split(" ").slice(1).join(" "), // Assuming last name is everything after the first word

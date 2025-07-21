@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../components/Layout/Layout";
 import { useAuth } from "../../context/AuthContext";
@@ -7,6 +7,7 @@ import ProfileSettings from "../../components/Profile/ProfileSettings";
 import SubscriptionRewards from "./SubscriptionRewards";
 import { useTranslation } from "react-i18next";
 import Head from "../../components/Layout/Head";
+import { useMetaTracking } from '../../hooks/useMetaTracking';
 
 const ProfilePage: React.FC = () => {
   const { user, isFirstLogin, profile } = useAuth();
@@ -23,6 +24,19 @@ const ProfilePage: React.FC = () => {
     phone: "",
   });
   const [dirty, setDirty] = useState(false);
+  const { trackViewContent } = useMetaTracking();
+  const hasTracked = useRef(false);
+
+  useEffect(() => {
+    if (!hasTracked.current) {
+      hasTracked.current = true;
+      trackViewContent({}, {
+        name: 'Profile Page',
+        category: 'profile',
+        type: 'page'
+      }).catch(() => {});
+    }
+  }, [trackViewContent]);
 
   useEffect(() => {
     if (isFirstLogin && profile && !profile.is_profile_completed) {

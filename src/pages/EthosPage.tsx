@@ -1,11 +1,25 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import Layout from "../components/Layout/Layout";
 import Head from "../components/Layout/Head";
 import { Shield, Users, Activity } from "lucide-react";
 import { useTranslation, Trans } from "react-i18next";
+import { useMetaTracking } from '../hooks/useMetaTracking';
 
 const EthosPage: React.FC = () => {
   const { t } = useTranslation("ethos");
+  const { trackViewContent } = useMetaTracking();
+  const hasTracked = useRef(false);
+
+  useEffect(() => {
+    if (!hasTracked.current) {
+      hasTracked.current = true;
+      trackViewContent({}, {
+        name: 'Ethos Page',
+        category: 'ethos',
+        type: 'page'
+      }).catch(() => {});
+    }
+  }, [trackViewContent]);
   return (
     <Layout>
       <Head>

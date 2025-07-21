@@ -2,9 +2,10 @@ import { Clock, Trophy, Target, FileText, ChevronUp } from "lucide-react";
 import { Submission } from "../../types";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../context/AuthContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useMetaTracking } from '../../hooks/useMetaTracking';
 
 // Live countdown hook with seconds
 const useLiveCountdown = () => {
@@ -140,6 +141,8 @@ const SubmissionDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [bestPerformance, setBestPerformance] = useState(0);
   const [currentMonthSubmission, setCurrentMonthSubmission] = useState<Submission | null>(null);
+  const { trackViewContent } = useMetaTracking();
+  const hasTracked = useRef(false);
 
   const fetchUserSubmissions = async () => {
     if (!user) return;
@@ -202,6 +205,17 @@ const SubmissionDashboard = () => {
     fetchUserSubmissions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  useEffect(() => {
+    if (!hasTracked.current) {
+      hasTracked.current = true;
+      trackViewContent({}, {
+        name: 'Submission Dashboard',
+        category: 'profile',
+        type: 'dashboard'
+      }).catch(() => {});
+    }
+  }, [trackViewContent]);
 
   const getStatusColor = (status: string) => {
     switch (status) {

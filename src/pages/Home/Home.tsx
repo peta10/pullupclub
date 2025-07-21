@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import Head from "../../components/Layout/Head";
 import Layout from "../../components/Layout/Layout";
 import Hero1 from "./Hero1";
@@ -13,15 +13,19 @@ import { useMetaTracking } from "../../hooks/useMetaTracking";
 const Home: React.FC = () => {
   const { t } = useTranslation("home");
   const { trackEvent } = useMetaTracking();
+  const hasTracked = useRef(false);
 
   useEffect(() => {
-    // Test Meta Pixel tracking
-    trackEvent('TestEvent', {
-      externalId: 'test-user-id'
-    }, {
-      testProperty: 'test-value',
-      timestamp: new Date().toISOString()
-    });
+    if (!hasTracked.current) {
+      hasTracked.current = true;
+      // Test Meta Pixel tracking
+      trackEvent('TestEvent', {
+        externalId: 'test-user-id'
+      }, {
+        testProperty: 'test-value',
+        timestamp: new Date().toISOString()
+      });
+    }
   }, [trackEvent]);
 
   return (

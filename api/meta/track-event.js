@@ -1,209 +1,155 @@
-export const config = {
-  runtime: 'edge',
-};
+const crypto = require('crypto');
 
-class MetaConversionsAPI {
-  constructor() {
-    this.pixelId = process.env.META_PIXEL_ID;
-    this.accessToken = process.env.META_ACCESS_TOKEN;
-    this.apiVersion = process.env.META_API_VERSION || 'v21.0';
-    this.baseUrl = `https://graph.facebook.com/${this.apiVersion}`;
-  }
-
-  async sendEvents(events) {
-    try {
-      const url = `${this.baseUrl}/${this.pixelId}/events`;
-      
-      const payload = {
-        data: events,
-        access_token: this.accessToken
-      };
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(`Meta API Error: ${JSON.stringify(result)}`);
-      }
-
-      return result;
-    } catch (error) {
-      console.error('Meta Conversions API Error:', error);
-      throw error;
-    }
-  }
-
-  hashData(data) {
-    if (!data) return null;
-    // Use Web Crypto API instead of Node's crypto module for Edge Runtime
-    const encoder = new TextEncoder();
-    const data_buffer = encoder.encode(data.toLowerCase().trim());
-    return crypto.subtle.digest('SHA-256', data_buffer)
-      .then(hash => {
-        return Array.from(new Uint8Array(hash))
-          .map(b => b.toString(16).padStart(2, '0'))
-          .join('');
-      });
-  }
-
-  generateEventId(userId, eventName, timestamp) {
-    const baseString = `${userId || 'anonymous'}_${eventName}_${timestamp}`;
-    const encoder = new TextEncoder();
-    const data_buffer = encoder.encode(baseString);
-    return crypto.subtle.digest('MD5', data_buffer)
-      .then(hash => {
-        return Array.from(new Uint8Array(hash))
-          .map(b => b.toString(16).padStart(2, '0'))
-          .join('');
-      });
-  }
-
-  async createEvent({
-    eventName,
-    eventTime = Math.floor(Date.now() / 1000),
-    eventSourceUrl,
-    userAgent,
-    ipAddress,
-    userData = {},
-    customData = {},
-    eventId,
-  }) {
-    const hashedUserData = {};
-    
-    if (userData.email) {
-      hashedUserData.em = [await this.hashData(userData.email)];
-    }
-    if (userData.phone) {
-      hashedUserData.ph = [await this.hashData(userData.phone)];
-    }
-    if (userData.firstName) {
-      hashedUserData.fn = [await this.hashData(userData.firstName)];
-    }
-    if (userData.lastName) {
-      hashedUserData.ln = [await this.hashData(userData.lastName)];
-    }
-    if (userData.externalId) {
-      hashedUserData.external_id = [userData.externalId];
-    }
-    if (userData.fbp) {
-      hashedUserData.fbp = userData.fbp;
-    }
-    if (userAgent) {
-      hashedUserData.client_user_agent = userAgent;
-    }
-    if (ipAddress) {
-      hashedUserData.client_ip_address = ipAddress;
-    }
-
-    const generatedEventId = eventId || await this.generateEventId(userData.externalId, eventName, eventTime);
-
-    return {
-      event_name: eventName,
-      event_time: eventTime,
-      event_id: generatedEventId,
-      event_source_url: eventSourceUrl,
-      action_source: 'website',
-      user_data: hashedUserData,
-      custom_data: customData,
-    };
-  }
+function hashData(data) {
+  if (!data) return null;
+  return crypto.createHash('sha256').update(data.toLowerCase().trim()).digest('hex');
 }
 
-export default async function handler(req) {
-  // Handle CORS
+function generateEventId(userId, eventName, timestamp) {
+  const baseString = `${userId || 'anonymous'}_${eventName}_${timestamp}`;
+  return crypto.createHash('md5').update(baseString).digest('hex');
+}
+
+async function sendToMeta(events) {
+  const url = `https://graph.facebook.com/v21.0/${process.env.META_PIXEL_ID}/events`;
+  
+  const payload = {
+    data: events,
+    access_token: process.env.META_ACCESS_TOKEN
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Meta API Error: ${JSON.stringify(error)}`);
+  }
+
+  return response.json();
+}
+
+function createEvent({
+  eventName,
+  eventTime = Math.floor(Date.now() / 1000),
+  eventSourceUrl,
+  userAgent,
+  ipAddress,
+  userData = {},
+  customData = {},
+}) {
+  const hashedUserData = {};
+  
+  if (userData.email) {
+    hashedUserData.em = [hashData(userData.email)];
+  }
+  if (userData.phone) {
+    hashedUserData.ph = [hashData(userData.phone)];
+  }
+  if (userData.firstName) {
+    hashedUserData.fn = [hashData(userData.firstName)];
+  }
+  if (userData.lastName) {
+    hashedUserData.ln = [hashData(userData.lastName)];
+  }
+  if (userData.externalId) {
+    hashedUserData.external_id = [userData.externalId];
+  }
+  if (userData.fbp) {
+    hashedUserData.fbp = userData.fbp;
+  }
+  if (userAgent) {
+    hashedUserData.client_user_agent = userAgent;
+  }
+  if (ipAddress) {
+    hashedUserData.client_ip_address = ipAddress;
+  }
+
+  return {
+    event_name: eventName,
+    event_time: eventTime,
+    event_id: generateEventId(userData.externalId, eventName, eventTime),
+    event_source_url: eventSourceUrl,
+    action_source: 'website',
+    user_data: hashedUserData,
+    custom_data: customData,
+  };
+}
+
+module.exports = async function handler(req, res) {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
-    });
+    return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-    });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const body = await req.json();
-    const { eventName, userData = {}, customData = {}, eventSourceUrl } = body;
+    console.log('🔍 Meta API called from:', req.headers['user-agent']);
+    
+    const { eventName, userData = {}, customData = {}, eventSourceUrl } = req.body;
 
     if (!eventName) {
-      return new Response(JSON.stringify({ error: 'eventName is required' }), {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-      });
+      return res.status(400).json({ error: 'eventName is required' });
     }
 
+    // Check environment variables
     if (!process.env.META_PIXEL_ID || !process.env.META_ACCESS_TOKEN) {
-      console.error('Missing Meta environment variables');
-      return new Response(JSON.stringify({ error: 'Meta configuration missing' }), {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
+      console.error('Missing Meta environment variables:', {
+        hasPixelId: !!process.env.META_PIXEL_ID,
+        hasToken: !!process.env.META_ACCESS_TOKEN
       });
+      return res.status(500).json({ error: 'Meta configuration missing' });
     }
 
-    const meta = new MetaConversionsAPI();
-    
-    const event = await meta.createEvent({
+    const userAgent = req.headers['user-agent'];
+    const ipAddress = req.headers['x-forwarded-for'] || 
+                     req.headers['x-real-ip'] || 
+                     req.connection?.remoteAddress || '127.0.0.1';
+
+    const event = createEvent({
       eventName,
-      eventSourceUrl,
-      userAgent: req.headers.get('user-agent'),
-      ipAddress: req.headers.get('x-forwarded-for') || 
-                 req.headers.get('x-real-ip') || 
-                 '127.0.0.1',
+      eventSourceUrl: eventSourceUrl || req.headers.referer,
+      userAgent,
+      ipAddress,
       userData,
       customData,
     });
 
-    const result = await meta.sendEvents([event]);
+    console.log('📤 Sending to Meta:', {
+      eventName: event.event_name,
+      pixelId: process.env.META_PIXEL_ID,
+      hasUserData: Object.keys(event.user_data).length > 0
+    });
 
-    return new Response(JSON.stringify({
-      success: true,
+    const result = await sendToMeta([event]);
+
+    console.log('✅ Meta API Success');
+
+    return res.status(200).json({ 
+      success: true, 
       result,
-      eventId: event.event_id
-    }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      eventId: event.event_id 
     });
 
   } catch (error) {
-    console.error('Track event error:', error);
+    console.error('❌ Meta API Error:', error.message);
     
-    return new Response(JSON.stringify({
+    return res.status(500).json({ 
       error: 'Failed to track event',
       details: error.message,
       timestamp: new Date().toISOString()
-    }), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
     });
   }
-} 
+}; 

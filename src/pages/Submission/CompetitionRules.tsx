@@ -1,8 +1,22 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useMetaTracking } from '../../hooks/useMetaTracking';
 
 const CompetitionRules: React.FC = () => {
   const { t } = useTranslation('rules');
+  const { trackViewContent } = useMetaTracking();
+  const hasTracked = useRef(false);
+
+  useEffect(() => {
+    if (!hasTracked.current) {
+      hasTracked.current = true;
+      trackViewContent({}, {
+        name: 'Competition Rules',
+        category: 'rules',
+        type: 'page'
+      }).catch(() => {});
+    }
+  }, [trackViewContent]);
 
   return (
     <div className="max-w-3xl mx-auto bg-gray-900 rounded-lg p-8 border border-gray-700">

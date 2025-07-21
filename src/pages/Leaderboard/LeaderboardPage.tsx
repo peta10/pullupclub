@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Layout from "../../components/Layout/Layout";
 import BadgeLegend from "./BadgeLegend";
 import LeaderboardTable from "../../components/Leaderboard/LeaderboardTable";
@@ -85,6 +85,7 @@ const LeaderboardPage: React.FC = () => {
   const { cacheInfo, clearAllCaches } = useCache();
   const { trackViewContent } = useMetaTracking();
   const { user } = useAuth();
+  const hasTracked = useRef(false);
 
   // Use fresh data if available, fall back to cached data
   const finalData = originalData?.length > 0 ? originalData : cachedData;
@@ -157,19 +158,22 @@ const LeaderboardPage: React.FC = () => {
   };
 
   useEffect(() => {
-    // Track leaderboard view
-    trackViewContent(
-      {
-        email: user?.email,
-        externalId: user?.id
-      },
-      {
-        name: 'PUC Leaderboard',
-        category: 'leaderboard',
-        type: 'page'
-      }
-    ).catch(console.error);
-  }, []);
+    if (!hasTracked.current) {
+      hasTracked.current = true;
+      // Track leaderboard view
+      trackViewContent(
+        {
+          email: user?.email,
+          externalId: user?.id
+        },
+        {
+          name: 'PUC Leaderboard',
+          category: 'leaderboard',
+          type: 'page'
+        }
+      ).catch(console.error);
+    }
+  }, [trackViewContent, user]);
 
   if (finalLoading) return <LoadingState message={t('table.loading')} />;
   if (finalError) return <ErrorState message={typeof finalError === 'string' ? finalError : t('common:errors.generic')} />;

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Layout from "../../components/Layout/Layout.tsx";
 import { useAuth } from "../../context/AuthContext.tsx";
 import LoginForm from "./LoginForm.tsx";
 import ResetPasswordForm from "./ResetPasswordForm.tsx";
 import ResetSentConfirmation from "./ResetSentConfirmation.tsx";
+import { useMetaTracking } from '../../hooks/useMetaTracking';
 
 const LoginPage: React.FC = () => {
   const [showResetForm, setShowResetForm] = useState(false);
@@ -13,6 +14,19 @@ const LoginPage: React.FC = () => {
   const { user, profile, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { trackViewContent } = useMetaTracking();
+  const hasTracked = useRef(false);
+
+  useEffect(() => {
+    if (!hasTracked.current) {
+      hasTracked.current = true;
+      trackViewContent({}, {
+        name: 'Login Page',
+        category: 'login',
+        type: 'page'
+      }).catch(() => {});
+    }
+  }, [trackViewContent]);
 
   useEffect(() => {
     if (!isLoading && user && profile) {

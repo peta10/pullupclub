@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   CheckCircle2,
   ChevronRight,
@@ -9,6 +9,7 @@ import { products } from "../../lib/stripe-config";
 import { trackEvent } from "../../utils/analytics";
 import { useTranslation } from "react-i18next";
 import Head from "../../components/Layout/Head";
+import { useMetaTracking } from '../../hooks/useMetaTracking';
 
 // Payment links - hardcoded since they are public and don't change between environments
 const PAYMENT_LINKS = {
@@ -21,6 +22,19 @@ const SubscriptionPlans: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "annual">("monthly");
+  const { trackViewContent } = useMetaTracking();
+  const hasTracked = useRef(false);
+
+  useEffect(() => {
+    if (!hasTracked.current) {
+      hasTracked.current = true;
+      trackViewContent({}, {
+        name: 'Subscription Plans',
+        category: 'subscription',
+        type: 'page'
+      }).catch(() => {});
+    }
+  }, [trackViewContent]);
 
   const handleSubscribe = async () => {
     setError(null);

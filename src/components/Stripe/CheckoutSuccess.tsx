@@ -32,7 +32,7 @@ const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({
   session,
   user
 }) => {
-  const { trackPurchase } = useMetaTracking();
+  const { trackEvent } = useMetaTracking();
   const planType = subscriptionType === 'annual' ? 'Annual' : 'Monthly';
   
   useEffect(() => {
@@ -40,7 +40,8 @@ const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({
       try {
         // Track purchase
         if (session?.customer_details?.email) {
-          await trackPurchase(
+          await trackEvent(
+            'Purchase',
             {
               email: session.customer_details.email,
               externalId: user?.id
@@ -59,7 +60,7 @@ const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({
     };
 
     handleSuccess();
-  }, [session, user, trackPurchase]);
+  }, [session, user, trackEvent]);
 
   return (
     <div className="max-w-lg mx-auto text-center">

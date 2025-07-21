@@ -1,11 +1,25 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import Layout from "../../components/Layout/Layout";
 import { FaqSection } from "../../components/ui/faq-section";
 import { useTranslation } from "react-i18next";
 import Head from "../../components/Layout/Head";
+import { useMetaTracking } from '../../hooks/useMetaTracking';
 
 const FAQPage: React.FC = () => {
   const { t } = useTranslation('faq');
+  const { trackViewContent } = useMetaTracking();
+  const hasTracked = useRef(false);
+
+  useEffect(() => {
+    if (!hasTracked.current) {
+      hasTracked.current = true;
+      trackViewContent({}, {
+        name: 'FAQ Page',
+        category: 'faq',
+        type: 'page'
+      }).catch(() => {});
+    }
+  }, [trackViewContent]);
 
   const faqs = Array.from({ length: 14 }, (_, i) => ({
     question: t(`q${i + 1}.q`),
