@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+import crypto from 'crypto';
 
 function hashData(data) {
   if (!data) return null;
@@ -11,7 +11,8 @@ function generateEventId(userId, eventName, timestamp) {
 }
 
 async function sendToMeta(events) {
-  const url = `https://graph.facebook.com/v21.0/${process.env.META_PIXEL_ID}/events`;
+  const apiVersion = process.env.META_API_VERSION || 'v21.0';
+  const url = `https://graph.facebook.com/${apiVersion}/${process.env.META_PIXEL_ID}/events`;
   
   const payload = {
     data: events,
@@ -81,7 +82,7 @@ function createEvent({
   };
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -152,4 +153,4 @@ module.exports = async function handler(req, res) {
       timestamp: new Date().toISOString()
     });
   }
-}; 
+} 
