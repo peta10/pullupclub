@@ -129,22 +129,69 @@ async function updateUserPaymentStatus(userId: string, customerId: string, custo
   }
 }
 
+async function storePendingPayment(session: Stripe.Checkout.Session) {
+  if (!session.customer_details?.email || !session.customer) {
+    console.log('Missing required customer details for pending payment');
+    return null;
+  }
+
+  try {
+    // Store the pending payment with 30-day expiration
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
+    const { data: pendingPayment, error } = await supabaseAdmin
+      .from('pending_payments')
+      .insert({
+        stripe_session_id: session.id,
+        stripe_customer_id: session.customer,
+        customer_email: session.customer_details.email,
+        payment_status: session.payment_status,
+        subscription_id: session.subscription,
+        amount_cents: session.amount_total,
+        currency: session.currency,
+        expires_at: expiresAt.toISOString(),
+        metadata: {
+          customer_name: session.customer_details.name,
+          payment_intent: session.payment_intent,
+          session_data: {
+            mode: session.mode,
+            status: session.status
+          }
+        }
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error storing pending payment:', error);
+      return null;
+    }
+
+    console.log('Successfully stored pending payment:', pendingPayment.id);
+    return pendingPayment;
+  } catch (error) {
+    console.error('Error in storePendingPayment:', error);
+    return null;
+  }
+}
+
 async function verifyStripeSignature(req: Request) {
   try {
     const signature = req.headers.get('stripe-signature');
     if (!signature) {
       return { valid: false };
     }
-    
+
     const body = await req.text();
     const event = await stripe.webhooks.constructEventAsync(
-      body, 
-      signature, 
-      stripeWebhookSecret, 
-      undefined, 
+      body,
+      signature,
+      stripeWebhookSecret,
+      undefined,
       cryptoProvider
     );
-    
+
     return { valid: true, event };
   } catch (err) {
     console.error('Error verifying Stripe signature:', err);
@@ -248,12 +295,45 @@ Deno.serve(async (req: Request) => {
           console.log(`Successfully processed payment for user: ${user.id}`);
         } else {
           console.log(`No user found with email: ${customerEmail}`);
-          console.log('This might be a payment from a user who hasnt created an account yet');
-          console.log('Customer details:', {
-            email: customerEmail,
-            customerId: customerId,
-            name: session.customer_details?.name
-          });
+          console.log('Storing pending payment for future account creation');
+          
+          const pendingPayment = await storePendingPayment(session);
+          if (pendingPayment) {
+            // Send email notification about pending account creation
+            try {
+              const emailData = {
+                to: customerEmail,
+                subject: 'Complete Your Pull-Up Club Account Setup',
+                html: `
+                  <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2>Welcome to Pull-Up Club!</h2>
+                    <p>Thank you for your payment. To access your subscription, please complete your account setup:</p>
+                    <p><a href="https://pullupclub.com/signup-access?session_id=${session.id}" style="display: inline-block; background: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Complete Account Setup</a></p>
+                    <p>This link will expire in 30 days. If you need assistance, please contact support@pullupclub.com</p>
+                  </div>
+                `
+              };
+
+              const { error: emailError } = await supabaseAdmin
+                .from('email_notifications')
+                .insert({
+                  recipient_email: customerEmail,
+                  email_type: 'account_setup',
+                  subject: emailData.subject,
+                  message: emailData.html,
+                  metadata: {
+                    pending_payment_id: pendingPayment.id,
+                    stripe_session_id: session.id
+                  }
+                });
+
+              if (emailError) {
+                console.error('Error queuing account setup email:', emailError);
+              }
+            } catch (emailError) {
+              console.error('Error handling account setup notification:', emailError);
+            }
+          }
         }
         break;
       }
