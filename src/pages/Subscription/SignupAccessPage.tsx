@@ -1,18 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { supabase } from '../../lib/supabase';
-import { toast } from 'react-hot-toast';
-import { Button, Card, Input, PasswordInput } from '../../components/ui';
-import { PasswordRequirements } from '../../components/Auth/PasswordRequirements';
+import { useAuth } from '../../context/AuthContext';
+import Layout from '../../components/Layout/Layout';
+import { Button } from '../../components/ui/Button';
+import { useTranslation } from 'react-i18next';
+import Head from '../../components/Layout/Head';
 
 interface VerificationResult {
   isValid: boolean;
-  error?: string;
   customerEmail?: string;
-  customerId?: string;
   subscriptionId?: string;
+  customerId?: string;
+  error?: string;
   sessionData?: {
     paymentStatus: string;
     status: string;
@@ -159,95 +161,133 @@ const SignupAccessPage: React.FC = () => {
   const passwordsMatch = formData.password === formData.confirmPassword && formData.password.length > 0;
   const isPasswordValid = hasMinLength && hasUpperCase && hasLowerCase && hasNumber && passwordsMatch;
 
+  const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
+    <div className="flex items-center space-x-2 text-sm">
+      <CheckCircle2 size={16} className={met ? "text-green-500" : "text-gray-500"} />
+      <span className={met ? "text-green-500" : "text-gray-500"}>{text}</span>
+    </div>
+  );
+
   if (verificationStatus === 'loading') {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Card className="w-full max-w-md p-6">
+      <Layout>
+        <Head><title>{t('meta.title')}</title></Head>
+        <div className="min-h-screen bg-black flex items-center justify-center">
           <div className="text-center">
-            <h2 className="mb-4 text-xl font-semibold">Verifying Payment...</h2>
-            <p className="text-gray-600">Please wait while we verify your payment session.</p>
+            <Loader2 className="h-12 w-12 animate-spin text-[#9b9b6f] mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-white mb-2">{t('signup.verifying')}</h2>
+            <p className="text-gray-400">{t('signup.verifyingDesc')}</p>
           </div>
-        </Card>
-      </div>
+        </div>
+      </Layout>
     );
   }
 
   if (verificationStatus === 'invalid') {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Card className="w-full max-w-md p-6">
-          <div className="text-center">
-            <h2 className="mb-4 text-xl font-semibold text-red-600">Payment Verification Failed</h2>
-            <p className="text-gray-600">{verificationResult?.error || 'Invalid or expired payment session'}</p>
-            <Button
-              className="mt-4"
-              onClick={() => navigate('/subscription')}
-            >
-              Return to Subscription Page
+      <Layout>
+        <Head><title>{t('meta.title')}</title></Head>
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <div className="max-w-md mx-auto text-center">
+            <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-4">{t('signup.failedTitle')}</h2>
+            <p className="text-gray-400 mb-6">
+              {verificationResult?.error || t('signup.failedDesc')}
+            </p>
+            <Button onClick={() => navigate('/subscription')} className="bg-[#9b9b6f] text-black hover:bg-[#7a7a58]">
+              {t('signup.backButton')}
             </Button>
           </div>
-        </Card>
-      </div>
+        </div>
+      </Layout>
     );
   }
 
   if (isClaimingPayment) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Card className="w-full max-w-md p-6">
+      <Layout>
+        <Head><title>{t('meta.title')}</title></Head>
+        <div className="min-h-screen bg-black flex items-center justify-center">
           <div className="text-center">
-            <h2 className="mb-4 text-xl font-semibold">Claiming Payment...</h2>
-            <p className="text-gray-600">Please wait while we set up your subscription.</p>
+            <Loader2 className="h-12 w-12 animate-spin text-[#9b9b6f] mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-white mb-2">Claiming Payment...</h2>
+            <p className="text-gray-400">Please wait while we set up your subscription.</p>
           </div>
-        </Card>
-      </div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <Card className="w-full max-w-md p-6">
-        <h2 className="mb-6 text-center text-2xl font-bold">Complete Your Account Setup</h2>
-        <form onSubmit={handleCreateAccount}>
-          <div className="space-y-4">
-            <Input
-              label="Email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              disabled={!!verificationResult?.customerEmail}
-              required
-            />
-            <PasswordInput
-              label="Password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              required
-            />
-            <PasswordInput
-              label="Confirm Password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              required
-            />
-            <PasswordRequirements
-              password={formData.password}
-              confirmPassword={formData.confirmPassword}
-            />
+    <Layout>
+      <Head><title>{t('meta.title')}</title></Head>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden w-full">
+        <div className="relative z-10 w-full max-w-sm rounded-3xl bg-gradient-to-r from-[#ffffff10] to-[#121212] backdrop-blur-sm shadow-2xl p-8 flex flex-col items-center">
+          <div className="flex items-center justify-center mb-6">
+            <img src="/PUClogo-optimized.webp" alt="Pull-Up Club Logo" className="h-16 w-auto" />
           </div>
-          <Button
-            type="submit"
-            className="mt-6 w-full"
-            disabled={isCreatingAccount || !isPasswordValid}
-          >
-            {isCreatingAccount ? 'Creating Account...' : 'Create Account'}
-          </Button>
-        </form>
-      </Card>
-    </div>
+          <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
+          <h1 className="text-3xl font-bold text-[#9b9b6f] mb-2 text-center">{t('signup.successTitle')}</h1>
+          <p className="text-gray-400 text-sm mb-6 text-center">{t('signup.successDesc')}</p>
+          <div className="w-full">
+            <form onSubmit={handleCreateAccount} className="flex flex-col w-full gap-4">
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                readOnly={!!verificationResult?.customerEmail}
+                className={`w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f] ${verificationResult?.customerEmail ? 'opacity-75 cursor-not-allowed' : ''}`}
+                placeholder={t('common:labels.email')}
+              />
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+                minLength={8}
+                className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
+                placeholder={t('signup.passwordPlaceholder')}
+              />
+              <input
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                required
+                minLength={8}
+                className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
+                placeholder={t('signup.confirmPasswordPlaceholder')}
+              />
+              <div className="space-y-2 bg-white/5 p-4 rounded-xl">
+                <p className="text-sm font-medium text-gray-300 mb-2">{t('signup.requirementsTitle')}</p>
+                <PasswordRequirement met={hasMinLength} text={t('signup.reqMinLength')} />
+                <PasswordRequirement met={hasUpperCase} text={t('signup.reqUpperCase')} />
+                <PasswordRequirement met={hasLowerCase} text={t('signup.reqLowerCase')} />
+                <PasswordRequirement met={hasNumber} text={t('signup.reqNumber')} />
+                <PasswordRequirement met={passwordsMatch} text={t('signup.reqMatch')} />
+              </div>
+              <Button
+                type="submit"
+                disabled={isCreatingAccount || !isPasswordValid}
+                className="w-full bg-[#9b9b6f] text-black hover:bg-[#7a7a58] font-medium py-3"
+              >
+                {isCreatingAccount ? (
+                  <span className="flex items-center justify-center">
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    {t('signup.creatingButton')}
+                  </span>
+                ) : (
+                  t('signup.createButton')
+                )}
+              </Button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </Layout>
   );
 };
 
