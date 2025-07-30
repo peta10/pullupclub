@@ -5,7 +5,7 @@ declare global {
   }
 }
 
-export function initMetaPixel(pixelId: string) {
+export function initMetaPixel() {
   if (typeof window === 'undefined') {
     console.log('🔍 Meta Pixel: Window not available (SSR)');
     return;
