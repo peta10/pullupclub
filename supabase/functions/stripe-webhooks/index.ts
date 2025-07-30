@@ -293,6 +293,38 @@ Deno.serve(async (req: Request) => {
           }
           
           console.log(`Successfully processed payment for user: ${user.id}`);
+          
+          // Track purchase event via Meta Conversions API
+          try {
+            const response = await fetch(
+              `${Deno.env.get('SUPABASE_URL')}/functions/v1/meta-conversions`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
+                },
+                body: JSON.stringify({
+                  event_name: 'Purchase',
+                  user_data: {
+                    external_id: user.id,
+                    email: customerEmail,
+                  },
+                  custom_data: {
+                    currency: session.currency,
+                    value: session.amount_total ? session.amount_total / 100 : 0,
+                    subscription_id: session.subscription,
+                  },
+                }),
+              }
+            );
+            
+            if (!response.ok) {
+              throw new Error('Failed to track purchase event');
+            }
+          } catch (error) {
+            console.error('Error tracking purchase event:', error);
+          }
         } else {
           console.log(`No user found with email: ${customerEmail}`);
           console.log('Storing pending payment for future account creation');

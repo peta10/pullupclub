@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
 import { CheckCircle2 } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { trackConversion } from "../../utils/meta-pixel";
 
 interface SignUpFormProps {
   onToggleForm: () => void;
@@ -13,7 +14,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const { signUp } = useAuth();
+  const { signUp, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation(['auth', 'common']);
@@ -43,6 +44,18 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
         throw new Error(t('errors.passwordRequirementsNotMet'));
       }
       await signUp(email, password);
+      
+      // Track trial start - user will be available from context after successful sign up
+      if (user) {
+        await trackConversion('StartTrial', {
+          external_id: user.id,
+          email: user.email
+        }, {
+          value: 9.99,
+          currency: 'USD',
+          predicted_ltv: '119.88' // Yearly value
+        });
+      }
 
       // Redirect user to subscription flow immediately
       navigate('/subscribe', {

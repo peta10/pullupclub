@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTranslation } from "react-i18next";
+import { trackConversion } from "../../utils/meta-pixel";
 
 interface LoginFormProps {
   onShowResetForm: () => void;
@@ -14,7 +15,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation(['auth', 'common']);
@@ -36,6 +37,15 @@ const LoginForm: React.FC<LoginFormProps> = ({
         localStorage.setItem("pendingSubscriptionPlan", intendedPlan);
       }
       await signIn(email, password);
+      
+      // Track login event - user will be available from context after successful sign in
+      if (user) {
+        await trackConversion('Login', {
+          external_id: user.id,
+          email: user.email
+        });
+      }
+      
       navigate("/profile", { replace: true });
     } catch (err) {
       localStorage.removeItem("pendingSubscriptionPlan");
