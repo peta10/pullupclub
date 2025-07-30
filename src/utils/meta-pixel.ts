@@ -21,10 +21,29 @@ export function initMetaPixel() {
 }
 
 export function trackPixelEvent(eventName: string, parameters: Record<string, any> = {}) {
-  if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('track', eventName, parameters);
-    console.log('🔍 Meta Pixel: Tracked event', { eventName, parameters });
-  } else {
-    console.warn('🔍 Meta Pixel: Failed to track event - fbq not initialized', { eventName, parameters });
+  if (typeof window === 'undefined') {
+    console.log('🔍 Meta Pixel: Window not available (SSR)');
+    return;
+  }
+
+  // Ensure fbq queue exists
+  if (!window.fbq) {
+    window.fbq = function() {
+      // @ts-ignore
+      window.fbq.queue = window.fbq.queue || [];
+      // @ts-ignore
+      window.fbq.queue.push(arguments);
+    };
+  }
+
+  try {
+    // Add test_event_code in development
+    const isDev = import.meta.env.MODE === 'development';
+    const eventParams = isDev ? { ...parameters, test_event_code: 'TEST12345' } : parameters;
+
+    window.fbq('track', eventName, eventParams);
+    console.log('🔍 Meta Pixel: Tracked event', { eventName, parameters: eventParams });
+  } catch (error) {
+    console.error('🔍 Meta Pixel: Error tracking event', { eventName, parameters, error });
   }
 } 

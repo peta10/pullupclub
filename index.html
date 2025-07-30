@@ -98,8 +98,23 @@
       t.src=v;s=b.getElementsByTagName(e)[0];
       s.parentNode.insertBefore(t,s)}(window, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', '1512318086417813');
+      
+      // Initialize pixel with advanced matching
+      fbq('init', '1512318086417813', {
+        external_id: 'default',
+        em: 'default'  // Will be overwritten by actual values
+      });
+      
+      // Track PageView immediately
       fbq('track', 'PageView');
+      
+      // Make fbq available globally
+      window.fbq = fbq;
+      
+      // Debug mode for development
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        fbq('set', 'debug', true);
+      }
     </script>
     <noscript>
       <img height="1" width="1" style="display:none"
