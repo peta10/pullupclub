@@ -18,12 +18,15 @@ const Home: React.FC = () => {
   useEffect(() => {
     if (!hasTracked.current) {
       hasTracked.current = true;
-      // Test Meta Pixel tracking
-      trackEvent('TestEvent', {
+      // Track ViewContent event for homepage
+      trackEvent('ViewContent', {
         externalId: 'test-user-id'
       }, {
-        testProperty: 'test-value',
-        timestamp: new Date().toISOString()
+        content_name: t("meta.title"),
+        content_category: 'Homepage',
+        content_type: 'website',
+        value: 0,
+        currency: 'USD'
       });
     }
   }, [trackEvent]);

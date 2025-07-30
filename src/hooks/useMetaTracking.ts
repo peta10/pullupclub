@@ -9,17 +9,48 @@ interface ContentData {
 export function useMetaTracking() {
   const [isLoading, setIsLoading] = useState(false);
 
-  // Disable tracking in development
-  const isProduction = process.env.NODE_ENV === 'production';
+  // Check if we're in production mode
+  const isProduction = import.meta.env.MODE === 'production';
   
+  // Get Facebook-specific parameters from cookies/localStorage
+  const getFacebookParams = () => {
+    if (typeof window === 'undefined') return {};
+    
+    const fbp = document.cookie.match(/_fbp=([^;]+)/)?.[1];
+    const fbc = document.cookie.match(/_fbc=([^;]+)/)?.[1];
+    const fb_login_id = localStorage.getItem('fb_login_id');
+
+    return {
+      fbp,
+      fbc,
+      fb_login_id,
+    };
+  };
+
   const trackEvent = async (eventName: string, userData = {}, customData = {}) => {
+    // In development, we'll still track but log it
     if (!isProduction) {
       console.log('🔍 Meta tracking (dev mode):', { eventName, userData, customData });
+      // Still track the event but mark it as test data
+      if (window.fbq) {
+        window.fbq('track', eventName, {
+          ...customData,
+          test_event_code: 'TEST12345', // Add your test event code here
+          is_test: true
+        });
+      }
       return { success: true, dev: true };
     }
 
     setIsLoading(true);
     try {
+      // Merge Facebook parameters with user data
+      const facebookParams = getFacebookParams();
+      const enrichedUserData = {
+        ...userData,
+        ...facebookParams,
+      };
+
       const response = await fetch('/api/meta/track-event', {
         method: 'POST',
         headers: {
@@ -27,7 +58,7 @@ export function useMetaTracking() {
         },
         body: JSON.stringify({
           eventName,
-          userData,
+          userData: enrichedUserData,
           customData,
           eventSourceUrl: typeof window !== 'undefined' ? window.location.href : '',
         }),

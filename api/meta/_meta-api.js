@@ -73,6 +73,7 @@ export class MetaConversionsAPI {
   }) {
     const hashedUserData = {};
     
+    // Basic user data
     if (userData.email) {
       hashedUserData.em = [await this.hashData(userData.email)];
     }
@@ -88,9 +89,35 @@ export class MetaConversionsAPI {
     if (userData.externalId) {
       hashedUserData.external_id = [userData.externalId];
     }
+
+    // Facebook-specific parameters
+    if (userData.fbc) {
+      hashedUserData.fbc = userData.fbc;
+    }
+    if (userData.fb_login_id) {
+      hashedUserData.fb_login_id = userData.fb_login_id;
+    }
     if (userData.fbp) {
       hashedUserData.fbp = userData.fbp;
     }
+
+    // Location data
+    if (userData.zip) {
+      hashedUserData.zp = [await this.hashData(userData.zip)];
+    }
+    if (userData.city) {
+      hashedUserData.ct = [await this.hashData(userData.city)];
+    }
+    if (userData.state) {
+      hashedUserData.st = [await this.hashData(userData.state)];
+    }
+    
+    // Date of birth
+    if (userData.dob) {
+      hashedUserData.db = [await this.hashData(userData.dob)];
+    }
+
+    // Client info
     if (userAgent) {
       hashedUserData.client_user_agent = userAgent;
     }

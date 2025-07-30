@@ -8,6 +8,7 @@ import Layout from '../../components/Layout/Layout';
 import { Button } from '../../components/ui/Button';
 import { useTranslation } from 'react-i18next';
 import Head from '../../components/Layout/Head';
+import { useMetaTracking } from '../../hooks/useMetaTracking';
 
 interface VerificationResult {
   isValid: boolean;
@@ -28,6 +29,7 @@ const SignupAccessPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { trackEvent } = useMetaTracking();
   const [verificationStatus, setVerificationStatus] = useState<'loading' | 'valid' | 'invalid'>('loading');
   const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
@@ -99,6 +101,19 @@ const SignupAccessPage: React.FC = () => {
       }
 
       if (data.success) {
+        // Track Purchase event
+        await trackEvent('Purchase', {
+          email: user?.email,
+          externalId: verificationResult?.customerId,
+        }, {
+          value: verificationResult?.sessionData?.amountTotal,
+          currency: verificationResult?.sessionData?.currency,
+          content_name: 'Pull-Up Club Membership',
+          content_type: 'subscription',
+          content_ids: [verificationResult?.subscriptionId],
+          predicted_ltv: '119.88' // $9.99 * 12 months
+        });
+
         toast.success('Payment claimed successfully!');
         navigate('/profile');
       }
@@ -127,6 +142,17 @@ const SignupAccessPage: React.FC = () => {
         toast.error(t('common:errors.passwordRequirementsNotMet'));
         return;
       }
+
+      // Track StartTrial event before account creation
+      await trackEvent('StartTrial', {
+        email: formData.email,
+        externalId: verificationResult?.customerId,
+      }, {
+        value: verificationResult?.sessionData?.amountTotal,
+        currency: verificationResult?.sessionData?.currency,
+        predicted_ltv: '119.88' // $9.99 * 12 months
+      });
+
       const { error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -142,6 +168,13 @@ const SignupAccessPage: React.FC = () => {
         toast.error(`Failed to create account: ${authError.message}`);
         return;
       }
+
+      // Track CompleteRegistration event
+      await trackEvent('CompleteRegistration', {
+        email: formData.email,
+        externalId: verificationResult?.customerId,
+      });
+
       toast.success(t('common:status.success'));
       // The payment will be claimed automatically when the user is logged in
       // due to the useEffect hook above
