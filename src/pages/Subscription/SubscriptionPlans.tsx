@@ -22,7 +22,7 @@ const SubscriptionPlans: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "annual">("monthly");
-  const { trackViewContent } = useMetaTracking();
+  const { trackViewContent, trackEvent: trackMetaEvent } = useMetaTracking();
   const hasTracked = useRef(false);
 
   useEffect(() => {
@@ -46,6 +46,19 @@ const SubscriptionPlans: React.FC = () => {
         action: 'subscription_plan_selected',
         category: 'stripe',
         label: selectedPlan,
+      });
+
+      // Track InitiateCheckout event for Meta
+      await trackMetaEvent('InitiateCheckout', {}, {
+        value: selectedPlan === 'monthly' ? 9.99 : 99.99,
+        currency: 'USD',
+        content_name: `PUC ${selectedPlan === 'monthly' ? 'Monthly' : 'Annual'} Membership`,
+        content_category: 'Subscription',
+        content_ids: [selectedPlan],
+        content_type: 'product',
+        num_items: 1,
+        page_url: window.location.href,
+        page_path: window.location.pathname,
       });
 
       console.log(`Redirecting to Stripe payment link for ${selectedPlan} plan`);

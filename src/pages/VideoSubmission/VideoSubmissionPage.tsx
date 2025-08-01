@@ -15,6 +15,7 @@ import toast from 'react-hot-toast';
 import { Link } from '../../components/ui/Link';
 import { useTranslation } from 'react-i18next';
 import Head from '../../components/Layout/Head';
+import { useMetaTracking } from '../../hooks/useMetaTracking';
 
 interface FormData {
   pullUpCount: number;
@@ -127,6 +128,7 @@ const VideoSubmissionPage: React.FC = () => {
   const { t } = useTranslation(['submission', 'common']);
   const { submitVideo, uploading } = useVideoSubmission();
   const navigate = useNavigate();
+  const { trackEvent } = useMetaTracking();
   const [formData, setFormData] = useState<FormData & { otherClubAffiliation?: string }>({
     pullUpCount: 0,
     videoUrl: '',
@@ -198,6 +200,23 @@ const VideoSubmissionPage: React.FC = () => {
     if (!user) {
       return;
     }
+
+    // Track video submission event
+    await trackEvent('SubmitApplication', {
+      externalId: user.id,
+      email: user.email
+    }, {
+      content_name: 'PUC Video Submission',
+      content_category: 'Competition',
+      content_type: 'product',
+      value: 0,
+      currency: 'USD',
+      pull_up_count: formData.pullUpCount,
+      region: formData.region,
+      gender: formData.gender,
+      page_url: window.location.href,
+      page_path: window.location.pathname,
+    });
 
     const result = await submitVideo({
       videoUrl: formData.videoUrl,
