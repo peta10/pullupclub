@@ -171,15 +171,23 @@ export class MetaConversionsAPI {
         hashedUserData.client_ip_address = ipAddress;
       }
 
-      // Additional user data for better matching
-      if (userData.referrer) {
-        hashedUserData.referrer = userData.referrer;
-      }
-      if (userData.page_url) {
-        hashedUserData.page_url = userData.page_url;
-      }
+      // Remove these from user_data - they should be in custom_data instead
+      // if (userData.referrer) {
+      //   hashedUserData.referrer = userData.referrer;
+      // }
+      // if (userData.page_url) {
+      //   hashedUserData.page_url = userData.page_url;
+      // }
 
       const generatedEventId = eventId || await this.generateEventId(userData.externalId, eventName, eventTime);
+
+      // Move referrer and page_url to custom_data
+      const enrichedCustomData = {
+        ...customData,
+        ...(userData.referrer && { referrer: userData.referrer }),
+        ...(userData.page_url && { page_url: userData.page_url }),
+        ...(userData.page_path && { page_path: userData.page_path }),
+      };
 
       return {
         event_name: eventName,
@@ -188,7 +196,7 @@ export class MetaConversionsAPI {
         event_source_url: eventSourceUrl,
         action_source: 'website',
         user_data: hashedUserData,
-        custom_data: customData,
+        custom_data: enrichedCustomData,
       };
     } catch (error) {
       console.error('❌ Error creating event:', error);

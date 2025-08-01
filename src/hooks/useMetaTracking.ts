@@ -39,8 +39,7 @@ export function useMetaTracking() {
       ...facebookParams,
       // Add client IP if available (will be captured server-side)
       // Add user agent (will be captured server-side)
-      // Add referrer information
-      referrer: document.referrer || '',
+      // Remove referrer from user_data - it should go in custom_data instead
       // Add page URL for context
       page_url: window.location.href,
       page_path: window.location.pathname,
@@ -69,6 +68,12 @@ export function useMetaTracking() {
       // Enhance user data with Facebook parameters and additional context
       const enrichedUserData = getEnhancedUserData(userData);
 
+      // Add referrer to custom_data instead of user_data
+      const enrichedCustomData = {
+        ...customData,
+        referrer: typeof window !== 'undefined' ? document.referrer || '' : '',
+      };
+
       const response = await fetch('/api/meta/track-event', {
         method: 'POST',
         headers: {
@@ -77,7 +82,7 @@ export function useMetaTracking() {
         body: JSON.stringify({
           eventName,
           userData: enrichedUserData,
-          customData,
+          customData: enrichedCustomData, // Use enriched custom data
           eventSourceUrl: typeof window !== 'undefined' ? window.location.href : '',
         }),
       });

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "r
 import { AuthProvider } from "./context/AuthContext.tsx";
 import ProtectedRoute from "./components/Layout/ProtectedRoute.tsx";
 import AdminRoute from "./components/Layout/AdminRoute.tsx";
+import AnalyticsWrapper from "./components/Layout/AnalyticsWrapper.tsx";
 import { supabase } from "./lib/supabase.ts";
 import Lenis from "lenis";
 import StripeProvider from "./lib/StripeProvider.tsx";
@@ -321,99 +322,101 @@ function App() {
             {/* Debug connection component for better diagnostics */}
             <DebugConnection />
             
-            <Suspense fallback={<LoadingFallback />}>
-              <Routes>
-                {/* Public routes that don't require authentication */}
-                <Route path="/" element={<Home />} />
-                <Route path="/rules" element={<RulesPage />} />
-                <Route path="/faq" element={<FAQPage />} />
-                <Route path="/privacy" element={<PrivacyPolicyPage />} />
-                <Route path="/cookies" element={<CookiesPolicyPage />} />
-                <Route path="/leaderboard" element={<LeaderboardPage />} />
-                <Route path="/ethos" element={<EthosPage />} />
+            <AnalyticsWrapper>
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes>
+                  {/* Public routes that don't require authentication */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/rules" element={<RulesPage />} />
+                  <Route path="/faq" element={<FAQPage />} />
+                  <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                  <Route path="/cookies" element={<CookiesPolicyPage />} />
+                  <Route path="/leaderboard" element={<LeaderboardPage />} />
+                  <Route path="/ethos" element={<EthosPage />} />
 
-                {/* Authentication routes - redirect if already logged in */}
-                <Route
-                  path="/login"
-                  element={
-                    <ProtectedRoute requireAuth={false} redirectTo="/profile">
-                      <LoginPage />
-                    </ProtectedRoute>
-                  }
-                />
+                  {/* Authentication routes - redirect if already logged in */}
+                  <Route
+                    path="/login"
+                    element={
+                      <ProtectedRoute requireAuth={false} redirectTo="/profile">
+                        <LoginPage />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                {/* Redirect from /create-account to /login */}
-                <Route
-                  path="/create-account"
-                  element={<Navigate to="/login" replace />}
-                />
+                  {/* Redirect from /create-account to /login */}
+                  <Route
+                    path="/create-account"
+                    element={<Navigate to="/login" replace />}
+                  />
 
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-                {/* Public route with conditional display based on auth state */}
-                <Route path="/subscription" element={<SubscriptionPage />} />
+                  {/* Public route with conditional display based on auth state */}
+                  <Route path="/subscription" element={<SubscriptionPage />} />
 
-                {/* Alias route for backwards compatibility */}
-                <Route path="/subscribe" element={<SubscriptionPage />} />
+                  {/* Alias route for backwards compatibility */}
+                  <Route path="/subscribe" element={<SubscriptionPage />} />
 
-                {/* New pay-first signup route */}
-                <Route path="/signup" element={<SubscribeRedirect />} />
+                  {/* New pay-first signup route */}
+                  <Route path="/signup" element={<SubscribeRedirect />} />
 
-                {/* Secure signup access page */}
-                <Route path="/signup-access" element={<SignupAccessPage />} />
+                  {/* Secure signup access page */}
+                  <Route path="/signup-access" element={<SignupAccessPage />} />
 
-                {/* Protected routes - require authentication */}
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <ProfilePage />
-                    </ProtectedRoute>
-                  }
-                />
+                  {/* Protected routes - require authentication */}
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <ProfilePage />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                <Route path="/success" element={<SuccessPage />} />
+                  <Route path="/success" element={<SuccessPage />} />
 
-                <Route
-                  path="/submit"
-                  element={
-                    <ProtectedRoute>
-                      <VideoSubmissionPage />
-                    </ProtectedRoute>
-                  }
-                />
+                  <Route
+                    path="/submit"
+                    element={
+                      <ProtectedRoute>
+                        <VideoSubmissionPage />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                {/* Admin routes with role check */}
-                <Route
-                  path="/admin-dashboard"
-                  element={
-                    <AdminRoute>
-                      <AdminDashboardPage />
-                    </AdminRoute>
-                  }
-                />
+                  {/* Admin routes with role check */}
+                  <Route
+                    path="/admin-dashboard"
+                    element={
+                      <AdminRoute>
+                        <AdminDashboardPage />
+                      </AdminRoute>
+                    }
+                  />
 
-                <Route
-                  path="/admin-payouts"
-                  element={
-                    <AdminRoute>
-                      <AdminPayoutsPage />
-                    </AdminRoute>
-                  }
-                />
+                  <Route
+                    path="/admin-payouts"
+                    element={
+                      <AdminRoute>
+                        <AdminPayoutsPage />
+                      </AdminRoute>
+                    }
+                  />
 
-                <Route
-                  path="/admin-users"
-                  element={
-                    <AdminRoute>
-                      <AdminUserManagement />
-                    </AdminRoute>
-                  }
-                />
+                  <Route
+                    path="/admin-users"
+                    element={
+                      <AdminRoute>
+                        <AdminUserManagement />
+                      </AdminRoute>
+                    }
+                  />
 
-                <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-            </Suspense>
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </Suspense>
+            </AnalyticsWrapper>
             <Analytics />
             <SpeedInsights />
           </StripeProvider>
