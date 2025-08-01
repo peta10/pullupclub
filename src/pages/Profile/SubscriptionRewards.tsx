@@ -325,23 +325,6 @@ const SubscriptionRewards: React.FC = () => {
       <div className="flex flex-col gap-8">
         {/* Top Row - 3 boxes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Subscription & Rewards */}
-          <div className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105">
-            <div className="flex justify-center mb-4">
-              <CreditCard size={48} className="text-[#9b9b6f]" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2">Subscription</h3>
-            <p className="text-gray-400 mb-4">Manage your monthly subscription</p>
-            <a
-              href="https://billing.stripe.com/p/login/dRmdR9dos2kmaQcdHGejK00"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2"
-            >
-              Manage Subscription <ExternalLink size={16} />
-            </a>
-          </div>
-
           {/* Claim Patch */}
           <div className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105">
             <div className="flex justify-center mb-4">
@@ -383,11 +366,45 @@ const SubscriptionRewards: React.FC = () => {
               until your next patch ships (Cycle {patchProgress.currentCycle})
             </p>
           </div>
+
+          {/* Shop Gear */}
+          <div className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105">
+            <div className="flex justify-center mb-4">
+              <ShoppingBag size={48} className="text-[#9b9b6f]" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Shop Gear</h3>
+            <p className="text-gray-400 mb-4">Get your training equipment</p>
+            <a
+              href="https://shop.thebattlebunker.com/collections/workout-equipment/products/3-pack-battle-bands"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-[#9b9b6f] hover:bg-[#a5a575] text-black font-semibold py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2"
+            >
+              Shop Gear <ExternalLink size={16} />
+            </a>
+          </div>
         </div>
 
         {/* Bottom Row - 3 boxes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* PayPal Settings - NEW first box in bottom row */}
+          {/* Subscription & Rewards */}
+          <div className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105">
+            <div className="flex justify-center mb-4">
+              <CreditCard size={48} className="text-[#9b9b6f]" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Subscription</h3>
+            <p className="text-gray-400 mb-4">Manage your monthly subscription</p>
+            <a
+              href="https://billing.stripe.com/p/login/dRmdR9dos2kmaQcdHGejK00"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2"
+            >
+              Manage Subscription <ExternalLink size={16} />
+            </a>
+          </div>
+
+          {/* PayPal Settings */}
           <div className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105">
             <div className="flex justify-center mb-4">
               <DollarSign size={48} className="text-[#9b9b6f]" />
@@ -430,23 +447,6 @@ const SubscriptionRewards: React.FC = () => {
                 </a>
               </div>
             )}
-          </div>
-
-          {/* Shop Gear */}
-          <div className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105">
-            <div className="flex justify-center mb-4">
-              <ShoppingBag size={48} className="text-[#9b9b6f]" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2">Shop Gear</h3>
-            <p className="text-gray-400 mb-4">Get your training equipment</p>
-            <a
-              href="https://shop.thebattlebunker.com/collections/workout-equipment/products/3-pack-battle-bands"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-[#9b9b6f] hover:bg-[#a5a575] text-black font-semibold py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2"
-            >
-              Shop Gear <ExternalLink size={16} />
-            </a>
           </div>
 
           {/* Payouts */}
