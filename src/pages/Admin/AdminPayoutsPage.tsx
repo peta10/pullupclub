@@ -18,6 +18,8 @@ interface Payout {
   user_paypal_email?: string;
   request_date: string;
   status: string;
+  paid_at?: string;
+  paid_by?: string;
 }
 
 interface MonthData {
@@ -154,6 +156,27 @@ const AdminPayoutsPage: React.FC = () => {
     } catch (error) {
       console.error('Error sending reminders:', error);
       toast.error('Failed to send PayPal reminders');
+    }
+  };
+
+  const markAsPaid = async (payoutId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase.rpc('mark_payout_as_paid', {
+        payout_id_param: payoutId,
+        admin_user_id: user.id
+      });
+
+      if (error) throw error;
+      
+      toast.success('✅ Marked payout as paid');
+      fetchPayouts(selectedMonth); // Refresh the list
+      
+    } catch (error) {
+      console.error('Error marking payout as paid:', error);
+      toast.error('Failed to mark payout as paid');
     }
   };
 
@@ -321,6 +344,7 @@ const AdminPayoutsPage: React.FC = () => {
                       <th className="text-left p-3 font-medium text-[#ededed]">PayPal Email</th>
                       <th className="text-left p-3 font-medium text-[#ededed]">Amount</th>
                       <th className="text-left p-3 font-medium text-[#ededed]">Status</th>
+                      <th className="text-left p-3 font-medium text-[#ededed]">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -343,7 +367,11 @@ const AdminPayoutsPage: React.FC = () => {
                           </td>
                           <td className="p-3 font-semibold text-[#ededed]">${payout.amount_dollars}</td>
                           <td className="p-3">
-                            {isReady ? (
+                            {payout.paid_at ? (
+                              <span className="bg-blue-900/30 text-blue-400 px-2 py-1 rounded text-xs">
+                                Paid
+                              </span>
+                            ) : isReady ? (
                               <span className="bg-green-900/30 text-green-400 px-2 py-1 rounded text-xs">
                                 Ready
                               </span>
@@ -351,6 +379,21 @@ const AdminPayoutsPage: React.FC = () => {
                               <span className="bg-yellow-900/30 text-yellow-400 px-2 py-1 rounded text-xs">
                                 Setup Needed
                               </span>
+                            )}
+                          </td>
+                          <td className="p-3">
+                            {payout.paid_at ? (
+                              <div className="text-xs text-[#9a9871]">
+                                Paid by {payout.paid_by}<br/>
+                                {new Date(payout.paid_at).toLocaleDateString()}
+                              </div>
+                            ) : isReady && (
+                              <button
+                                onClick={() => markAsPaid(payout.payout_id)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-1 px-3 rounded transition-colors"
+                              >
+                                Mark Paid
+                              </button>
                             )}
                           </td>
                         </tr>
