@@ -52,7 +52,9 @@
     "hardened": "Endurci (20-29 reps)",
     "operator": "Opérateur (30-39 reps)",
     "elite": "Élite (40+ reps)",
-    "pullUpsRequired": "{{count}}+ Tractions Requises"
+    "pullUpsRequired": "{{count}}+ Tractions Requises",
+    "menPullUps": "Hommes <0>{{count}}</0>+ Tractions",
+    "womenPullUps": "Femmes <0>{{count}}</0>+ Tractions"
   },
   "subtitle": "Voyez comment vous vous situez par rapport à la concurrence. Notre classement montre les meilleurs du Pull-Up Club Challenge.",
   "error": "Échec du chargement des données du classement",

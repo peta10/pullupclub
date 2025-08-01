@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { useMetaTracking } from "../../hooks/useMetaTracking";
 
 interface CheckoutSuccessProps {
   subscriptionType?: 'monthly' | 'annual';
@@ -9,11 +11,45 @@ interface CheckoutSuccessProps {
 }
 
 const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({
+  subscriptionType = 'monthly',
   customerName,
   redirectTo,
   redirectLabel
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { trackEvent } = useMetaTracking();
+  
+  useEffect(() => {
+    // Track Purchase event with enhanced user data
+    const trackPurchase = async () => {
+      if (!user) return;
+
+      const userData = {
+        email: user.email,
+        externalId: user.id,
+        firstName: user.user_metadata?.full_name?.split(' ')[0],
+        lastName: user.user_metadata?.full_name?.split(' ').slice(1).join(' '),
+        phone: user.phone,
+      };
+
+      const value = subscriptionType === 'monthly' ? 9.99 : 99.99;
+
+      await trackEvent('Purchase', userData, {
+        value,
+        currency: 'USD',
+        content_name: `PUC ${subscriptionType === 'monthly' ? 'Monthly' : 'Annual'} Membership`,
+        content_category: 'Subscription',
+        content_ids: [subscriptionType],
+        content_type: 'product',
+        num_items: 1,
+        order_id: `order_${user.id}_${Date.now()}`,
+        delivery_category: 'home_delivery',
+      });
+    };
+
+    trackPurchase();
+  }, [user, subscriptionType, trackEvent]);
   
   const handleNavigate = () => {
     if (redirectTo) {

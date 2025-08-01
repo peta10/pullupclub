@@ -35,18 +35,15 @@ const SubscriptionRewards: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRequestingPayout, setIsRequestingPayout] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paypalEmail, setPaypalEmail] = useState<string>('');
+  const [isUpdatingPaypal, setIsUpdatingPaypal] = useState(false);
+  const [showPaypalModal, setShowPaypalModal] = useState(false);
+  const [newPaypalEmail, setNewPaypalEmail] = useState('');
   const [patchProgress, setPatchProgress] = useState<PatchProgress>({
     daysRemaining: 90,
     progressPercentage: 0,
     currentCycle: 1
   });
-
-  // Function to check if we're at the end of the month
-  const isEndOfMonth = () => {
-    const now = new Date();
-    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    return now.getDate() >= lastDay - 2; // Allow requests 2 days before month end
-  };
 
   // Calculate total available earnings (not paid out)
   const calculateAvailableEarnings = () => {
@@ -55,16 +52,7 @@ const SubscriptionRewards: React.FC = () => {
     }, 0);
   };
 
-  // Calculate on-hold earnings (competition payouts that can't be withdrawn yet)
-  const calculateOnHoldEarnings = () => {
-    if (!isEndOfMonth()) {
-      // All earnings are on hold until end of month
-      return calculateAvailableEarnings();
-    }
-    return 0;
-  };
-
-  // Calculate immediately available earnings (end of month only)
+  // Calculate immediately available earnings (all earned money minus what's already been requested/paid)
   const calculateImmediatelyAvailable = () => {
     const totalEarned = calculateAvailableEarnings();
     const totalRequestedOrPaid = payoutRequests.reduce((total, request) => {
@@ -74,8 +62,7 @@ const SubscriptionRewards: React.FC = () => {
       return total;
     }, 0);
     
-    const available = totalEarned - totalRequestedOrPaid;
-    return isEndOfMonth() ? Math.max(0, available) : 0;
+    return Math.max(0, totalEarned - totalRequestedOrPaid);
   };
 
   const formatAmount = (dollars: number) => {
@@ -142,6 +129,17 @@ const SubscriptionRewards: React.FC = () => {
 
       if (payoutError) throw payoutError;
 
+      // Fetch PayPal email from profiles
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('paypal_email')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (!profileError && profile) {
+        setPaypalEmail(profile.paypal_email || '');
+      }
+
       setWeeklyEarnings(earningsData || []);
       setPayoutRequests(payoutData || []);
       
@@ -164,10 +162,10 @@ const SubscriptionRewards: React.FC = () => {
     try {
       setIsRequestingPayout(true);
       
-      // Only allow payout of immediately available funds
+      // Allow payout of all available funds
       const amount = calculateImmediatelyAvailable();
       if (amount <= 0) {
-        toast.error('No funds available for payout at this time');
+        toast.error('No funds available for payout');
         return;
       }
 
@@ -190,6 +188,45 @@ const SubscriptionRewards: React.FC = () => {
     }
   };
 
+  const handlePaypalUpdate = async () => {
+    if (!user?.id || isUpdatingPaypal) return;
+    
+    try {
+      setIsUpdatingPaypal(true);
+      
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(newPaypalEmail)) {
+        toast.error('Please enter a valid email address');
+        return;
+      }
+
+      // Update PayPal email in profiles table
+      const { error } = await supabase
+        .from('profiles')
+        .update({ paypal_email: newPaypalEmail })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      toast.success('PayPal email updated successfully!');
+      setPaypalEmail(newPaypalEmail);
+      setShowPaypalModal(false);
+      setNewPaypalEmail('');
+      
+    } catch (error) {
+      console.error('Error updating PayPal email:', error);
+      toast.error('Failed to update PayPal email. Please try again.');
+    } finally {
+      setIsUpdatingPaypal(false);
+    }
+  };
+
+  const openPaypalModal = () => {
+    setNewPaypalEmail(paypalEmail || '');
+    setShowPaypalModal(true);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'text-yellow-400 bg-yellow-900/20';
@@ -206,7 +243,6 @@ const SubscriptionRewards: React.FC = () => {
       return <div className="animate-pulse">Loading payouts...</div>;
     }
 
-    const onHoldAmount = calculateOnHoldEarnings();
     const availableAmount = calculateImmediatelyAvailable();
     const totalEarned = calculateAvailableEarnings();
     const hasPendingRequest = payoutRequests.some(req => req.status === 'pending');
@@ -217,7 +253,7 @@ const SubscriptionRewards: React.FC = () => {
           <DollarSign size={48} className="text-[#9b9b6f]" />
         </div>
         <h3 className="text-xl font-bold text-white mb-2">Competition Payouts</h3>
-        <p className="text-gray-400 mb-4">Monthly earnings from pull-up competitions</p>
+        <p className="text-gray-400 mb-4">Earnings from pull-up competitions</p>
 
         <div className="space-y-3 mb-4">
           <div className="bg-gray-800 p-3 rounded">
@@ -226,15 +262,6 @@ const SubscriptionRewards: React.FC = () => {
               {formatAmount(totalEarned)}
             </p>
           </div>
-
-          {onHoldAmount > 0 && (
-            <div className="bg-yellow-900/20 border border-yellow-600 p-3 rounded">
-              <p className="text-sm text-yellow-400">On Hold Until Month End</p>
-              <p className="text-lg font-bold text-yellow-300">
-                {formatAmount(onHoldAmount)}
-              </p>
-            </div>
-          )}
 
           {availableAmount > 0 && (
             <div className="bg-green-900/20 border border-green-600 p-3 rounded">
@@ -246,15 +273,7 @@ const SubscriptionRewards: React.FC = () => {
           )}
         </div>
 
-        {!isEndOfMonth() && totalEarned > 0 && (
-          <div className="bg-blue-900/20 border border-blue-600 p-3 rounded mb-4">
-            <p className="text-blue-300 text-sm">
-              💡 Payouts are available at the end of each month
-            </p>
-          </div>
-        )}
-
-        {availableAmount > 0 && !hasPendingRequest && (
+        {availableAmount > 0 && !hasPendingRequest && paypalEmail && (
           <button
             onClick={handlePayoutRequest}
             disabled={isRequestingPayout || isLoading}
@@ -262,6 +281,14 @@ const SubscriptionRewards: React.FC = () => {
           >
             {isRequestingPayout ? 'Processing...' : `Request Payout (${formatAmount(availableAmount)})`}
           </button>
+        )}
+
+        {availableAmount > 0 && !paypalEmail && (
+          <div className="bg-orange-900/20 border border-orange-700 rounded px-4 py-2">
+            <span className="text-orange-400 text-sm font-medium">
+              Add PayPal email in Payout Settings to request payouts
+            </span>
+          </div>
         )}
 
         {hasPendingRequest && (
@@ -323,7 +350,7 @@ const SubscriptionRewards: React.FC = () => {
             <h3 className="text-xl font-bold text-white mb-2">Claim Your Patch</h3>
             <p className="text-gray-400 mb-4">Get your earned patch</p>
             <a
-              href="https://shop.thebattlebunker.com/checkouts/cn/Z2NwLXVzLWNlbnRyYWwxOjAxSlhCMDJBTkVaOENFOFpTQlM2N1RTM0tR?auto_redirect=false&cart_link_id=MbgRQA7E&discount=PULLUPCLUB100&edge_redirect=true&locale=en-US&skip_shop_pay=true"
+              href="https://shop.thebattlebunker.com/cart/45041068572857:1?discount=PULLUPCLUB100"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-[#9b9b6f] hover:bg-[#a5a575] text-black font-semibold py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2"
@@ -358,8 +385,53 @@ const SubscriptionRewards: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom Row - 2 boxes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:w-2/3 mx-auto">
+        {/* Bottom Row - 3 boxes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* PayPal Settings - NEW first box in bottom row */}
+          <div className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105">
+            <div className="flex justify-center mb-4">
+              <DollarSign size={48} className="text-[#9b9b6f]" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Payout Settings</h3>
+            <p className="text-gray-400 mb-4">Manage your PayPal for earnings</p>
+            
+            {paypalEmail ? (
+              <div className="space-y-3">
+                <div className="bg-green-900/20 border border-green-600 p-3 rounded">
+                  <p className="text-xs text-green-400">✅ Ready to Receive Payments</p>
+                  <p className="text-sm text-green-300 font-medium truncate">PayPal: {paypalEmail}</p>
+                </div>
+                <button 
+                  onClick={openPaypalModal}
+                  className="bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm w-full"
+                >
+                  Update PayPal
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="bg-yellow-900/20 border border-yellow-700 p-3 rounded">
+                  <p className="text-xs text-yellow-400">PayPal Required</p>
+                  <p className="text-sm text-yellow-300">Add email to receive payouts</p>
+                </div>
+                <button 
+                  onClick={openPaypalModal}
+                  className="bg-[#9b9b6f] hover:bg-[#a5a575] text-black font-semibold py-2 px-4 rounded-lg transition-colors text-sm w-full"
+                >
+                  Add PayPal Email
+                </button>
+                <a
+                  href="https://www.paypal.com/signup"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#9b9b6f] hover:underline text-xs inline-flex items-center gap-1"
+                >
+                  Need PayPal? Sign up <ExternalLink size={12} />
+                </a>
+              </div>
+            )}
+          </div>
+
           {/* Shop Gear */}
           <div className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105">
             <div className="flex justify-center mb-4">
@@ -398,8 +470,8 @@ const SubscriptionRewards: React.FC = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-white font-bold">{formatAmount(earning.earning_amount_dollars)}</p>
-                  <span className="text-xs px-2 py-1 rounded text-yellow-400 bg-yellow-900/20">
-                    {isEndOfMonth() ? 'Available' : 'Pending'}
+                  <span className="text-xs px-2 py-1 rounded text-green-400 bg-green-900/20">
+                    Available
                   </span>
                 </div>
               </div>
@@ -444,6 +516,55 @@ const SubscriptionRewards: React.FC = () => {
         <div className="bg-gray-900 p-6 rounded-lg text-center">
           <h3 className="text-xl font-bold text-white mb-2">No Earnings Yet</h3>
           <p className="text-gray-400">Start participating in pull-up competitions to earn money!</p>
+        </div>
+      )}
+
+      {/* PayPal Email Modal */}
+      {showPaypalModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold text-white mb-4">
+              {paypalEmail ? 'Update PayPal Email' : 'Add PayPal Email'}
+            </h3>
+            <p className="text-gray-400 mb-4">
+              Enter your PayPal email address to receive competition payouts.
+            </p>
+            
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="paypal-email" className="block text-sm font-medium text-gray-300 mb-2">
+                  PayPal Email
+                </label>
+                <input
+                  type="email"
+                  id="paypal-email"
+                  value={newPaypalEmail}
+                  onChange={(e) => setNewPaypalEmail(e.target.value)}
+                  placeholder="your-email@example.com"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9b9b6f] focus:border-transparent"
+                />
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowPaypalModal(false);
+                    setNewPaypalEmail('');
+                  }}
+                  className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handlePaypalUpdate}
+                  disabled={isUpdatingPaypal || !newPaypalEmail.trim()}
+                  className="flex-1 bg-[#9b9b6f] hover:bg-[#a5a575] disabled:bg-gray-600 disabled:cursor-not-allowed text-black font-semibold py-2 px-4 rounded-lg transition-colors"
+                >
+                  {isUpdatingPaypal ? 'Updating...' : (paypalEmail ? 'Update' : 'Add')}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

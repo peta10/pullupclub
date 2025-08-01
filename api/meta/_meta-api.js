@@ -73,7 +73,7 @@ export class MetaConversionsAPI {
   }) {
     const hashedUserData = {};
     
-    // Basic user data
+    // Basic user data - hash all personal information
     if (userData.email) {
       hashedUserData.em = [await this.hashData(userData.email)];
     }
@@ -90,7 +90,7 @@ export class MetaConversionsAPI {
       hashedUserData.external_id = [userData.externalId];
     }
 
-    // Facebook-specific parameters
+    // Facebook-specific parameters (don't hash these)
     if (userData.fbc) {
       hashedUserData.fbc = userData.fbc;
     }
@@ -101,7 +101,7 @@ export class MetaConversionsAPI {
       hashedUserData.fbp = userData.fbp;
     }
 
-    // Location data
+    // Location data - hash all location information
     if (userData.zip) {
       hashedUserData.zp = [await this.hashData(userData.zip)];
     }
@@ -112,17 +112,25 @@ export class MetaConversionsAPI {
       hashedUserData.st = [await this.hashData(userData.state)];
     }
     
-    // Date of birth
+    // Date of birth - hash
     if (userData.dob) {
       hashedUserData.db = [await this.hashData(userData.dob)];
     }
 
-    // Client info
+    // Client info - don't hash these
     if (userAgent) {
       hashedUserData.client_user_agent = userAgent;
     }
     if (ipAddress) {
       hashedUserData.client_ip_address = ipAddress;
+    }
+
+    // Additional user data for better matching
+    if (userData.referrer) {
+      hashedUserData.referrer = userData.referrer;
+    }
+    if (userData.page_url) {
+      hashedUserData.page_url = userData.page_url;
     }
 
     const generatedEventId = eventId || await this.generateEventId(userData.externalId, eventName, eventTime);

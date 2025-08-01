@@ -251,6 +251,7 @@ export const getBadgesForSubmission = (pullUpCount: number, gender: string = 'Ma
   }));
 };
 
+export { femaleBadges };
 export default maleBadges;
 
 export const getStatusInfo = (status: string) => {

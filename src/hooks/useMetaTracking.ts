@@ -27,6 +27,28 @@ export function useMetaTracking() {
     };
   };
 
+  // Enhanced user data collection
+  const getEnhancedUserData = (userData: any = {}) => {
+    if (typeof window === 'undefined') return userData;
+
+    const facebookParams = getFacebookParams();
+    
+    // Get additional browser/user data
+    const enhancedData = {
+      ...userData,
+      ...facebookParams,
+      // Add client IP if available (will be captured server-side)
+      // Add user agent (will be captured server-side)
+      // Add referrer information
+      referrer: document.referrer || '',
+      // Add page URL for context
+      page_url: window.location.href,
+      page_path: window.location.pathname,
+    };
+
+    return enhancedData;
+  };
+
   const trackEvent = async (eventName: string, userData = {}, customData = {}) => {
     // In development, we'll still track but log it
     if (!isProduction) {
@@ -44,12 +66,8 @@ export function useMetaTracking() {
 
     setIsLoading(true);
     try {
-      // Merge Facebook parameters with user data
-      const facebookParams = getFacebookParams();
-      const enrichedUserData = {
-        ...userData,
-        ...facebookParams,
-      };
+      // Enhance user data with Facebook parameters and additional context
+      const enrichedUserData = getEnhancedUserData(userData);
 
       const response = await fetch('/api/meta/track-event', {
         method: 'POST',
@@ -65,7 +83,7 @@ export function useMetaTracking() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       const result = await response.json();
@@ -88,9 +106,28 @@ export function useMetaTracking() {
     });
   };
 
+  // Enhanced purchase tracking
+  const trackPurchase = async (userData = {}, purchaseData = {}) => {
+    return trackEvent('Purchase', userData, {
+      currency: 'USD',
+      ...purchaseData,
+    });
+  };
+
+  // Enhanced lead tracking
+  const trackLead = async (userData = {}, leadData = {}) => {
+    return trackEvent('Lead', userData, {
+      content_name: 'PUC Membership',
+      content_category: 'Subscription',
+      ...leadData,
+    });
+  };
+
   return {
     trackEvent,
     trackViewContent,
+    trackPurchase,
+    trackLead,
     isLoading,
   };
 } 

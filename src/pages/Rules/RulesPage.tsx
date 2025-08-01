@@ -18,7 +18,7 @@ const RulesPage: React.FC = () => {
           <div className="text-center mb-8">
             <h1 className="text-5xl font-extrabold text-white tracking-tight">{t('title')}</h1>
             <p className="mt-2 text-gray-400">
-              {t('introduction.text')}
+              {t('subtitle')}
             </p>
           </div>
 

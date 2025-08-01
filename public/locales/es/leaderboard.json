@@ -55,7 +55,9 @@
     "hardened": "Endurecido (20-29 reps)",
     "operator": "Operador (30-39 reps)",
     "elite": "Élite (40+ reps)",
-    "pullUpsRequired": "{{count}}+ Dominadas Requeridas"
+    "pullUpsRequired": "{{count}}+ Dominadas Requeridas",
+    "menPullUps": "Hombres <0>{{count}}</0>+ Dominadas",
+    "womenPullUps": "Mujeres <0>{{count}}</0>+ Dominadas"
   },
   "subtitle": "Mira cómo te comparas con la competencia. Nuestra clasificación muestra a los mejores en el Pull-Up Club Challenge.",
   "error": "Error al cargar los datos de la clasificación",

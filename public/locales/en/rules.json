@@ -4,38 +4,105 @@
     "title": "Competition Rules | Pull-Up Club",
     "description": "Official rules for the Battle Bunker Pull-Up Club competition. Read the guidelines for video submission, pull-up standards, and judging criteria."
   },
-  "mainTitle": "Official Video Submission Rules",
-  "introduction": "To ensure fairness, consistency, and integrity across all entries, all participants must adhere to the following Video Submission Requirements. Any video submission that fails to meet any of these criteria may be denied without notice. If you are a member of the Pull-Up Club and pay the monthly fee, you are allowed one video submission per month.",
-  "section1": {
-    "title": "1. Clear and Unobstructed View",
-    "point1": "The entire body and bar must be clearly visible at all times throughout the video.",
-    "point2": "Camera angle must not hide or obscure key points of movement (e.g., chin, arms, lockout position).",
-    "point3": "Avoid dark lighting, excessive backlighting, or shaky camera work. Stabilize your shot before beginning."
+  "mainTitle": "Official Competition Rules",
+  "subtitle": "Complete guidelines for participating in the Battle Bunker Pull-Up Club monthly challenge",
+  "downloadRulebook": "Download Official Rulebook",
+  "whatIs": {
+    "title": "What Is Pull-Up Club?",
+    "description": "Pull-Up Club is a monthly global leaderboard and challenge. You join, submit your strict pull-ups, earn your patch, earn $1 for every rep, and get ranked. Simple. No BS — just clean reps and community.",
+    "step1": {
+      "title": "Join",
+      "description": "$9.99/month. First Month Free. Unlock your first patch. Receive a new patch every 3 months while active."
+    },
+    "step2": {
+      "title": "Record Your Reps",
+      "description": "Submit your unbroken video. Must be posted publicly on IG, YT, FB or TikTok. Tag @battlebunkerpullupclub. Submit at: www.pullupclub.com/profile"
+    },
+    "step3": {
+      "title": "Get Verified",
+      "description": "Head judge Shannon manually reviews all reps. If your submission is rejected, you'll receive a follow-up email explaining why. You may then re-record and re-submit your video at any time."
+    }
   },
-  "section2": {
-    "title": "2. Proper Form Requirements",
-    "intro": "To count as a valid rep, each repetition must meet the following standards:",
-    "point1": "Chin Over Bar: The athlete's chin must clearly rise above the horizontal plane of the bar for each rep.",
-    "point2": "Full Extension: Arms must reach full extension (elbows locked out) at the bottom of every repetition.",
-    "point3": "Reps performed with kipping, swinging, or partial range of motion may not be counted at our discretion."
+  "pullUpStandards": {
+    "title": "Pull-Up Standards",
+    "requirements": {
+      "title": "Form Requirements",
+      "grip": "Grip: Overhand grip only — no underhand (chin-ups) or neutral grips",
+      "chin": "Chin: Must clearly break the horizontal plane of the bar",
+      "lockout": "Lockout: Full elbow lockout at the bottom of each rep",
+      "form": "Form: No kipping, swinging, or obvious momentum",
+      "speed": "Speed: Touch-and-go is okay if every rep meets standards",
+      "feet": "Feet: Any position is fine, as long as you're not cheating the movement"
+    },
+    "equipment": {
+      "title": "Equipment Rules",
+      "notAllowed": {
+        "title": "NOT Allowed",
+        "description": "Lifting straps or any equipment that touches or wraps around the bar"
+      },
+      "allowed": {
+        "title": "Allowed",
+        "description": "Chalk, gloves, wrist wraps, lifting belts"
+      }
+    }
   },
-  "section3": {
-    "title": "3. Continuous Recording",
-    "point1": "The video must be captured in one continuous take from start to finish, no cuts, edits, slow motion, or time skips.",
-    "point2": "Ensure the recording starts before the first rep and continues until after the final rep is completed.",
-    "point3": "Do not crop or splice footage in post-production."
+  "videoSubmission": {
+    "title": "Video Submission Rules",
+    "fullBody": "Full-body view required (from dead hang to top of each rep)",
+    "unbroken": "Video must be unbroken - no cuts, edits, or time skips",
+    "deadHang": "Must show your first rep starting from a dead hang",
+    "straightBar": "Bar must be straight (no angled grips, half bars, or multi-grips)",
+    "chinVisible": "We must clearly see your chin cross the top of the bar",
+    "publicUpload": "Upload publicly on social (not private or unlisted)",
+    "tagRequired": "Must tag @battlebunkerpullupclub in the caption or video"
   },
-  "section4": {
-    "title": "4. Video Authenticity",
-    "intro": "Your submission must be 100% real, unaltered footage. By submitting, you agree that:",
-    "point1": "The video is not generated, enhanced, or altered by any AI tools.",
-    "point2": "The video is not manipulated using looping, layering, or time edits to falsely extend or improve performance.",
-    "point3": "Any submission found to violate this will be automatically disqualified."
+  "tierSystem": {
+    "title": "Tier System",
+    "men": {
+      "title": "Men",
+      "recruit": "5+ pull-ups",
+      "proven": "10+ pull-ups",
+      "hardened": "15+ pull-ups",
+      "operator": "20+ pull-ups",
+      "elite": "25+ pull-ups"
+    },
+    "women": {
+      "title": "Women",
+      "recruit": "3+ pull-ups",
+      "proven": "7+ pull-ups",
+      "hardened": "12+ pull-ups",
+      "operator": "15+ pull-ups",
+      "elite": "20+ pull-ups"
+    }
   },
-  "section5": {
-    "title": "5. Public Access",
-    "point1": "Your video must be publicly accessible on a platform like Instagram, TikTok, YouTube or Facebook.",
-    "point2": "Private, password-protected, or expired links will not be reviewed or counted."
+  "pucBank": {
+    "title": "PUC Bank",
+    "description": "Each week, the PUC Bank is stocked with $250, replenished weekly. Every verified rep earns you $1. If you submit 20 reps, and we verify 20 reps, you'll receive $20",
+    "payoutInfo": "Payouts are awarded to everyone with verified reps, while the PUC bank is still active. All payouts are delivered to your PUC Bank account at the end of each month"
+  },
+  "leaderboard": {
+    "title": "Leaderboard Rules",
+    "verifiedOnly": "Only verified reps count",
+    "weeklyUpdates": "Leaderboard updates weekly",
+    "resubmitAllowed": "If rejected, you may resubmit at any time",
+    "onePerMonth": "Only 1 approved entry per month is allowed",
+    "monthlyFeature": "Monthly top rep gets featured on socials and may earn an additional cash payout"
+  },
+  "rejections": {
+    "title": "Top Reasons for Rejections",
+    "intro": "Submissions will be rejected if:",
+    "grip": "Grip is not overhand",
+    "chin": "Chin doesn't clearly cross the bar",
+    "lockout": "Arms don't fully lock out at the bottom",
+    "momentum": "You use momentum, swinging, or kipping",
+    "videoQuality": "Your video is unclear, edited, or private",
+    "tagging": "You fail to tag us or follow format"
+  },
+  "support": {
+    "title": "Support",
+    "description": "Need help or want to challenge a ruling?",
+    "email": "support@pullupclub.com",
+    "social": "@battlebunkerpullupclub"
   },
   "conclusion": "By submitting your video, you acknowledge and accept these rules in full. We reserve the right to deny any submission that does not clearly meet these standards."
 } 

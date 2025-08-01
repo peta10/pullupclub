@@ -313,6 +313,30 @@ export async function startCheckout(plan: 'monthly' | 'annual' = 'monthly') {
       label: plan,
     });
 
+    // Track InitiateCheckout event before creating session
+    const { trackEvent: trackMetaEvent } = await import('../hooks/useMetaTracking');
+    const { user } = await import('../context/AuthContext');
+    
+    // Get current user data for tracking
+    const currentUser = user?.();
+    const userData = currentUser ? {
+      email: currentUser.email,
+      externalId: currentUser.id,
+      firstName: currentUser.user_metadata?.full_name?.split(' ')[0],
+      lastName: currentUser.user_metadata?.full_name?.split(' ').slice(1).join(' '),
+    } : {};
+
+    // Track InitiateCheckout with enhanced user data
+    await trackMetaEvent('InitiateCheckout', userData, {
+      value: plan === 'monthly' ? 9.99 : 99.99,
+      currency: 'USD',
+      content_name: `PUC ${plan === 'monthly' ? 'Monthly' : 'Annual'} Membership`,
+      content_category: 'Subscription',
+      content_ids: [plan],
+      content_type: 'product',
+      num_items: 1,
+    });
+
     const url = await createCheckoutSession(plan);
     if (!url) throw new Error('Unable to start checkout');
 

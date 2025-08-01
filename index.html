@@ -99,17 +99,27 @@
       s.parentNode.insertBefore(t,s)}(window, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
       
-      // Enable debug mode for troubleshooting
+      // Enable debug mode for troubleshooting (remove in production)
       fbq('set', 'debug', true);
       
       // Initialize pixel
       fbq('init', '1512318086417813');
+      
+      // Enable Advanced Matching for better Event Match Quality
+      fbq('set', 'autoConfig', false, '1512318086417813');
       
       // Track PageView immediately
       fbq('track', 'PageView');
       
       // Make fbq available globally
       window.fbq = fbq;
+      
+      // Helper function to get Facebook parameters
+      window.getFacebookParams = function() {
+        const fbp = document.cookie.match(/_fbp=([^;]+)/)?.[1];
+        const fbc = document.cookie.match(/_fbc=([^;]+)/)?.[1];
+        return { fbp, fbc };
+      };
     </script>
     <noscript>
       <img height="1" width="1" style="display:none"

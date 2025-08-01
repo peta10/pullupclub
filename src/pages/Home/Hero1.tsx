@@ -4,6 +4,7 @@ import { Link } from '../../components/ui/Link';
 import { Zap } from 'lucide-react';
 import { useTranslation, Trans } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
+import { useMetaTracking } from "../../hooks/useMetaTracking";
 
 // Lazy load non-critical features
 const LazyActivityTicker = memo(() => {
@@ -68,6 +69,7 @@ const LazyActivityTicker = memo(() => {
 
 const Hero1: React.FC = () => {
   const { t } = useTranslation('home');
+  const { trackEvent } = useMetaTracking();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [displayedActiveUsers, setDisplayedActiveUsers] = useState(0);
   const [currentPullUps] = useState(368);
@@ -168,6 +170,19 @@ const Hero1: React.FC = () => {
     }
   }, [isVisible, totalSubmissions]);
 
+  const handleSignUpClick = async () => {
+    // Track Lead event when user clicks Sign Up
+    await trackEvent('Lead', {}, {
+      content_name: 'PUC Membership Hero CTA',
+      content_category: 'Subscription',
+      content_type: 'product',
+      value: 9.99,
+      currency: 'USD',
+      page_url: window.location.href,
+      page_path: window.location.pathname,
+    });
+  };
+
   return (
     <div ref={heroRef} className="relative bg-gray-900 text-white overflow-hidden" style={{ minHeight: '70vh' }}>
       {/* Background image with overlay */}
@@ -238,7 +253,11 @@ const Hero1: React.FC = () => {
           {/* CTA Buttons - matching original style */}
           <div className="flex flex-col space-y-3 w-full max-w-xs mx-auto">
             <Link href="/subscription" className="block w-full">
-              <Button size="lg" className="w-full bg-[#9b9b6f] hover:bg-[#8f8f66] text-white font-bold rounded-full px-8 py-4 text-lg transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
+              <Button 
+                size="lg" 
+                className="w-full bg-[#9b9b6f] hover:bg-[#8f8f66] text-white font-bold rounded-full px-8 py-4 text-lg transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg"
+                onClick={handleSignUpClick}
+              >
                 Sign Up Now
               </Button>
             </Link>
@@ -278,7 +297,11 @@ const Hero1: React.FC = () => {
 
         <div className="mb-14 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
           <Link href="/subscription" className="block">
-            <Button size="lg" className="bg-[#a5a676] hover:bg-[#8f8f66] text-white rounded-full px-8 py-3">
+            <Button 
+              size="lg" 
+              className="bg-[#a5a676] hover:bg-[#8f8f66] text-white rounded-full px-8 py-3"
+              onClick={handleSignUpClick}
+            >
               {t('hero.cta')}
             </Button>
           </Link>

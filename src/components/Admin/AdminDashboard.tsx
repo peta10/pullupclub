@@ -7,6 +7,7 @@ import { Alert } from '../ui/Alert';
 import { LoadingState } from '../ui/LoadingState';
 import { Submission } from '../../types';
 import { supabase } from '../../lib/supabase';
+import { Link } from 'react-router-dom';
 
 const AdminDashboard: React.FC = () => {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -122,6 +123,21 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Toggle Navigation */}
+      <div className="flex justify-center mb-8">
+        <div className="bg-[#18181b] rounded-lg border border-[#23231f] p-1">
+          <span className="px-6 py-2 rounded-md bg-[#9b9b6f] text-black font-semibold">
+            Submission Center
+          </span>
+          <Link
+            to="/admin-payouts"
+            className="px-6 py-2 rounded-md text-[#9a9871] hover:text-[#ededed] transition-colors"
+          >
+            Monthly Payouts
+          </Link>
+        </div>
+      </div>
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="submissions">Submissions</TabsTrigger>

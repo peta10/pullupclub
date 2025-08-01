@@ -8,6 +8,7 @@ import { supabase } from "../../lib/supabase";
 import { useTranslation } from 'react-i18next';
 import Head from "../../components/Layout/Head";
 import toast from 'react-hot-toast';
+import { Link } from 'react-router-dom';
 
 const LOGO_PATH = "/PUClogo-optimized.webp";
 
@@ -459,6 +460,21 @@ The Pull-Up Club Team`,
               <span className="text-[#9a9871] text-sm font-medium">{t('submissions.newSubmissions')}</span>
             </div>
           )}
+        </div>
+
+        {/* Toggle Navigation */}
+        <div className="flex justify-center mb-8">
+          <div className="bg-[#18181b] rounded-lg border border-[#23231f] p-1">
+            <span className="px-6 py-2 rounded-md bg-[#9b9b6f] text-black font-semibold">
+              Submission Center
+            </span>
+            <Link
+              to="/admin-payouts"
+              className="px-6 py-2 rounded-md text-[#9a9871] hover:text-[#ededed] transition-colors"
+            >
+              Monthly Payouts
+            </Link>
+          </div>
         </div>
 
         {/* Filters */}

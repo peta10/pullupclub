@@ -21,6 +21,7 @@ import { useRef } from "react";
 const Home = lazy(() => import("./pages/Home/Home.tsx"));
 const LeaderboardPage = lazy(() => import("./pages/Leaderboard/LeaderboardPage.tsx"));
 const AdminDashboardPage = lazy(() => import("./pages/Admin/AdminDashboardPage.tsx"));
+const AdminPayoutsPage = lazy(() => import("./pages/Admin/AdminPayoutsPage.tsx"));
 const NotFoundPage = lazy(() => import("./pages/NotFound/NotFoundPage.tsx"));
 const SuccessPage = lazy(() => import("./pages/Success/SuccessPage.tsx"));
 const LoginPage = lazy(() => import("./pages/Login/LoginPage.tsx"));
@@ -388,6 +389,15 @@ function App() {
                   element={
                     <AdminRoute>
                       <AdminDashboardPage />
+                    </AdminRoute>
+                  }
+                />
+
+                <Route
+                  path="/admin-payouts"
+                  element={
+                    <AdminRoute>
+                      <AdminPayoutsPage />
                     </AdminRoute>
                   }
                 />
