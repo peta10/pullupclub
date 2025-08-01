@@ -17,7 +17,7 @@ const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({
   redirectLabel
 }) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { trackEvent } = useMetaTracking();
   
   useEffect(() => {
@@ -28,9 +28,9 @@ const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({
       const userData = {
         email: user.email,
         externalId: user.id,
-        firstName: user.user_metadata?.full_name?.split(' ')[0],
-        lastName: user.user_metadata?.full_name?.split(' ').slice(1).join(' '),
-        phone: user.phone,
+        firstName: profile?.full_name?.split(' ')[0] || '',
+        lastName: profile?.full_name?.split(' ').slice(1).join(' ') || '',
+        phone: profile?.phone || '',
       };
 
       const value = subscriptionType === 'monthly' ? 9.99 : 99.99;

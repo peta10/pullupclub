@@ -1,22 +1,36 @@
 import React, { useState, useEffect } from "react";
 import Layout from "../../components/Layout/Layout";
-import { Button } from "../../components/ui/Button";
-import { LoadingState, ErrorState } from "../../components/ui/LoadingState";
+import { LoadingState } from "../../components/ui/LoadingState";
 import { Download, DollarSign, Users, CheckCircle, AlertCircle } from "lucide-react";
 import { supabase } from "../../lib/supabase";
-import { useTranslation } from 'react-i18next';
 import Head from "../../components/Layout/Head";
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 
 const LOGO_PATH = "/PUClogo-optimized.webp";
 
+interface Payout {
+  payout_id: string;
+  full_name: string;
+  email: string;
+  amount_dollars: string;
+  payout_paypal_email?: string;
+  user_paypal_email?: string;
+  request_date: string;
+  status: string;
+}
+
+interface MonthData {
+  month_value: string;
+  month_label: string;
+  payout_count: number;
+}
+
 const AdminPayoutsPage: React.FC = () => {
-  const { t } = useTranslation('admin');
-  const [payouts, setPayouts] = useState([]);
+  const [payouts, setPayouts] = useState<Payout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
-  const [availableMonths, setAvailableMonths] = useState([]);
+  const [availableMonths, setAvailableMonths] = useState<MonthData[]>([]);
   const [summary, setSummary] = useState({
     total: 0,
     readyToPay: 0,
@@ -33,7 +47,7 @@ const AdminPayoutsPage: React.FC = () => {
       setAvailableMonths(data || []);
       
       if (data && data.length > 0) {
-        const currentMonthExists = data.some(m => m.month_value === selectedMonth);
+        const currentMonthExists = data.some((m: MonthData) => m.month_value === selectedMonth);
         if (!currentMonthExists) {
           setSelectedMonth(data[0].month_value);
         }
@@ -43,7 +57,7 @@ const AdminPayoutsPage: React.FC = () => {
     }
   };
 
-  const fetchPayouts = async (month) => {
+  const fetchPayouts = async (month: string) => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.rpc('get_payouts_by_month', {
@@ -54,15 +68,15 @@ const AdminPayoutsPage: React.FC = () => {
 
       setPayouts(data || []);
 
-      const readyToPay = data?.filter(p => p.payout_paypal_email || p.user_paypal_email) || [];
-      const needsSetup = data?.filter(p => !p.payout_paypal_email && !p.user_paypal_email) || [];
+      const readyToPay = data?.filter((p: Payout) => p.payout_paypal_email || p.user_paypal_email) || [];
+      const needsSetup = data?.filter((p: Payout) => !p.payout_paypal_email && !p.user_paypal_email) || [];
       
       setSummary({
         total: data?.length || 0,
         readyToPay: readyToPay.length,
         needsSetup: needsSetup.length,
-        totalAmount: data?.reduce((sum, p) => sum + parseFloat(p.amount_dollars || 0), 0) || 0,
-        readyAmount: readyToPay.reduce((sum, p) => sum + parseFloat(p.amount_dollars || 0), 0)
+        totalAmount: data?.reduce((sum: number, p: Payout) => sum + parseFloat(p.amount_dollars || '0'), 0) || 0,
+        readyAmount: readyToPay.reduce((sum: number, p: Payout) => sum + parseFloat(p.amount_dollars || '0'), 0)
       });
 
     } catch (error) {
