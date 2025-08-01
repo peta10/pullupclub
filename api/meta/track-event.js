@@ -29,6 +29,25 @@ export default async function handler(req) {
     });
   }
 
+  // Check if Meta tracking is properly configured
+  const isMetaConfigured = process.env.META_PIXEL_ID && process.env.META_ACCESS_TOKEN;
+  
+  if (!isMetaConfigured) {
+    console.warn('⚠️ Meta tracking not configured - missing environment variables');
+    // Return success to prevent frontend errors, but log the issue
+    return new Response(JSON.stringify({ 
+      success: true, 
+      warning: 'Meta tracking not configured',
+      dev: true 
+    }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+  }
+
   try {
     const body = await req.json();
     const { eventName, userData = {}, customData = {}, eventSourceUrl } = body;
@@ -57,6 +76,7 @@ export default async function handler(req) {
       userAgent: req.headers.get('user-agent'),
       ipAddress: req.headers.get('x-forwarded-for') || 
                 req.headers.get('x-real-ip') || 
+                req.headers.get('cf-connecting-ip') ||
                 '127.0.0.1',
       userData,
       customData
@@ -77,11 +97,16 @@ export default async function handler(req) {
     });
   } catch (error) {
     console.error('❌ Meta API Error:', error);
+    
+    // Return a more graceful error response
     return new Response(JSON.stringify({ 
+      success: false,
       error: 'Failed to track event',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
+      // Don't expose sensitive error details in production
+      dev: process.env.NODE_ENV === 'development'
     }), {
-      status: 500,
+      status: 200, // Changed from 500 to 200 to prevent frontend errors
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'

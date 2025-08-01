@@ -1,163 +1,156 @@
-// Test utility for Meta tracking implementation
+// Test utility for Meta tracking
 export const testMetaTracking = {
-  // Test all tracking functions
-  async testAllEvents() {
-    console.log('🧪 Testing Meta tracking implementation...');
+  // Test environment variables
+  checkConfig: () => {
+    const config = {
+      pixelId: import.meta.env.VITE_META_PIXEL_ID,
+      hasToken: !!import.meta.env.VITE_META_ACCESS_TOKEN,
+      apiVersion: import.meta.env.VITE_META_API_VERSION || 'v21.0'
+    };
     
+    console.log('🔍 Meta Tracking Config:', config);
+    
+    if (!config.pixelId) {
+      console.error('❌ Missing META_PIXEL_ID environment variable');
+      return false;
+    }
+    
+    if (!config.hasToken) {
+      console.error('❌ Missing META_ACCESS_TOKEN environment variable');
+      return false;
+    }
+    
+    console.log('✅ Meta tracking configuration looks good');
+    return true;
+  },
+
+  // Test API endpoint
+  testAPI: async () => {
     try {
-      // Test basic event tracking
-      await this.testBasicEvent();
+      const response = await fetch('/api/meta/track-event', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          eventName: 'TestEvent',
+          userData: {
+            email: 'test@example.com',
+            externalId: 'test-user-123'
+          },
+          customData: {
+            content_name: 'Test Page',
+            test: true
+          }
+        }),
+      });
+
+      const result = await response.json();
+      console.log('🔍 API Test Result:', result);
       
-      // Test lead tracking
-      await this.testLeadEvent();
-      
-      // Test checkout tracking
-      await this.testCheckoutEvent();
-      
-      // Test purchase tracking
-      await this.testPurchaseEvent();
-      
-      console.log('✅ All Meta tracking tests completed successfully!');
+      if (result.success) {
+        console.log('✅ API endpoint working correctly');
+        return true;
+      } else {
+        console.error('❌ API endpoint failed:', result.error);
+        return false;
+      }
     } catch (error) {
-      console.error('❌ Meta tracking test failed:', error);
+      console.error('❌ API test failed:', error);
+      return false;
     }
   },
 
-  // Test basic event tracking
-  async testBasicEvent() {
-    console.log('📊 Testing basic event tracking...');
-    
-    const response = await fetch('/api/meta/track-event', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        eventName: 'ViewContent',
-        userData: {
-          email: 'test@example.com',
-          externalId: 'test-user-123',
+  // Test purchase tracking
+  testPurchaseTracking: async () => {
+    try {
+      const response = await fetch('/api/meta/track-purchase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        customData: {
-          content_name: 'Test Page',
-          content_category: 'Test',
-        },
-      }),
-    });
-
-    const result = await response.json();
-    console.log('Basic event result:', result);
-    return result;
-  },
-
-  // Test lead event tracking
-  async testLeadEvent() {
-    console.log('🎯 Testing lead event tracking...');
-    
-    const response = await fetch('/api/meta/track-event', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        eventName: 'Lead',
-        userData: {
-          email: 'test@example.com',
-          externalId: 'test-user-123',
-        },
-        customData: {
-          content_name: 'PUC Membership Test',
-          content_category: 'Subscription',
-          value: 9.99,
+        body: JSON.stringify({
+          userId: 'test-user-123',
+          userEmail: 'test@example.com',
+          customerId: 'cus_test123',
+          amount: 9.99,
           currency: 'USD',
-        },
-      }),
-    });
-
-    const result = await response.json();
-    console.log('Lead event result:', result);
-    return result;
-  },
-
-  // Test checkout event tracking
-  async testCheckoutEvent() {
-    console.log('🛒 Testing checkout event tracking...');
-    
-    const response = await fetch('/api/meta/track-event', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        eventName: 'InitiateCheckout',
-        userData: {
-          email: 'test@example.com',
-          externalId: 'test-user-123',
-        },
-        customData: {
-          value: 9.99,
-          currency: 'USD',
-          content_name: 'PUC Monthly Membership',
-          content_category: 'Subscription',
-          content_ids: ['monthly'],
-          content_type: 'product',
-          num_items: 1,
-        },
-      }),
-    });
-
-    const result = await response.json();
-    console.log('Checkout event result:', result);
-    return result;
-  },
-
-  // Test purchase event tracking
-  async testPurchaseEvent() {
-    console.log('💰 Testing purchase event tracking...');
-    
-    const response = await fetch('/api/meta/track-purchase', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userData: {
-          email: 'test@example.com',
-          externalId: 'test-user-123',
-        },
-        value: 9.99,
-        currency: 'USD',
-        orderId: 'test-order-123',
-      }),
-    });
-
-    const result = await response.json();
-    console.log('Purchase event result:', result);
-    return result;
-  },
-
-  // Test frontend pixel tracking
-  testFrontendPixel() {
-    console.log('🎯 Testing frontend pixel tracking...');
-    
-    if (typeof window !== 'undefined' && window.fbq) {
-      // Test PageView
-      window.fbq('track', 'PageView');
-      
-      // Test Lead
-      window.fbq('track', 'Lead', {
-        content_name: 'Frontend Test Lead',
-        value: 9.99,
-        currency: 'USD',
+          subscriptionId: 'sub_test123',
+          sessionId: 'cs_test123',
+          plan: 'monthly',
+          source: 'test'
+        }),
       });
+
+      const result = await response.json();
+      console.log('🔍 Purchase Tracking Test Result:', result);
       
-      // Test InitiateCheckout
-      window.fbq('track', 'InitiateCheckout', {
-        value: 9.99,
-        currency: 'USD',
-        content_name: 'Frontend Test Checkout',
-      });
-      
-      console.log('✅ Frontend pixel tracking tests completed');
+      if (result.success) {
+        console.log('✅ Purchase tracking working correctly');
+        return true;
+      } else {
+        console.error('❌ Purchase tracking failed:', result.error);
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Purchase tracking test failed:', error);
+      return false;
+    }
+  },
+
+  // Test Facebook parameters
+  checkFacebookParams: () => {
+    if (typeof window === 'undefined') {
+      console.log('⚠️ Not in browser environment');
+      return false;
+    }
+
+    const fbp = document.cookie.match(/_fbp=([^;]+)/)?.[1];
+    const fbc = document.cookie.match(/_fbc=([^;]+)/)?.[1];
+    const fb_login_id = localStorage.getItem('fb_login_id');
+
+    const params = { fbp, fbc, fb_login_id };
+    console.log('🔍 Facebook Parameters:', params);
+    
+    if (fbp || fbc || fb_login_id) {
+      console.log('✅ Facebook parameters detected');
+      return true;
     } else {
-      console.warn('⚠️ Frontend pixel not available (server-side execution)');
+      console.warn('⚠️ No Facebook parameters detected');
+      return false;
     }
   },
+
+  // Run all tests
+  runAllTests: async () => {
+    console.log('🧪 Running Meta Tracking Tests...');
+    
+    const results = {
+      config: testMetaTracking.checkConfig(),
+      api: await testMetaTracking.testAPI(),
+      purchase: await testMetaTracking.testPurchaseTracking(),
+      facebookParams: testMetaTracking.checkFacebookParams()
+    };
+    
+    console.log('📊 Test Results:', results);
+    
+    const allPassed = Object.values(results).every(result => result === true);
+    
+    if (allPassed) {
+      console.log('🎉 All Meta tracking tests passed!');
+    } else {
+      console.error('❌ Some tests failed. Check the logs above.');
+    }
+    
+    return results;
+  }
 };
 
-// Export for use in browser console
-if (typeof window !== 'undefined') {
-  (window as any).testMetaTracking = testMetaTracking;
+// Auto-run tests in development
+if (import.meta.env.MODE === 'development') {
+  // Wait for page to load
+  setTimeout(() => {
+    console.log('🔍 Auto-running Meta tracking tests...');
+    testMetaTracking.runAllTests();
+  }, 2000);
 } 

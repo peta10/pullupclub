@@ -130,49 +130,62 @@ async function updateUserPaymentStatus(userId: string, customerId: string, custo
 }
 
 async function storePendingPayment(session: Stripe.Checkout.Session) {
-  if (!session.customer_details?.email || !session.customer) {
-    console.log('Missing required customer details for pending payment');
-    return null;
-  }
-
+  console.log('Storing pending payment for session:', session.id);
+  
   try {
-    // Store the pending payment with 30-day expiration
+    const customerEmail = session.customer_details?.email;
+    const customerName = session.customer_details?.name;
+    const customerId = session.customer;
+    
+    if (!customerEmail || !customerId) {
+      console.log('Missing required customer data for pending payment');
+      return;
+    }
+    
+    // Check if already exists
+    const { data: existing } = await supabaseAdmin
+      .from('pending_payments')
+      .select('id')
+      .eq('stripe_session_id', session.id)
+      .maybeSingle();
+      
+    if (existing) {
+      console.log('Pending payment already exists');
+      return;
+    }
+    
+    // Calculate expiration (30 days from now)
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
-
-    const { data: pendingPayment, error } = await supabaseAdmin
+    
+    // Insert pending payment
+    const { error } = await supabaseAdmin
       .from('pending_payments')
       .insert({
         stripe_session_id: session.id,
-        stripe_customer_id: session.customer,
-        customer_email: session.customer_details.email,
-        payment_status: session.payment_status,
-        subscription_id: session.subscription,
-        amount_cents: session.amount_total,
-        currency: session.currency,
+        stripe_customer_id: customerId,
+        customer_email: customerEmail,
+        payment_status: 'completed',
+        amount_cents: session.amount_total || 0,
+        currency: session.currency || 'usd',
+        subscription_id: session.subscription || null,
         expires_at: expiresAt.toISOString(),
+        claimed_by_user_id: null,
         metadata: {
-          customer_name: session.customer_details.name,
-          payment_intent: session.payment_intent,
-          session_data: {
-            mode: session.mode,
-            status: session.status
-          }
+          customer_name: customerName || 'Customer',
+          subscription_plan: session.subscription ? 'monthly' : 'one-time',
+          payment_intent_id: session.payment_intent,
+          created_via: 'webhook'
         }
-      })
-      .select()
-      .single();
-
+      });
+      
     if (error) {
       console.error('Error storing pending payment:', error);
-      return null;
+    } else {
+      console.log('Successfully stored pending payment');
     }
-
-    console.log('Successfully stored pending payment:', pendingPayment.id);
-    return pendingPayment;
   } catch (error) {
     console.error('Error in storePendingPayment:', error);
-    return null;
   }
 }
 
@@ -196,6 +209,54 @@ async function verifyStripeSignature(req: Request) {
   } catch (err) {
     console.error('Error verifying Stripe signature:', err);
     return { valid: false };
+  }
+}
+
+// Track purchase event via Meta Conversions API
+async function trackPurchaseEvent(userId: string, customerEmail: string, session: Stripe.Checkout.Session) {
+  try {
+    console.log('💰 Tracking purchase event for user:', userId);
+    
+    const response = await fetch(
+      `${Deno.env.get('SUPABASE_URL')}/functions/v1/meta-conversions`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
+        },
+        body: JSON.stringify({
+          event_name: 'Purchase',
+          user_data: {
+            external_id: userId,
+            email: customerEmail,
+          },
+          custom_data: {
+            currency: session.currency,
+            value: session.amount_total ? session.amount_total / 100 : 0,
+            subscription_id: session.subscription,
+            content_name: `PUC ${session.metadata?.plan || 'monthly'} Membership`,
+            content_category: 'Subscription',
+            content_ids: [session.metadata?.plan || 'monthly'],
+            content_type: 'product',
+            num_items: 1,
+            order_id: session.id,
+            delivery_category: 'home_delivery',
+          },
+        }),
+      }
+    );
+    
+    if (!response.ok) {
+      throw new Error(`Failed to track purchase event: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('✅ Purchase event tracked successfully:', result);
+    return result;
+  } catch (error) {
+    console.error('❌ Error tracking purchase event:', error);
+    return null;
   }
 }
 
@@ -295,77 +356,20 @@ Deno.serve(async (req: Request) => {
           console.log(`Successfully processed payment for user: ${user.id}`);
           
           // Track purchase event via Meta Conversions API
-          try {
-            const response = await fetch(
-              `${Deno.env.get('SUPABASE_URL')}/functions/v1/meta-conversions`,
-              {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
-                },
-                body: JSON.stringify({
-                  event_name: 'Purchase',
-                  user_data: {
-                    external_id: user.id,
-                    email: customerEmail,
-                  },
-                  custom_data: {
-                    currency: session.currency,
-                    value: session.amount_total ? session.amount_total / 100 : 0,
-                    subscription_id: session.subscription,
-                  },
-                }),
-              }
-            );
-            
-            if (!response.ok) {
-              throw new Error('Failed to track purchase event');
-            }
-          } catch (error) {
-            console.error('Error tracking purchase event:', error);
-          }
+          await trackPurchaseEvent(user.id, customerEmail, session);
+          
         } else {
           console.log(`No user found with email: ${customerEmail}`);
-          console.log('Storing pending payment for future account creation');
+          console.log('This might be a payment from a user who hasnt created an account yet');
           
-          const pendingPayment = await storePendingPayment(session);
-          if (pendingPayment) {
-            // Send email notification about pending account creation
-            try {
-              const emailData = {
-                to: customerEmail,
-                subject: 'Complete Your Pull-Up Club Account Setup',
-                html: `
-                  <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2>Welcome to Pull-Up Club!</h2>
-                    <p>Thank you for your payment. To access your subscription, please complete your account setup:</p>
-                    <p><a href="https://pullupclub.com/signup-access?session_id=${session.id}" style="display: inline-block; background: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Complete Account Setup</a></p>
-                    <p>This link will expire in 30 days. If you need assistance, please contact support@pullupclub.com</p>
-                  </div>
-                `
-              };
-
-              const { error: emailError } = await supabaseAdmin
-                .from('email_notifications')
-                .insert({
-                  recipient_email: customerEmail,
-                  email_type: 'account_setup',
-                  subject: emailData.subject,
-                  message: emailData.html,
-                  metadata: {
-                    pending_payment_id: pendingPayment.id,
-                    stripe_session_id: session.id
-                  }
-                });
-
-              if (emailError) {
-                console.error('Error queuing account setup email:', emailError);
-              }
-            } catch (emailError) {
-              console.error('Error handling account setup notification:', emailError);
-            }
-          }
+          // Store pending payment for later account creation
+          await storePendingPayment(session);
+          
+          console.log('Customer details:', {
+            email: customerEmail,
+            customerId: customerId,
+            name: session.customer_details?.name
+          });
         }
         break;
       }
@@ -445,6 +449,41 @@ Deno.serve(async (req: Request) => {
               console.log('Marked user as unpaid due to subscription cancellation');
             }
           }
+        }
+        break;
+      }
+
+      case 'account.updated': {
+        const account = event.data.object as Stripe.Account;
+        console.log(`Stripe Connect account updated: ${account.id}`);
+        console.log(`Details submitted: ${account.details_submitted}`);
+        console.log(`Payouts enabled: ${account.payouts_enabled}`);
+        console.log(`Charges enabled: ${account.charges_enabled}`);
+        
+        // Check if account is fully onboarded and ready to receive payouts
+        if (account.details_submitted && account.payouts_enabled) {
+          console.log(`Account ${account.id} is fully onboarded - updating database`);
+          
+          const { data: updatedProfile, error } = await supabaseAdmin
+            .from('profiles')
+            .update({
+              stripe_onboarded: true,
+              updated_at: new Date().toISOString()
+            })
+            .eq('stripe_connect_id', account.id)
+            .select('id, full_name, email');
+            
+          if (error) {
+            console.error('Error updating onboarding status:', error);
+          } else if (updatedProfile && updatedProfile.length > 0) {
+            console.log(`Successfully updated onboarding status for user: ${updatedProfile[0].full_name} (${updatedProfile[0].email})`);
+          } else {
+            console.log(`No user found with stripe_connect_id: ${account.id}`);
+          }
+        } else {
+          console.log(`Account ${account.id} not fully ready yet`);
+          console.log(`- Details submitted: ${account.details_submitted}`);
+          console.log(`- Payouts enabled: ${account.payouts_enabled}`);
         }
         break;
       }

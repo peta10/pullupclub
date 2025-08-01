@@ -28,13 +28,16 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
+    storageKey: 'pullupclub-auth', // Custom storage key
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    flowType: 'pkce', // Use PKCE flow for better security
   },
   // Reduce default timeout and retry counts
   global: {
     fetch: (url, options) => {
       return fetch(url, { 
         ...options, 
-        signal: AbortSignal.timeout(10000) // 10-second timeout
+        signal: AbortSignal.timeout(15000) // Increased timeout to 15 seconds
       });
     }
   },
