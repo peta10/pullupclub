@@ -36,7 +36,7 @@ const useSubmissions = (options: UseSubmissionsOptions = {}) => {
         age: record.profiles?.age || 0,
         gender: (record.profiles?.gender as 'Male' | 'Female' | 'Other') || 'Other',
         region: record.profiles?.city || 'Unknown Region',
-        clubAffiliation: record.profiles?.organization || 'None',
+        organization: record.profiles?.organization || 'None',
         pullUpCount: record.pull_up_count,
         actualPullUpCount: record.actual_pull_up_count || undefined,
         videoUrl: record.video_url,

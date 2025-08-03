@@ -27,8 +27,10 @@ const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const [region, setRegion] = useState('');
-  const [clubAffiliation, setClubAffiliation] = useState('');
-  const [otherClubAffiliation, setOtherClubAffiliation] = useState('');
+  const [organization, setOrganization] = useState('');
+  const [otherOrganization, setOtherOrganization] = useState('');
+  const [age, setAge] = useState<number>(0);
+  const [gender, setGender] = useState<string>('Male');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +49,9 @@ const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
         video_url: videoLink,
         status: "pending",
         region: region,
-        club_affiliation: clubAffiliation === 'Other' ? otherClubAffiliation : clubAffiliation,
+        age: age,
+        gender: gender,
+        organization: organization === 'Other' ? otherOrganization : organization,
       });
 
       if (submissionError) {
@@ -160,14 +164,49 @@ const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
             </select>
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="age" className="block text-white mb-1">
+                Age <span className="text-[#9b9b6f]">*</span>
+              </label>
+              <input
+                type="number"
+                id="age"
+                min="16"
+                max="100"
+                value={age || ""}
+                onChange={e => setAge(parseInt(e.target.value) || 0)}
+                className="w-full px-4 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="gender" className="block text-white mb-1">
+                Gender <span className="text-[#9b9b6f]">*</span>
+              </label>
+              <select
+                id="gender"
+                value={gender}
+                onChange={e => setGender(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
+                required
+              >
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
           <div>
-            <label htmlFor="clubAffiliation" className="block text-white mb-1">
+            <label htmlFor="organization" className="block text-white mb-1">
               {t('form.club')}
             </label>
             <select
-              id="clubAffiliation"
-              value={clubAffiliation}
-              onChange={e => setClubAffiliation(e.target.value)}
+              id="organization"
+              value={organization}
+              onChange={e => setOrganization(e.target.value)}
               className="w-full px-4 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
             >
               <option value="">{t('form.selectClub')}</option>
@@ -177,13 +216,13 @@ const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
               <option value="Other">{t('form.otherClub')}</option>
               <option value="None">{t('form.none')}</option>
             </select>
-            {clubAffiliation === 'Other' && (
+            {organization === 'Other' && (
               <div className="mt-2">
                 <input
                   type="text"
-                  id="otherClubAffiliation"
-                  value={otherClubAffiliation}
-                  onChange={e => setOtherClubAffiliation(e.target.value)}
+                  id="otherOrganization"
+                  value={otherOrganization}
+                  onChange={e => setOtherOrganization(e.target.value)}
                   placeholder={t('form.otherClubPlaceholder')}
                   className="w-full px-4 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
                   required

@@ -73,7 +73,7 @@ const RankingsTab: React.FC<RankingsTabProps> = ({ userEmail }) => {
                       {submission.fullName}
                     </p>
                     <p className="text-sm text-gray-400">
-                      {submission.clubAffiliation || 'No Club'}
+                      {submission.organization || 'No Club'}
                     </p>
                   </div>
                 </div>

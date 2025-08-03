@@ -42,8 +42,8 @@ const initialFormState: FormState = {
   age: 0,
   gender: "Male",
   region: "",
-  clubAffiliation: "",
-  otherClubAffiliation: "",
+  organization: "",
+  otherOrganization: "",
   pullUpCount: 0,
   videoLink: "",
   videoConfirmed: false,
@@ -127,11 +127,11 @@ const SubmissionForm: React.FC = () => {
 
   const submitVideoForReview = async () => {
     try {
-      // If "Other" is selected, use the otherClubAffiliation value
-      const finalClubAffiliation =
-        formState.clubAffiliation === "Other"
-          ? formState.otherClubAffiliation
-          : formState.clubAffiliation;
+      // If "Other" is selected, use the otherOrganization value
+      const finalOrganization =
+        formState.organization === "Other"
+          ? formState.otherOrganization
+          : formState.organization;
 
       const { error } = await supabase.from("submissions").insert([
         {
@@ -139,7 +139,7 @@ const SubmissionForm: React.FC = () => {
           pull_up_count: formState.pullUpCount,
           video_url: formState.videoLink,
           status: "pending",
-          club_affiliation: finalClubAffiliation,
+          organization: finalOrganization,
           region: formState.region,
           age: formState.age,
           gender: formState.gender,
@@ -179,11 +179,11 @@ const SubmissionForm: React.FC = () => {
     try {
       dispatch({ type: "SET_SUBMITTING", value: true });
 
-      // If "Other" is selected, use the otherClubAffiliation value
-      const finalClubAffiliation =
-        formState.clubAffiliation === "Other"
-          ? formState.otherClubAffiliation
-          : formState.clubAffiliation;
+      // If "Other" is selected, use the otherOrganization value
+      const finalOrganization =
+        formState.organization === "Other"
+          ? formState.otherOrganization
+          : formState.organization;
 
       if (isSubscriber) {
         await submitVideoForReview();
@@ -195,7 +195,7 @@ const SubmissionForm: React.FC = () => {
           {
             userId: String(formState.email),
             fullName: formState.fullName,
-            clubAffiliation: finalClubAffiliation,
+            organization: finalOrganization,
           } as Record<string, string>
         );
         
@@ -238,8 +238,8 @@ const SubmissionForm: React.FC = () => {
           !formState.age ||
           !formState.region ||
           !formState.email.includes("@") ||
-          (formState.clubAffiliation === "Other" &&
-            !formState.otherClubAffiliation)
+          (formState.organization === "Other" &&
+            !formState.otherOrganization)
         );
       case 2:
         return (
@@ -464,13 +464,13 @@ const SubmissionForm: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="clubAffiliation" className="block text-white mb-1">
+                  <label htmlFor="organization" className="block text-white mb-1">
                     {t('form.club')}
                   </label>
                   <select
-                    id="clubAffiliation"
-                    name="clubAffiliation"
-                    value={formState.clubAffiliation}
+                    id="organization"
+                    name="organization"
+                    value={formState.organization}
                     onChange={handleChange}
                     className="w-full px-4 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
                   >
@@ -479,12 +479,12 @@ const SubmissionForm: React.FC = () => {
                     {clubs.map(c => <option key={c} value={c}>{c}</option>)}
                     <option value="Other">{t('form.otherClub')}</option>
                   </select>
-                  {formState.clubAffiliation === 'Other' && (
+                  {formState.organization === 'Other' && (
                     <div className="mt-2">
                       <input
                         type="text"
-                        name="otherClubAffiliation"
-                        value={formState.otherClubAffiliation}
+                        name="otherOrganization"
+                        value={formState.otherOrganization}
                         onChange={handleChange}
                         placeholder={t('form.otherClubPlaceholder')}
                         className="w-full px-4 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"

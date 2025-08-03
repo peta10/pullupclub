@@ -161,13 +161,13 @@ const SubmissionReview: React.FC<SubmissionReviewProps> = ({
                   </div>
                 )}
                 
-                {submission.clubAffiliation && submission.clubAffiliation !== 'None' && (
+                {submission.organization && submission.organization !== 'None' && (
                   <div className="flex justify-between">
                     <span className="text-[#8f8e6e]">
                       <Building size={14} className="inline mr-1" />
                       Club:
                     </span>
-                    <span className="text-white">{submission.clubAffiliation}</span>
+                    <span className="text-white">{submission.organization}</span>
                   </div>
                 )}
               </div>

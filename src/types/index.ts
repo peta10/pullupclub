@@ -7,7 +7,7 @@ export interface Submission {
   age: number;
   gender: 'Male' | 'Female' | 'Other';
   region: string;
-  clubAffiliation: string;
+  organization: string;
   pullUpCount: number;
   actualPullUpCount?: number;
   videoUrl: string;
@@ -49,8 +49,8 @@ export interface FormState {
   age: number;
   gender: "Male" | "Female" | "Other";
   region: string;
-  clubAffiliation: string;
-  otherClubAffiliation: string;
+  organization: string;
+  otherOrganization: string;
   pullUpCount: number;
   videoLink: string;
   videoConfirmed: boolean;

@@ -52,7 +52,7 @@ export function useLeaderboardWithCache(filters: LeaderboardFilters = {}) {
         // Apply filters client-side
         if (filters.region) filtered = filtered.filter((x: any) => x.region === filters.region);
         if (filters.gender) filtered = filtered.filter((x: any) => x.gender === filters.gender);
-        if (filters.club) filtered = filtered.filter((x: any) => x.clubAffiliation === filters.club);
+        if (filters.club) filtered = filtered.filter((x: any) => x.club_affiliation === filters.club);
         if (filters.ageGroup) filtered = filtered.filter((x: any) => x.ageGroup === filters.ageGroup);
         if (filters.badge) filtered = filtered.filter((x: any) => x.badges?.includes(filters.badge));
         await CacheManager.setCache(cacheKey, filtered, CACHE_EXPIRY.leaderboard);

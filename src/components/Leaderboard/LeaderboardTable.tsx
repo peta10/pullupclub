@@ -152,7 +152,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                         CLUB
                       </div>
                       <div className="text-white text-base font-mono font-bold truncate">
-                        {submission.clubAffiliation || 'INDEPENDENT'}
+                        {submission.organization || 'INDEPENDENT'}
                       </div>
                     </div>
                     <div className="bg-gray-800/40 border border-gray-600/30 rounded p-1">
@@ -226,7 +226,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                   <div className="text-white font-medium">{submission.fullName}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-gray-300">{submission.clubAffiliation || 'None'}</div>
+                  <div className="text-gray-300">{submission.organization || 'None'}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-gray-300">{submission.region}</div>

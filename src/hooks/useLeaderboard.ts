@@ -26,7 +26,7 @@ export const useLeaderboard = (maxEntries?: number) => {
         age: submission.age || 0,
         gender: (submission.gender as 'Male' | 'Female' | 'Other') || 'Other',
         region: submission.region || 'Unknown Region',
-        clubAffiliation: submission.organization || 'None',
+        organization: submission.organization || 'None',
         pullUpCount: submission.actual_pull_up_count || submission.pull_up_count,
         actualPullUpCount: submission.actual_pull_up_count,
         videoUrl: submission.video_url,
