@@ -64,6 +64,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
+  refreshProfile: () => Promise<void>;
   isFirstLogin: boolean;
   isLoading: boolean;
   isAdmin: boolean;
@@ -80,6 +81,7 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
   resetPassword: async () => {},
   updatePassword: async () => {},
+  refreshProfile: async () => {},
   isFirstLogin: false,
   isLoading: false,
   isAdmin: false,
@@ -396,6 +398,13 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (error) {
       console.error(`Error updating ${settingType}:`, error);
       throw error;
+    }
+  };
+
+  // Expose refreshProfile method for components to call after submissions
+  const refreshProfile = async () => {
+    if (user?.id) {
+      await fetchProfile(user.id);
     }
   };
 
@@ -751,6 +760,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         signOut,
         resetPassword,
         updatePassword,
+        refreshProfile,
         isFirstLogin,
         isLoading,
         isAdmin,

@@ -223,25 +223,104 @@ const AdminDashboardPage: React.FC = () => {
       }
 
       // 🆕 Include admin notes directly in the email notification
+      const adminNotesSection = submission.adminNotes 
+        ? `
+          <div style="background: linear-gradient(135deg, #2d1b0d 0%, #1a1a1a 100%); padding: 25px; border-radius: 12px; border-left: 4px solid #918f6f; margin: 25px 0; border: 1px solid #333333;">
+            <h3 style="color: #918f6f; margin: 0 0 15px 0; font-size: 18px; font-weight: 600; display: flex; align-items: center;">
+              📝 Feedback from our review team:
+            </h3>
+            <p style="color: #ffffff; font-size: 16px; margin: 0; line-height: 1.6; font-style: italic; background: rgba(145, 143, 111, 0.1); padding: 15px; border-radius: 8px;">
+              "${submission.adminNotes}"
+            </p>
+          </div>
+        ` : '';
+
       const emailData = {
         user_id: submission.userId,
         email_type: 'rejection',
         recipient_email: recipientEmail,
-        subject: 'Your Pull-Up Club Submission - Resubmission Available',
-        message: `Hi ${submission.fullName || 'there'},
+        subject: 'Your Pull-Up Club Submission Was Not Approved',
+        message: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #000000; color: #ffffff;">
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 30px; padding: 30px 20px; background: linear-gradient(135deg, #111111 0%, #1a1a1a 100%); border-radius: 12px; border: 1px solid #333333;">
+              <h1 style="color: #918f6f; margin: 0; font-size: 32px; font-weight: bold; letter-spacing: -0.5px;">Pull-Up Club</h1>
+              <p style="color: #999999; margin: 8px 0 0 0; font-size: 16px;">Monthly Pull-Up Competition</p>
+            </div>
 
-Unfortunately, your recent pull-up submission was not approved.
+            <!-- Main Content -->
+            <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 30px; border-radius: 12px; border-left: 4px solid #918f6f; margin-bottom: 30px; border: 1px solid #333333;">
+              <h2 style="color: #ffffff; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">Submission Update</h2>
+              
+              <p style="color: #ffffff; font-size: 18px; margin-bottom: 20px; line-height: 1.5;">
+                Hi <strong style="color: #918f6f;">${submission.fullName || 'there'}</strong>,
+              </p>
+              
+              <p style="color: #cccccc; font-size: 16px; margin-bottom: 25px; line-height: 1.6;">
+                Unfortunately, your recent pull-up submission was not approved.
+              </p>
 
-Don't worry - you can submit a new video right away! Make sure to:
-• Film in good lighting with clear form
-• Count your reps accurately
-• Follow our submission guidelines
-• Ensure video quality is clear
+              ${adminNotesSection}
+              
+              <p style="color: #ffffff; font-size: 16px; margin-bottom: 20px; line-height: 1.6;">
+                Don't worry - you can submit a new video right away! Make sure to:
+              </p>
+              
+              <ul style="color: #cccccc; font-size: 16px; margin: 20px 0; padding-left: 0; list-style: none;">
+                <li style="margin-bottom: 12px; padding-left: 25px; position: relative;">
+                  <span style="position: absolute; left: 0; color: #918f6f; font-weight: bold;">•</span>
+                  Film in good lighting with clear form
+                </li>
+                <li style="margin-bottom: 12px; padding-left: 25px; position: relative;">
+                  <span style="position: absolute; left: 0; color: #918f6f; font-weight: bold;">•</span>
+                  Count your reps accurately
+                </li>
+                <li style="margin-bottom: 12px; padding-left: 25px; position: relative;">
+                  <span style="position: absolute; left: 0; color: #918f6f; font-weight: bold;">•</span>
+                  Follow our submission guidelines
+                </li>
+                <li style="margin-bottom: 12px; padding-left: 25px; position: relative;">
+                  <span style="position: absolute; left: 0; color: #918f6f; font-weight: bold;">•</span>
+                  Ensure video quality is clear
+                </li>
+              </ul>
+              
+              <p style="color: #ffffff; font-size: 16px; margin-top: 25px; line-height: 1.6;">
+                Ready to try again? Log in and submit your new video:
+              </p>
+            </div>
 
-Ready to try again? Log in and submit your new video at: https://pullupclub.com/login
+            <!-- CTA Button -->
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://pullupclub.com/login" 
+                 style="display: inline-block; 
+                        background: linear-gradient(135deg, #918f6f 0%, #a19f7f 100%); 
+                        color: #000000; 
+                        padding: 16px 32px; 
+                        text-decoration: none; 
+                        border-radius: 8px; 
+                        font-weight: 600; 
+                        font-size: 16px; 
+                        transition: all 0.3s ease;
+                        box-shadow: 0 4px 12px rgba(145, 143, 111, 0.3);">
+                Submit New Video →
+              </a>
+            </div>
 
-Keep pushing your limits!
-The Pull-Up Club Team`,
+            <!-- Footer -->
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #333333; text-align: center;">
+              <p style="color: #ffffff; font-size: 18px; margin: 0 0 10px 0; font-weight: 500;">
+                Keep pushing your limits!
+              </p>
+              <p style="color: #918f6f; font-size: 16px; margin: 0 0 20px 0;">
+                The Pull-Up Club Team
+              </p>
+              <p style="color: #666666; font-size: 12px; margin: 0; line-height: 1.4;">
+                Questions? Contact us at <a href="mailto:support@pullupclub.com" style="color: #918f6f; text-decoration: none;">support@pullupclub.com</a>
+              </p>
+            </div>
+          </div>
+        `,
         // 🆕 Add admin notes as metadata so edge function can use them
         metadata: {
           admin_notes: submission.adminNotes || null,
@@ -261,6 +340,115 @@ The Pull-Up Club Team`,
       }
 
       console.log('Rejection email notification queued successfully for:', recipientEmail);
+
+      // Create a second email for resubmission available notification
+      const resubmissionEmailData = {
+        user_id: submission.userId,
+        email_type: 'resubmission',
+        recipient_email: recipientEmail,
+        subject: 'Your Pull-Up Club Submission - Resubmission Available',
+        message: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #000000; color: #ffffff;">
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 30px; padding: 30px 20px; background: linear-gradient(135deg, #111111 0%, #1a1a1a 100%); border-radius: 12px; border: 1px solid #333333;">
+              <h1 style="color: #918f6f; margin: 0; font-size: 32px; font-weight: bold; letter-spacing: -0.5px;">Pull-Up Club</h1>
+              <p style="color: #999999; margin: 8px 0 0 0; font-size: 16px;">Monthly Pull-Up Competition</p>
+            </div>
+
+            <!-- Main Content -->
+            <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 30px; border-radius: 12px; border-left: 4px solid #4ade80; margin-bottom: 30px; border: 1px solid #333333;">
+              <h2 style="color: #4ade80; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">🔄 Ready to Try Again?</h2>
+              
+              <p style="color: #ffffff; font-size: 18px; margin-bottom: 20px; line-height: 1.5;">
+                Hi <strong style="color: #918f6f;">${submission.fullName || 'there'}</strong>,
+              </p>
+              
+              <p style="color: #cccccc; font-size: 16px; margin-bottom: 25px; line-height: 1.6;">
+                Your submission cooldown period has ended and you can now submit a new pull-up video!
+              </p>
+              
+              <div style="background: rgba(74, 222, 128, 0.1); border: 1px solid #4ade80; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <p style="color: #4ade80; margin: 0; font-weight: bold; font-size: 16px;">
+                  ✅ You're eligible for a new submission
+                </p>
+              </div>
+
+              <p style="color: #ffffff; font-size: 16px; margin-bottom: 20px; line-height: 1.6;">
+                Make your next submission count! Remember our guidelines:
+              </p>
+              
+              <ul style="color: #cccccc; font-size: 16px; margin: 20px 0; padding-left: 0; list-style: none;">
+                <li style="margin-bottom: 12px; padding-left: 25px; position: relative;">
+                  <span style="position: absolute; left: 0; color: #4ade80; font-weight: bold;">✓</span>
+                  Record in good lighting with clear visibility
+                </li>
+                <li style="margin-bottom: 12px; padding-left: 25px; position: relative;">
+                  <span style="position: absolute; left: 0; color: #4ade80; font-weight: bold;">✓</span>
+                  Full range of motion - chin over bar, arms fully extended
+                </li>
+                <li style="margin-bottom: 12px; padding-left: 25px; position: relative;">
+                  <span style="position: absolute; left: 0; color: #4ade80; font-weight: bold;">✓</span>
+                  Count your reps accurately and clearly
+                </li>
+                <li style="margin-bottom: 12px; padding-left: 25px; position: relative;">
+                  <span style="position: absolute; left: 0; color: #4ade80; font-weight: bold;">✓</span>
+                  Ensure video quality is clear throughout
+                </li>
+              </ul>
+              
+              <p style="color: #ffffff; font-size: 16px; margin-top: 25px; line-height: 1.6;">
+                Ready to show us what you've got?
+              </p>
+            </div>
+
+            <!-- CTA Button -->
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://pullupclub.com/submit" 
+                 style="display: inline-block; 
+                        background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); 
+                        color: #000000; 
+                        padding: 16px 32px; 
+                        text-decoration: none; 
+                        border-radius: 8px; 
+                        font-weight: 600; 
+                        font-size: 16px; 
+                        transition: all 0.3s ease;
+                        box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);">
+                Submit New Video →
+              </a>
+            </div>
+
+            <!-- Footer -->
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #333333; text-align: center;">
+              <p style="color: #ffffff; font-size: 18px; margin: 0 0 10px 0; font-weight: 500;">
+                We believe in you!
+              </p>
+              <p style="color: #918f6f; font-size: 16px; margin: 0 0 20px 0;">
+                The Pull-Up Club Team
+              </p>
+              <p style="color: #666666; font-size: 12px; margin: 0; line-height: 1.4;">
+                Questions? Contact us at <a href="mailto:support@pullupclub.com" style="color: #918f6f; text-decoration: none;">support@pullupclub.com</a>
+              </p>
+            </div>
+          </div>
+        `,
+        metadata: {
+          submission_id: submission.id,
+          email_sequence: 'resubmission_available'
+        },
+        created_at: new Date().toISOString()
+      };
+
+      // Insert resubmission email notification
+      const { error: resubmissionEmailError } = await supabase
+        .from('email_notifications')
+        .insert(resubmissionEmailData);
+
+      if (resubmissionEmailError) {
+        console.error('Error creating resubmission email:', resubmissionEmailError);
+      } else {
+        console.log('Resubmission email notification queued successfully for:', recipientEmail);
+      }
       
       // SECURE: Get current session and pass authentication
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();

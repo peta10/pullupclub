@@ -120,6 +120,10 @@ export interface SubmitVideoParams {
   videoUrl: string;
   pullUpCount: number;
   userId: string;
+  organization?: string;
+  region?: string;
+  gender?: string;
+  age?: number;
 }
 
 export interface UseSubmissionsOptions {

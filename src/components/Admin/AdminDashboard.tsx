@@ -50,7 +50,7 @@ const AdminDashboard: React.FC = () => {
           age: submission.age || 0,
           gender: (submission.gender as 'Male' | 'Female' | 'Other') || 'Other',
           region: submission.region || 'Unknown Region',
-          organization: submission.organization || submission.club_affiliation || 'None',
+          organization: submission.organization || 'None',
           pullUpCount: submission.pull_up_count,
           actualPullUpCount: submission.actual_pull_up_count || undefined,
           videoUrl: submission.video_url,

@@ -37,7 +37,7 @@ const useLiveCountdown = () => {
 
 interface NextBeatTarget {
   fullName: string;
-  clubAffiliation: string;
+        organization: string;
   pullUpCount: number;
 }
 
@@ -71,7 +71,7 @@ const NextToBeat = ({ bestScore }: { bestScore: number }) => {
 
         const formattedTargets = data.map(target => ({
           fullName: target.full_name,
-          clubAffiliation: target.organization || 'Independent',
+          organization: target.organization || 'Independent',
           pullUpCount: target.actual_pull_up_count
         }));
 
@@ -114,7 +114,7 @@ const NextToBeat = ({ bestScore }: { bestScore: number }) => {
                     {target.fullName}
                   </span>
                   <span className="text-gray-400 text-sm ml-1">
-                    ({target.clubAffiliation})
+                    ({target.organization})
                   </span>
                 </div>
                 <span className="text-[#9b9b6f] font-bold">
@@ -164,7 +164,7 @@ const SubmissionDashboard = () => {
           age: submission.age ?? 0,
           gender: (submission.gender as "Male" | "Female" | "Other") || "Other",
           region: submission.region || 'Unknown Region',
-          organization: submission.organization || submission.club_affiliation || 'None',
+          organization: submission.organization || 'None',
           pullUpCount: submission.pull_up_count,
           actualPullUpCount: submission.actual_pull_up_count ?? undefined,
           videoUrl: submission.video_url,

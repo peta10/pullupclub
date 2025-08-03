@@ -35,7 +35,7 @@ const ResetPasswordPage = lazy(() => import("./pages/ResetPassword/ResetPassword
 const SubscriptionPage = lazy(() => import("./pages/Subscription/SubscriptionPage.tsx"));
 const SubscribeRedirect = lazy(() => import("./pages/Subscription/SubscribeRedirect.tsx"));
 const SignupAccessPage = lazy(() => import("./pages/Subscription/SignupAccessPage.tsx"));
-const VideoSubmissionPage = lazy(() => import("./pages/Submission/SubmissionForm.tsx"));
+const VideoSubmissionPage = lazy(() => import("./pages/VideoSubmission/VideoSubmissionPage.tsx"));
 const AdminUserManagement = lazy(() => import("./pages/AdminUserManagement.tsx"));
 const EthosPage = lazy(() => import("./pages/EthosPage.tsx"));
 

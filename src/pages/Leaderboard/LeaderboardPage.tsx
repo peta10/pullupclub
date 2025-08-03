@@ -116,7 +116,7 @@ const LeaderboardPage: React.FC = () => {
         return range === '50+' ? pullUps >= count : (pullUps >= minCount && pullUps <= count);
       });
     }
-    if (filters.club) filtered = filtered.filter(s => s.organization === filters.club);
+            if (filters.club) filtered = filtered.filter(s => s.organization === filters.club);
     if (filters.region) filtered = filtered.filter(s => s.region === filters.region);
     if (filters.gender) filtered = filtered.filter(s => s.gender === filters.gender);
     if (filters.ageGroup) {

@@ -1,13 +1,13 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.29.0";
-import { SMTPClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
+import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
 const supabaseAdmin = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
-const smtp = new SMTPClient({
+const smtp = new SmtpClient({
   connection: {
     hostname: Deno.env.get('SMTP_HOSTNAME') ?? '',
     port: parseInt(Deno.env.get('SMTP_PORT') ?? '587'),

@@ -17,7 +17,7 @@ const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
   onSubmissionComplete,
 }) => {
   const { t } = useTranslation('submission');
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const { trackEvent } = useMetaTracking();
   const [pullUpCount, setPullUpCount] = useState<number>(0);
   const [videoLink, setVideoLink] = useState("");
@@ -56,6 +56,14 @@ const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
 
       if (submissionError) {
         throw submissionError;
+      }
+
+      // Refresh profile data to pick up any trigger updates (like organization)
+      try {
+        await refreshProfile();
+      } catch (refreshError) {
+        console.warn('Failed to refresh profile after submission:', refreshError);
+        // Don't fail the submission if profile refresh fails
       }
 
       // Track video submission
