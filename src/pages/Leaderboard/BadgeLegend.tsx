@@ -16,6 +16,18 @@ const BadgeLegend: React.FC = () => {
     };
   };
   
+  // Helper function to get the correct image path for new cropped badges
+  const getBadgeImagePath = (badgeId: string) => {
+    const imageMap: { [key: string]: string } = {
+      'elite': '/optimized-avatars/New Cropped Elite.webp',
+      'hardened': '/optimized-avatars/New Cropped Hardened.webp',
+      'operator': '/optimized-avatars/New Cropped Operator.webp',
+      'proven': '/optimized-avatars/New Cropped Proven (1).webp',
+      'recruit': '/optimized-avatars/New Cropped Recruit.webp'
+    };
+    return imageMap[badgeId.toLowerCase()] || `/badge-${badgeId.toLowerCase()}-men-256.webp`;
+  };
+  
   // Sort badges to ensure Elite is last for mobile layout
   const sortedBadges = [...badges].sort((a, b) => {
     if (a.id.toLowerCase() === 'elite') return 1;
@@ -32,19 +44,18 @@ const BadgeLegend: React.FC = () => {
       
       {/* Mobile layout: 2-2-1 */}
       <div className="mt-4 sm:hidden">
-        <div className="grid grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-2 gap-3 mb-6">
           {sortedBadges.slice(0, 4).map((badge: any) => (
             <div
               key={badge.id}
               className="flex flex-col items-center text-center"
             >
               <img
-                src={`/badge-${badge.id.toLowerCase()}-men-256.webp`}
+                src={getBadgeImagePath(badge.id)}
                 alt={badge.name}
-                className="w-32 h-32 mb-2 object-contain"
+                className="w-40 h-40 mb-0 object-contain"
               />
-              <h4 className="text-[#9b9b6f] font-bold">{badge.name}</h4>
-              <div className="text-white text-sm space-y-1">
+              <div className="text-white text-sm space-y-0">
                 <div className="font-bold">
                   <Trans
                     i18nKey="badgeLegend.menPullUps"
@@ -73,12 +84,11 @@ const BadgeLegend: React.FC = () => {
               className="flex flex-col items-center text-center"
             >
               <img
-                src={`/badge-${badge.id.toLowerCase()}-men-256.webp`}
+                src={getBadgeImagePath(badge.id)}
                 alt={badge.name}
-                className="w-32 h-32 mb-2 object-contain"
+                className="w-40 h-40 mb-0 object-contain"
               />
-              <h4 className="text-[#9b9b6f] font-bold">{badge.name}</h4>
-              <div className="text-white text-sm space-y-1">
+              <div className="text-white text-sm space-y-0">
                 <div className="font-bold">
                   <Trans
                     i18nKey="badgeLegend.menPullUps"
@@ -102,19 +112,18 @@ const BadgeLegend: React.FC = () => {
       </div>
       
       {/* Tablet and Desktop layout: unchanged */}
-      <div className="mt-4 hidden sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="mt-4 hidden sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
         {badges.map((badge: any) => (
           <div
             key={badge.id}
             className="flex flex-col items-center text-center"
           >
             <img
-              src={`/badge-${badge.id.toLowerCase()}-men-256.webp`}
+              src={getBadgeImagePath(badge.id)}
               alt={badge.name}
-              className="w-32 h-32 mb-2 object-contain"
+              className="w-40 h-40 lg:w-36 lg:h-36 mb-0 object-contain"
             />
-            <h4 className="text-[#9b9b6f] font-bold">{badge.name}</h4>
-            <div className="text-white text-sm space-y-1">
+            <div className="text-white text-sm space-y-0">
               <div className="font-bold">
                 <Trans
                   i18nKey="badgeLegend.menPullUps"

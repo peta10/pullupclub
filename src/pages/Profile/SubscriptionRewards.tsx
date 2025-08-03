@@ -19,6 +19,8 @@ interface PayoutRequest {
   status: 'pending' | 'approved' | 'paid' | 'rejected';
   request_date: string;
   processed_date: string | null;
+  paid_at: string | null;
+  paid_by: string | null;
   notes: string | null;
 }
 
@@ -56,7 +58,8 @@ const SubscriptionRewards: React.FC = () => {
   const calculateImmediatelyAvailable = () => {
     const totalEarned = calculateAvailableEarnings();
     const totalRequestedOrPaid = payoutRequests.reduce((total, request) => {
-      if (request.status === 'paid' || request.status === 'approved' || request.status === 'pending') {
+      // Include paid requests (either by status or paid_at), approved requests, and pending requests
+      if (request.status === 'paid' || request.paid_at || request.status === 'approved' || request.status === 'pending') {
         return total + request.amount_dollars;
       }
       return total;
@@ -227,11 +230,15 @@ const SubscriptionRewards: React.FC = () => {
     setShowPaypalModal(true);
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, paidAt?: string) => {
+    // Check if paid via status field or paid_at timestamp
+    if (status === 'paid' || paidAt) {
+      return 'text-blue-400 bg-blue-900/20';
+    }
+    
     switch (status) {
       case 'pending': return 'text-yellow-400 bg-yellow-900/20';
       case 'approved': return 'text-green-400 bg-green-900/20';
-      case 'paid': return 'text-blue-400 bg-blue-900/20';
       case 'rejected': return 'text-red-400 bg-red-900/20';
       default: return 'text-gray-400 bg-gray-900/20';
     }
@@ -245,7 +252,9 @@ const SubscriptionRewards: React.FC = () => {
 
     const availableAmount = calculateImmediatelyAvailable();
     const totalEarned = calculateAvailableEarnings();
-    const hasPendingRequest = payoutRequests.some(req => req.status === 'pending');
+    const hasPendingRequest = payoutRequests.some(req => 
+      req.status === 'pending' && !req.paid_at
+    );
 
     return (
       <div className="bg-gray-900 p-6 rounded-lg text-center transform transition-transform hover:scale-105">
@@ -498,12 +507,15 @@ const SubscriptionRewards: React.FC = () => {
                   {request.processed_date && (
                     <p className="text-gray-500 text-xs">Processed: {new Date(request.processed_date).toLocaleDateString()}</p>
                   )}
+                  {request.paid_at && (
+                    <p className="text-gray-500 text-xs">Paid: {new Date(request.paid_at).toLocaleDateString()}</p>
+                  )}
                   {request.notes && (
                     <p className="text-gray-400 text-xs mt-1">{request.notes}</p>
                   )}
                 </div>
-                <span className={`text-xs px-2 py-1 rounded capitalize ${getStatusColor(request.status)}`}>
-                  {request.status}
+                <span className={`text-xs px-2 py-1 rounded capitalize ${getStatusColor(request.status || 'unknown', request.paid_at || undefined)}`}>
+                  {request.status === 'paid' || request.paid_at ? 'paid' : request.status}
                 </span>
               </div>
             ))}
