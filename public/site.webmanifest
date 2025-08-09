@@ -19,5 +19,7 @@
   "display": "standalone",
   "start_url": "/",
   "scope": "/",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "prefer_related_applications": false,
+  "categories": ["fitness", "sports", "health"]
 }

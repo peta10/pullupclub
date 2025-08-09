@@ -1,0 +1,68 @@
+{
+  "title": "Profile",
+  "personalInfo": "Personal Information",
+  "accountSettings": "Account Settings",
+  "subscription": "Subscription",
+  "earnings": "Earnings",
+  "badges": "Badges",
+  "submissions": "Submissions",
+  "loading": "Loading profile...",
+  "fields": {
+    "fullName": "Full Name",
+    "email": "Email",
+    "age": "Age", 
+    "gender": "Gender",
+    "organization": "Organization",
+    "phone": "Phone",
+    "address": "Address",
+    "paypalEmail": "PayPal Email"
+  },
+  "placeholders": {
+    "fullName": "Enter your full name",
+    "age": "Enter your age",
+    "gender": "Select gender",
+    "organization": "Enter organization",
+    "phone": "Enter phone number",
+    "address": "Enter your address",
+    "paypalEmail": "Enter PayPal email for payouts"
+  },
+  "buttons": {
+    "save": "Save Changes",
+    "edit": "Edit Profile",
+    "cancel": "Cancel",
+    "changePassword": "Change Password",
+    "requestPayout": "Request Payout"
+  },
+  "messages": {
+    "updateSuccess": "Profile updated successfully",
+    "updateError": "Failed to update profile",
+    "saveChanges": "Save your changes?",
+    "unsavedChanges": "You have unsaved changes"
+  },
+  "subscription": {
+    "status": "Subscription Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "manage": "Manage Subscription",
+    "upgrade": "Upgrade Plan"
+  },
+  "earnings": {
+    "total": "Total Earnings",
+    "pending": "Pending Payout",
+    "history": "Earnings History",
+    "noEarnings": "No earnings yet"
+  },
+  "badges": {
+    "current": "Current Badge",
+    "progress": "Progress to Next Badge",
+    "requirements": "Requirements"
+  },
+  "submissions": {
+    "total": "Total Submissions",
+    "approved": "Approved",
+    "pending": "Pending",
+    "rejected": "Rejected",
+    "recent": "Recent Submissions",
+    "viewAll": "View All Submissions"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "title": "Leaderboard",
+  "subtitle": "See how you stack up against the competition",
+  "loading": "Loading leaderboard...",
+  "noData": "No leaderboard data available",
+  "rank": "Rank",
+  "name": "Name",
+  "pullUps": "Pull-ups",
+  "badge": "Badge",
+  "earnings": "Earnings",
+  "filters": {
+    "title": "Filters",
+    "gender": "Gender",
+    "all": "All",
+    "male": "Male", 
+    "female": "Female",
+    "badgeLevel": "Badge Level",
+    "pullUpRange": "Pull-up Range",
+    "region": "Region",
+    "clearFilters": "Clear Filters",
+    "applyFilters": "Apply Filters"
+  },
+  "badges": {
+    "elite": "Elite",
+    "hardened": "Hardened", 
+    "operator": "Operator",
+    "proven": "Proven",
+    "recruit": "Recruit",
+    "unranked": "Unranked"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{current}} of {{total}}"
+  },
+  "badgeLegend": {
+    "title": "Badge Requirements",
+    "showLegend": "Show Badge Legend",
+    "hideLegend": "Hide Badge Legend",
+    "male": "Male Requirements",
+    "female": "Female Requirements"
+  },
+  "poolBanner": {
+    "title": "Weekly Prize Pool",
+    "remaining": "Remaining",
+    "total": "Total Pool",
+    "loading": "Loading pool status..."
+  }
+}

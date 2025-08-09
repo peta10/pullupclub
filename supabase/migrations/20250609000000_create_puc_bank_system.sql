@@ -46,6 +46,7 @@ DECLARE
   v_dollars_earned DECIMAL(10,2);
   v_is_first_submission BOOLEAN := false;
   v_existing_earning_id UUID;
+  v_user_role TEXT;
   v_result JSON;
 BEGIN
   -- Check if earnings already processed for this submission
@@ -58,6 +59,38 @@ BEGIN
       'success', true,
       'message', 'Earnings already processed',
       'earning_id', v_existing_earning_id
+    );
+  END IF;
+  
+  -- Check user role - admins and influencers don't earn money
+  SELECT role INTO v_user_role
+  FROM profiles 
+  WHERE id = p_user_id;
+  
+  IF v_user_role IN ('admin', 'influencer') THEN
+    -- Still create a record but with $0 earnings
+    INSERT INTO user_earnings (
+      user_id, 
+      submission_id, 
+      pool_id, 
+      pull_up_count, 
+      dollars_earned, 
+      is_first_submission
+    ) VALUES (
+      p_user_id, 
+      p_submission_id, 
+      (SELECT id FROM weekly_pools WHERE is_current = true LIMIT 1), 
+      p_pull_up_count, 
+      0, 
+      false
+    ) RETURNING id INTO v_existing_earning_id;
+    
+    RETURN json_build_object(
+      'success', true,
+      'message', 'Submission processed - admins/influencers do not earn money',
+      'earning_id', v_existing_earning_id,
+      'dollars_earned', 0,
+      'user_role', v_user_role
     );
   END IF;
   
@@ -77,7 +110,7 @@ BEGIN
     );
   END IF;
   
-  -- Check if this is user's first submission this week
+  -- Check if this is user's first submission this week (for tracking only)
   IF NOT EXISTS (
     SELECT 1 FROM user_earnings ue 
     JOIN weekly_pools wp ON ue.pool_id = wp.id 
@@ -86,12 +119,8 @@ BEGIN
     v_is_first_submission := true;
   END IF;
   
-  -- Calculate earnings: $1 per pull-up, but first submission is free
-  IF v_is_first_submission THEN
-    v_dollars_earned := 0;
-  ELSE
-    v_dollars_earned := LEAST(p_pull_up_count::DECIMAL, v_remaining_dollars);
-  END IF;
+  -- Calculate earnings: $1 per pull-up for ALL submissions (no free first submission)
+  v_dollars_earned := LEAST(p_pull_up_count::DECIMAL, v_remaining_dollars);
   
   -- Insert earning record
   INSERT INTO user_earnings (

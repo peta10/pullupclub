@@ -1,151 +1,326 @@
-// Enhanced service worker with browser extension protection
-const CACHE_NAME = 'pull-up-club-v2'; // Increment version to force cache refresh
-const STATIC_ASSETS = [
-  // HTML shell deliberately excluded to always fetch latest version
-  '/pullup_header_desktop.webp',
-  '/pullup_header-tablet.webp',
-  '/pullup_header-mobile.webp',
-  '/PUClogo-optimized.webp',
-  '/optimized-avatars/mike-johnson.svg',
-  '/optimized-avatars/sarah-williams.svg',
-  '/optimized-avatars/dave-rodriguez.svg'
-];
+// Next.js Service Worker for Pull-Up Club with Vercel optimization
+const CACHE_NAME = 'pullup-club-v1'
+const BUILD_ID = self.location.search.includes('buildId=') ? 
+  new URLSearchParams(self.location.search).get('buildId') : Date.now().toString()
 
-// Install event - cache critical assets
+console.log('[SW] Service Worker initialized with BUILD_ID:', BUILD_ID)
+
+// Assets to cache - essential pages and resources
+const STATIC_ASSETS = [
+  '/',
+  '/login',
+  '/leaderboard',
+  '/manifest.json'
+]
+
+// Install event - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('SW: Installing version', CACHE_NAME);
+  console.log('[SW] Installing service worker with BUILD_ID:', BUILD_ID)
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(STATIC_ASSETS))
-      .catch((error) => console.log('SW: Install failed:', error))
-  );
-  self.skipWaiting();
-});
+    caches.open(CACHE_NAME + '-' + BUILD_ID).then(async (cache) => {
+      console.log('[SW] Caching static assets')
+      
+      // Cache essential assets one by one to prevent failures
+      const cachePromises = STATIC_ASSETS.map(async (asset) => {
+        try {
+          await cache.add(asset)
+          console.log('[SW] Successfully cached:', asset)
+        } catch (error) {
+          console.warn('[SW] Failed to cache asset:', asset, error.message)
+          // Don't throw - continue with other assets
+        }
+      })
+      
+      await Promise.allSettled(cachePromises)
+      console.log('[SW] Asset caching completed')
+      
+    }).then(() => {
+      console.log('[SW] Skipping waiting to activate immediately')
+      return self.skipWaiting()
+    }).catch(err => {
+      console.error('[SW] Install failed:', err)
+    })
+  )
+})
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('SW: Activating version', CACHE_NAME);
+  console.log('[SW] Activating service worker...')
   event.waitUntil(
-    caches.keys().then((cacheNames) =>
-      Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('SW: Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      )
-    )
-  );
-  self.clients.claim();
-});
+    Promise.all([
+      // Clean up old caches
+      caches.keys().then((cacheNames) => {
+        const currentCache = CACHE_NAME + '-' + BUILD_ID
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName.startsWith(CACHE_NAME) && cacheName !== currentCache) {
+              console.log('[SW] Deleting old cache:', cacheName)
+              return caches.delete(cacheName)
+            }
+          }).filter(Boolean)
+        )
+      }),
+      // Take control of all clients immediately
+      self.clients.claim()
+    ]).then(() => {
+      console.log('[SW] Service worker activated successfully')
+    }).catch(err => {
+      console.error('[SW] Activation failed:', err)
+    })
+  )
+})
 
-// Message event - handle client messages
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type) {
-    switch (event.data.type) {
-      case 'SKIP_WAITING':
-        self.skipWaiting();
-        break;
-      case 'CACHE_URLS':
-        event.waitUntil(
-          caches.open(CACHE_NAME)
-            .then((cache) => cache.addAll(event.data.payload))
-            .catch((error) => console.log('SW: Cache URLs failed:', error))
-        );
-        break;
-      default:
-        if (event.ports && event.ports[0]) {
-          event.ports[0].postMessage({ error: 'Unknown message type' });
-        }
-    }
-  }
-});
-
-// Fetch event - serve from cache, fallback to network
+// Fetch event - handle network requests with intelligent caching
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
+  const { request } = event
+  const url = new URL(request.url)
 
   // Skip non-GET requests
-  if (event.request.method !== 'GET') return;
+  if (request.method !== 'GET') return
 
-  // CRITICAL: Skip browser extension requests and localhost protocol edge cases
-  if (
-    url.protocol === 'chrome-extension:' ||
-    url.protocol === 'moz-extension:' ||
-    url.protocol === 'safari-extension:' ||
-    url.protocol === 'chrome:' ||
-    (url.hostname === 'localhost' && url.port === '')
-  ) {
-    return;
-  }
+  // Skip external requests
+  if (!url.origin.includes(self.location.origin)) return
 
-  // Never cache index.html or the root route – always fetch from network
-  if (
-    event.request.url.includes('/index.html') ||
-    event.request.url === new URL('/', self.location).href ||
-    event.request.url.endsWith('/')
-  ) {
-    console.log('SW: Bypassing cache for HTML shell:', event.request.url);
-    return;
-  }
-
-  // Skip API calls and external requests
-  if (
-    event.request.url.includes('/api/') ||
-    event.request.url.includes('supabase.co') ||
-    event.request.url.includes('stripe.com') ||
-    event.request.url.includes('google-analytics.com') ||
-    event.request.url.includes('sentry.io') ||
-    event.request.url.includes('vercel.app')
-  ) {
-    return;
+  // Skip API routes, Next.js internals, and dynamic content
+  if (url.pathname.startsWith('/api/') || 
+      url.pathname.startsWith('/_next/webpack-hmr') ||
+      url.pathname.includes('.json') ||
+      url.pathname.startsWith('/auth/callback') ||
+      url.pathname.includes('hot-update') ||
+      url.pathname.includes('_next/static/css') ||
+      url.pathname.includes('_next/static/chunks')) {
+    return
   }
 
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      if (response) {
-        console.log('SW: Cache hit for:', event.request.url);
-        return response;
+    caches.match(request).then((cachedResponse) => {
+      // For HTML pages, use stale-while-revalidate strategy
+      if (request.destination === 'document') {
+        // If we have cached content, serve it immediately
+        if (cachedResponse) {
+          // Serve cached content instantly
+          const serveCache = () => cachedResponse
+          
+          // Update cache in background (don't await this)
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+          
+          fetch(request, { 
+            cache: 'no-cache',
+            signal: controller.signal
+          }).then((response) => {
+            clearTimeout(timeoutId)
+            if (response.ok && response.status === 200) {
+              const responseClone = response.clone()
+              caches.open(CACHE_NAME + '-' + BUILD_ID).then((cache) => {
+                cache.put(request, responseClone)
+                console.log('[SW] Background cache update completed for:', request.url)
+              })
+            }
+          }).catch((error) => {
+            clearTimeout(timeoutId)
+            console.log('[SW] Background update failed (this is OK):', error.message)
+          })
+          
+          // Return cached content immediately
+          return serveCache()
+        }
+        
+        // No cache available, try network with fast timeout
+        return Promise.race([
+          fetch(request).then((response) => {
+            if (response.ok && response.status === 200) {
+              const responseClone = response.clone()
+              caches.open(CACHE_NAME + '-' + BUILD_ID).then((cache) => {
+                cache.put(request, responseClone)
+              })
+            }
+            return response
+          }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Network timeout')), 3000)
+          )
+        ]).catch(() => {
+          // Network failed and no cache, return basic offline page
+          return new Response(
+            '<!DOCTYPE html><html><head><title>Offline</title></head><body><h1>You are offline</h1><p>Please check your connection and try again.</p></body></html>',
+            { headers: { 'Content-Type': 'text/html' } }
+          )
+        })
       }
 
-      console.log('SW: Cache miss, fetching:', event.request.url);
-      return fetch(event.request)
-        .then((networkResponse) => {
-          // Don't cache non-successful responses
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-            return networkResponse;
-          }
+      // For static assets, use cache-first strategy
+      if (cachedResponse) {
+        return cachedResponse
+      }
 
-          // Skip caching for browser extension requests
-          if (
-            event.request.url.startsWith('chrome-extension:') ||
-            event.request.url.startsWith('moz-extension:')
-          ) {
-            return networkResponse;
-          }
-
-          const responseToCache = networkResponse.clone();
-
-          // Cache images and static assets
-          if (event.request.url.match(/\.(jpg|jpeg|png|gif|webp|svg|css|js)$/)) {
-            caches.open(CACHE_NAME)
-              .then((cache) => cache.put(event.request, responseToCache))
-              .catch((error) => console.log('SW: Cache put failed:', error));
-          }
-
-          return networkResponse;
-        })
-        .catch((error) => {
-          console.log('SW: Fetch failed:', error);
-          if (event.request.destination === 'document') {
-            return new Response('Offline - Please check your connection', {
-              status: 200,
-              headers: { 'Content-Type': 'text/html' },
-            });
-          }
-          return new Response('Network error occurred', { status: 408 });
-        });
+      // Fetch from network and cache successful responses
+      return fetch(request).then((response) => {
+        // Only cache successful responses
+        if (response.ok && response.status === 200) {
+          // Clone response before caching
+          const responseClone = response.clone()
+          caches.open(CACHE_NAME + '-' + BUILD_ID).then((cache) => {
+            cache.put(request, responseClone)
+          }).catch(err => {
+            console.warn('[SW] Failed to cache response:', err)
+          })
+        }
+        return response
+      }).catch(() => {
+        // Network failed and no cache available
+        if (request.destination === 'document') {
+          // Try to return cached homepage as fallback
+          return caches.match('/').then(fallback => {
+            if (fallback) return fallback
+            // Return a basic offline page
+            return new Response(
+              '<!DOCTYPE html><html><head><title>Offline</title></head><body><h1>You are offline</h1><p>Please check your connection and try again.</p></body></html>',
+              { headers: { 'Content-Type': 'text/html' } }
+            )
+          })
+        }
+        throw new Error('Network failed and no cache available')
+      })
+    }).catch(err => {
+      console.error('[SW] Fetch error:', err)
+      // Return basic error response
+      return new Response('Service unavailable', { status: 503 })
     })
-  );
-}); 
+  )
+})
+
+// Message event - handle commands from main thread
+self.addEventListener('message', (event) => {
+  console.log('[SW] Received message:', event.data)
+  
+  if (event.data && event.data.type) {
+    switch (event.data.type) {
+      case 'SKIP_WAITING':
+        console.log('[SW] Received SKIP_WAITING command')
+        self.skipWaiting()
+        break
+      case 'CLEAR_CACHE':
+        console.log('[SW] Received CLEAR_CACHE command')
+        event.waitUntil(clearAllCaches())
+        break
+      case 'CHECK_UPDATE':
+        console.log('[SW] Received CHECK_UPDATE command')
+        checkForUpdates()
+        break
+      case 'FORCE_RELOAD':
+        console.log('[SW] Received FORCE_RELOAD command')
+        event.waitUntil(forceReload())
+        break
+      case 'CLIENT_VISIBLE':
+        console.log('[SW] Client became visible, checking for updates...')
+        checkForUpdates()
+        break
+    }
+  }
+})
+
+// Clear all caches function
+async function clearAllCaches() {
+  console.log('[SW] Clearing all caches...')
+  try {
+    const cacheNames = await caches.keys()
+    await Promise.all(cacheNames.map(name => caches.delete(name)))
+    console.log('[SW] All caches cleared successfully')
+    
+    // Notify all clients
+    const clients = await self.clients.matchAll()
+    clients.forEach(client => {
+      client.postMessage({ 
+        type: 'CACHE_CLEARED',
+        message: 'All caches have been cleared'
+      })
+    })
+  } catch (error) {
+    console.error('[SW] Failed to clear caches:', error)
+  }
+}
+
+// Force reload all clients (useful for critical updates)
+async function forceReload() {
+  console.log('[SW] Force reloading all clients...')
+  try {
+    await clearAllCaches()
+    
+    const clients = await self.clients.matchAll()
+    clients.forEach(client => {
+      client.postMessage({ 
+        type: 'FORCE_RELOAD',
+        message: 'Forcing reload due to critical update'
+      })
+    })
+  } catch (error) {
+    console.error('[SW] Force reload failed:', error)
+  }
+}
+
+// Check for Vercel deployment updates - simplified to reduce 404s
+async function checkForUpdates() {
+  try {
+    console.log('[SW] Checking for updates...')
+    
+    // Check if there's a waiting service worker
+    if (self.registration && self.registration.waiting) {
+      console.log('[SW] New service worker waiting to activate')
+      await notifyUpdate('New version available')
+      return
+    }
+    
+    // Skip network-based update checks to prevent 404s
+    console.log('[SW] No updates detected')
+  } catch (error) {
+    console.warn('[SW] Update check failed:', error)
+  }
+}
+
+// Helper function to notify clients of updates
+async function notifyUpdate(message) {
+  console.log('[SW] Notifying clients of update:', message)
+  
+  // Clear all caches
+  await clearAllCaches()
+  
+  // Notify all clients
+  const clients = await self.clients.matchAll()
+  clients.forEach(client => {
+    client.postMessage({ 
+      type: 'UPDATE_AVAILABLE',
+      message: message
+    })
+  })
+}
+
+// Periodic update check for Vercel deployments (every 5 minutes)
+let updateCheckInterval
+if (typeof setInterval !== 'undefined') {
+  updateCheckInterval = setInterval(() => {
+    checkForUpdates()
+  }, 300000) // 5 minutes
+}
+
+
+
+// Handle chunk load errors by clearing cache
+self.addEventListener('error', (event) => {
+  console.log('[SW] Error detected:', event.error)
+  if (event.error && event.error.message && 
+      (event.error.message.includes('ChunkLoadError') || 
+       event.error.message.includes('Loading chunk'))) {
+    console.log('[SW] ChunkLoadError detected, clearing cache...')
+    clearAllCaches()
+  }
+})
+
+// Cleanup on service worker termination
+self.addEventListener('beforeunload', () => {
+  if (updateCheckInterval) {
+    clearInterval(updateCheckInterval)
+  }
+})
+
+console.log('[SW] Service Worker setup complete')

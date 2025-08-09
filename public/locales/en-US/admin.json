@@ -1,0 +1,39 @@
+{
+  "title": "Admin Dashboard",
+  "submissions": {
+    "emailBanner": {
+      "title": "Email Notifications",
+      "text": "Rejection and resubmission emails will be queued automatically.",
+      "warning": "Make sure recipient emails are valid before sending."
+    },
+    "newSubmissions": "New submissions",
+    "filterTitle": "Filters",
+    "filterMonth": "Month",
+    "filterStatus": "Status",
+    "search": "Search",
+    "searchPlaceholder": "Search by name or handle",
+    "allMonths": "All Months",
+    "allStatuses": "All Status",
+    "loading": "Loading submissions...",
+    "table": {
+      "user": "User",
+      "date": "Date",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "actions": {
+      "viewVideo": "View video",
+      "infoTitle": "Submission details",
+      "claimed": "Claimed",
+      "verified": "Verified",
+      "pending": "Pending",
+      "countPlaceholder": "Verified count"
+    },
+    "pagination": {
+      "showing": "Showing {{count}} of {{total}} submissions",
+      "previous": "Previous",
+      "page": "Page {{current}} of {{total}}",
+      "next": "Next"
+    }
+  }
+}

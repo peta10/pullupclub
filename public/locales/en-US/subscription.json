@@ -1,0 +1,69 @@
+{
+  "title": "Subscription",
+  "subtitle": "Manage your Pull-Up Club subscription",
+  "loading": "Loading subscription details...",
+  "plans": {
+    "title": "Choose Your Plan",
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "free": "Free",
+    "premium": "Premium"
+  },
+  "features": {
+    "videoSubmissions": "Video Submissions",
+    "leaderboardAccess": "Leaderboard Access", 
+    "earnMoney": "Earn Money for Pull-ups",
+    "badges": "Achievement Badges",
+    "communityAccess": "Community Access",
+    "prioritySupport": "Priority Support"
+  },
+  "pricing": {
+    "perMonth": "per month",
+    "perYear": "per year",
+    "billed": "Billed {{period}}",
+    "save": "Save {{amount}}%"
+  },
+  "buttons": {
+    "subscribe": "Subscribe Now",
+    "upgrade": "Upgrade Plan",
+    "manage": "Manage Subscription",
+    "cancel": "Cancel Subscription",
+    "reactivate": "Reactivate",
+    "changePlan": "Change Plan"
+  },
+  "status": {
+    "active": "Active",
+    "canceled": "Canceled", 
+    "expired": "Expired",
+    "pastDue": "Past Due",
+    "incomplete": "Incomplete"
+  },
+  "messages": {
+    "activeNotice": "Your subscription is active and ready to use!",
+    "cancellationNotice": "Your subscription has been cancelled and will expire at the end of the current billing period.",
+    "expirationWarning": "Your subscription will expire on {{date}}",
+    "paymentFailed": "Payment failed. Please update your payment method."
+  },
+  "details": {
+    "title": "Subscription Details",
+    "plan": "Current Plan",
+    "status": "Status",
+    "nextBilling": "Next Billing Date",
+    "amount": "Amount",
+    "paymentMethod": "Payment Method"
+  },
+  "history": {
+    "title": "Payment History",
+    "date": "Date",
+    "amount": "Amount",
+    "status": "Status",
+    "invoice": "Invoice",
+    "noHistory": "No payment history available"
+  },
+  "agreement": "By subscribing, you agree to our <0>Terms of Service</0> and <1>Privacy Policy</1>.",
+  "error": {
+    "loadFailed": "Failed to load subscription details",
+    "updateFailed": "Failed to update subscription",
+    "paymentFailed": "Payment processing failed"
+  }
+}

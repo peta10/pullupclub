@@ -1,0 +1,77 @@
+{
+  "title": "Cookies Policy",
+  "meta": {
+    "title": "Cookies Policy | Pull-Up Club",
+    "description": "Learn about how Pull-Up Club uses cookies and similar technologies to improve your experience."
+  },
+  "lastUpdated": "Last Updated: May 4, 2025",
+  "whatAreCookies": {
+    "title": "What Are Cookies?",
+    "description": "Cookies are small text files placed on your device when you visit our website. They help us recognize your device and remember certain information about your preferences or actions."
+  },
+  "types": {
+    "title": "Types of Cookies We Use",
+    "essential": {
+      "title": "Essential Cookies",
+      "description": "Required for basic website functionality. These cookies are necessary for the website to work properly and cannot be disabled."
+    },
+    "authentication": {
+      "title": "Authentication Cookies",
+      "description": "Remember your login status and keep you signed in during your session."
+    },
+    "preference": {
+      "title": "Preference Cookies",
+      "description": "Store your settings and preferences for future visits."
+    },
+    "analytics": {
+      "title": "Analytics Cookies",
+      "description": "Help us understand how visitors use our site, which pages are most popular, and identify any issues."
+    },
+    "marketing": {
+      "title": "Marketing Cookies",
+      "description": "Track the effectiveness of our marketing efforts and provide you with more relevant content."
+    }
+  },
+  "managing": {
+    "title": "Managing Cookies",
+    "description": "You can control cookies through your browser settings. Most browsers allow you to:",
+    "options": {
+      "block": "Block all cookies",
+      "delete": "Delete existing cookies",
+      "notify": "Be notified when receiving new cookies",
+      "thirdParty": "Enable or disable third-party cookies"
+    },
+    "note": "Please note that blocking some types of cookies may impact your experience on our website and limit access to certain features."
+  },
+  "thirdParty": {
+    "title": "Third-Party Cookies",
+    "description": "We use services from third parties that may place cookies on your device. These include:",
+    "analytics": {
+      "title": "Google Analytics",
+      "description": "Used to analyze website traffic and user behavior. These cookies collect information about how you use our website."
+    },
+    "stripe": {
+      "title": "Stripe",
+      "description": "Our payment processor uses cookies to enable secure transactions and prevent fraud."
+    },
+    "social": {
+      "title": "Social Media",
+      "description": "If you use social sharing buttons, the respective social media platforms may set cookies to track this activity."
+    }
+  },
+  "updates": {
+    "title": "Updates to This Policy",
+    "description": "We may update this Cookies Policy from time to time. Changes will be posted on this page with an updated effective date."
+  },
+  "contact": {
+    "title": "Contact Us",
+    "description": "If you have questions about our use of cookies, please contact us at:",
+    "company": "Pull-Up Club",
+    "email": "support@pullupclub.com",
+    "address": {
+      "line1": "871 Harold Place",
+      "line2": "Chula Vista, CA 91914",
+      "country": "United States"
+    }
+  }
+}

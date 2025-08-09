@@ -41,5 +41,8 @@
     "inactive": "Inactive",
     "connecting": "Connecting...",
     "connected": "Connected"
+  },
+  "misc": {
+    "logoAlt": "Pull-Up Club logo"
   }
 } 

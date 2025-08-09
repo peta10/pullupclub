@@ -158,7 +158,7 @@ These must be set in the Supabase project dashboard under Settings > Environment
         * Set your Site URL to `https://pullupclub.com` (your production domain)
         * Add the following additional redirect URLs for development and deployment previews:
           ```
-          http://localhost:3000/**
+          http://localhost:5173/**
           https://**--pullupclub.netlify.app/**
           ```
         * These wildcard patterns will handle both local development and Netlify preview deployments.

@@ -89,7 +89,7 @@ A subscription‑based pull‑up competition platform inspired by Battle Bunker.
 4. Database – run `supabase db push` or apply SQL in `/prisma/schema.prisma` if using Prisma.
 5. Stripe webhook – start the listener
    ```bash
-   stripe listen --forward-to localhost:3000/api/webhooks/stripe
+   stripe listen --forward-to localhost:5173/api/webhooks/stripe
    ```
 
 ---
