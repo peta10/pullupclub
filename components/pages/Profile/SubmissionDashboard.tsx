@@ -71,10 +71,10 @@ const NextToBeat = ({ bestScore }: { bestScore: number }) => {
           return;
         }
 
-        const formattedTargets = data.map(target => ({
-          fullName: target.full_name,
-          organization: target.organization || 'Independent',
-          pullUpCount: target.actual_pull_up_count
+        const formattedTargets = data.map((target: any) => ({
+          fullName: target.full_name as string,
+          organization: (target.organization || 'Independent') as string,
+          pullUpCount: target.actual_pull_up_count as number
         }));
 
         setTargets(formattedTargets);
@@ -157,9 +157,9 @@ const SubmissionDashboard = () => {
         .order("created_at", { ascending: false });
       if (error) throw error;
       if (data) {
-        const formattedSubmissions: Submission[] = data.map((submission) => ({
-          id: submission.id,
-          userId: submission.user_id,
+        const formattedSubmissions: Submission[] = data.map((submission: any) => ({
+          id: submission.id as string,
+          userId: submission.user_id as string,
           fullName: submission.full_name || submission.email?.split('@')[0] || 'Unknown User',
           email: submission.email || 'unknown@example.com',
           phone: submission.phone ?? undefined,
@@ -167,11 +167,11 @@ const SubmissionDashboard = () => {
           gender: (submission.gender as "Male" | "Female" | "Other") || "Other",
           region: submission.region || 'Unknown Region',
           organization: submission.organization || 'None',
-          pullUpCount: submission.pull_up_count,
+          pullUpCount: submission.pull_up_count as number,
           actualPullUpCount: submission.actual_pull_up_count ?? undefined,
-          videoUrl: submission.video_url,
+          videoUrl: submission.video_url as string,
           status: (submission.status.charAt(0).toUpperCase() + submission.status.slice(1)) as "Pending" | "Approved" | "Rejected",
-          submittedAt: submission.created_at,
+          submittedAt: submission.created_at as string,
           approvedAt: submission.approved_at || undefined,
           notes: submission.notes ?? undefined,
           featured: submission.status === 'approved',

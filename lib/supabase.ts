@@ -4,13 +4,16 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Debug environment variables
-console.log('🔧 Supabase Environment Check:', {
-  url: supabaseUrl ? '✓ Loaded' : '✗ Missing',
-  key: supabaseAnonKey ? '✓ Loaded' : '✗ Missing',
-  nodeEnv: process.env.NODE_ENV,
-  allPublicEnvs: Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC_'))
-});
+// Debug environment variables - only log once on initial load
+if (typeof window !== 'undefined' && !(window as any).__SUPABASE_LOGGED__) {
+  console.log('🔧 Supabase Environment Check:', {
+    url: supabaseUrl ? '✓ Loaded' : '✗ Missing',
+    key: supabaseAnonKey ? '✓ Loaded' : '✗ Missing',
+    nodeEnv: process.env.NODE_ENV,
+    allPublicEnvs: Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC_'))
+  });
+  (window as any).__SUPABASE_LOGGED__ = true;
+}
 
 // Validate required environment variables
 if (!supabaseUrl || !supabaseAnonKey) {
@@ -79,16 +82,24 @@ const getStorage = () => {
   };
 };
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    storageKey: 'pullupclub-auth',
-    detectSessionInUrl: false,
-    autoRefreshToken: true,
-    debug: false,
-    storage: getStorage()
+// Create a singleton instance to prevent multiple GoTrueClient warnings
+let supabaseInstance: ReturnType<typeof createClient> | null = null;
+
+export const supabase = (() => {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        storageKey: 'pullupclub-auth',
+        detectSessionInUrl: false,
+        autoRefreshToken: true,
+        debug: false,
+        storage: getStorage()
+      }
+    });
   }
-});
+  return supabaseInstance;
+})();
 
 // Development mode check
 export const isDevelopment = process.env.NODE_ENV === 'development';

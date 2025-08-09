@@ -8,7 +8,7 @@ import { LoadingState, ErrorState } from "../../ui/LoadingState";
 import { Eye, CheckCircle, XCircle, Star, Filter, Search, ChevronDown, Save, MessageSquare } from "lucide-react";
 import { supabase } from "../../../lib/supabase";
 import { useTranslation } from 'react-i18next';
-
+import Image from 'next/image';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 
@@ -535,7 +535,7 @@ const AdminDashboardPage: React.FC = () => {
           if (earningsError) {
             console.error('Error processing earnings:', earningsError);
             // Don't fail the approval if earnings processing fails
-          } else if (earningsResult?.success) {
+          } else if (earningsResult && (earningsResult as any).success) {
             console.log('Earnings processed successfully:', earningsResult);
           }
         } catch (earningsErr) {
@@ -639,14 +639,13 @@ const AdminDashboardPage: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex flex-1 items-center justify-center">
-            <img 
+            <Image 
               src={LOGO_PATH} 
               alt={t('common:misc.logoAlt')} 
+              width={48}
+              height={48}
               className="h-12 w-auto object-contain mr-4" 
-              onError={(e) => {
-                console.log('Logo failed to load, trying PNG fallback');
-                e.currentTarget.src = "/PUClogo.png";
-              }}
+              priority
             />
             <h1 className="text-2xl md:text-3xl font-bold text-[#918f6f] tracking-wide text-center">
               {t('title')}

@@ -11,7 +11,7 @@ const nextConfig = {
     pagesBufferLength: 2,
   },
   
-  // Experimental features disabled temporarily for stability
+  // Experimental features disabled for production stability
   // experimental: {
   //   turbo: {
   //     rules: {

@@ -302,7 +302,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const fetchProfile = async (userId: string, retryCount = 0) => {
     try {
       // Fetch profile and admin role in parallel
-      let profileData;
+      let profileData: any;
       const [
         { data: { session } },
         profileResult,
@@ -467,7 +467,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (profileError) throw profileError;
 
-      const pendingPlan = profileData?.pending_subscription_plan?.plan as "monthly" | "annual" | null;
+      const pendingPlan = (profileData?.pending_subscription_plan as any)?.plan as "monthly" | "annual" | null;
       
       if (pendingPlan) {
         // Clear pending subscription from database
@@ -668,7 +668,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const { error: testError } = await supabase.from('profiles').select('id').limit(1);
         if (testError && (testError.message.includes('JWT') || testError.message.includes('expired'))) {
           console.log('🔄 Invalid session detected during init, signing out...');
-          await supabase.auth.signOut();
+          await supabase.auth.signOut({ scope: 'local' });
           setIsLoading(false);
           return;
         }
@@ -678,7 +678,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           await evaluateSubscription();
         } catch (error) {
           console.error('Profile fetch error:', error);
-          await supabase.auth.signOut();
+          await supabase.auth.signOut({ scope: 'local' });
         }
       } else {
         // No session - user is not logged in
@@ -687,7 +687,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     } catch (e) {
       console.warn('initAuth getSession failed', e);
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'local' });
     } finally {
       // Always set loading to false after initialization
       setIsLoading(false);
@@ -721,7 +721,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               
             if (testError && (testError.message.includes('JWT') || testError.message.includes('expired'))) {
               console.log('🔄 Invalid session detected in auth change, signing out...');
-              await supabase.auth.signOut();
+              await supabase.auth.signOut({ scope: 'local' });
               return;
             }
 
@@ -747,7 +747,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             console.error('[AuthContext] Error processing sign in:', error);
             setSubscriptionState('unpaid');
             // Clear invalid state
-            await supabase.auth.signOut();
+            await supabase.auth.signOut({ scope: 'local' });
           } finally {
             setIsLoading(false);
           }
@@ -1070,7 +1070,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const signOut = async () => {
     console.log('[AuthContext] Signing out user');
-    await supabase.auth.signOut();
+    // Use local scope only to avoid 403 errors with deprecated global scope
+    await supabase.auth.signOut({ scope: 'local' });
     setUser(null);
     setProfile(null);
     setIsFirstLogin(false);

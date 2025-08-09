@@ -27,9 +27,9 @@ const useSubmissions = (options: UseSubmissionsOptions = {}) => {
 
       if (error) throw error;
 
-      const transformedData: Submission[] = (data || []).map(record => ({
-        id: record.id,
-        userId: record.user_id,
+      const transformedData: Submission[] = (data || []).map((record: any) => ({
+        id: record.id as string,
+        userId: record.user_id as string,
         fullName: record.profiles?.full_name || 'Unknown User',
         email: record.profiles?.email || 'unknown@example.com',
         phone: record.profiles?.phone,
@@ -37,11 +37,11 @@ const useSubmissions = (options: UseSubmissionsOptions = {}) => {
         gender: (record.profiles?.gender as 'Male' | 'Female' | 'Other') || 'Other',
         region: record.profiles?.city || 'Unknown Region',
         organization: record.profiles?.organization || 'None',
-        pullUpCount: record.pull_up_count,
+        pullUpCount: record.pull_up_count as number,
         actualPullUpCount: record.actual_pull_up_count || undefined,
-        videoUrl: record.video_url,
+        videoUrl: record.video_url as string,
         status: record.status.charAt(0).toUpperCase() + record.status.slice(1) as 'Pending' | 'Approved' | 'Rejected',
-        submittedAt: record.created_at,
+        submittedAt: record.created_at as string,
         approvedAt: record.approved_at || undefined,
         notes: record.notes || undefined,
         featured: record.status === 'approved',

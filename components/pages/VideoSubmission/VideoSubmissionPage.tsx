@@ -167,7 +167,7 @@ const VideoSubmissionPage: React.FC = () => {
         input_user_id: user.id
       });
       if (error) throw error;
-      setEligibilityStatus(data);
+      setEligibilityStatus(data as EligibilityStatus);
     } catch (error) {
       console.error('Error checking eligibility:', error);
       setEligibilityStatus({

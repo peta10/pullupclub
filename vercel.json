@@ -38,7 +38,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "script-src 'self' 'unsafe-inline' https://www.youtube.com https://js.stripe.com https://va.vercel-scripts.com https://www.googletagmanager.com https://connect.facebook.net; frame-src 'self' https://www.youtube.com https://js.stripe.com https://player.vimeo.com;"
+          "value": "script-src 'self' 'unsafe-inline' https://www.youtube.com https://js.stripe.com https://va.vercel-scripts.com https://www.googletagmanager.com https://connect.facebook.net https://www.chatbase.co; frame-src 'self' https://www.youtube.com https://js.stripe.com https://player.vimeo.com https://www.chatbase.co;"
         },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }

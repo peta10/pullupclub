@@ -15,7 +15,9 @@ interface WeeklyEarning {
 
 interface PayoutRequest {
   id: string;
+  user_id: string;
   amount_dollars: number;
+  paypal_email: string;
   status: 'pending' | 'approved' | 'paid' | 'rejected';
   request_date: string;
   processed_date: string | null;
@@ -88,7 +90,7 @@ const SubscriptionRewards: React.FC = () => {
       if (error) throw error;
 
       if (data?.created_at) {
-        const signupDate = new Date(data.created_at);
+        const signupDate = new Date(data.created_at as string);
         const daysSinceSignup = Math.floor((Date.now() - signupDate.getTime()) / (1000 * 60 * 60 * 24));
         const currentCycle = Math.floor(daysSinceSignup / 90) + 1;
         const daysInCurrentCycle = daysSinceSignup - ((currentCycle - 1) * 90);
@@ -140,11 +142,34 @@ const SubscriptionRewards: React.FC = () => {
         .maybeSingle();
 
       if (!profileError && profile) {
-        setPaypalEmail(profile.paypal_email || '');
+        setPaypalEmail((profile.paypal_email as string) || '');
       }
 
-      setWeeklyEarnings(earningsData || []);
-      setPayoutRequests(payoutData || []);
+      // Transform the data to match our interface
+      const transformedEarnings: WeeklyEarning[] = (earningsData || []).map((earning: any) => ({
+        id: earning.id,
+        earning_amount_dollars: earning.earning_amount_dollars || earning.dollars_earned || 0,
+        pull_up_count: earning.pull_up_count,
+        is_first_submission: earning.is_first_submission || false,
+        created_at: earning.created_at,
+        weekly_pool_id: earning.weekly_pool_id || earning.pool_id
+      }));
+      
+      const transformedPayouts: PayoutRequest[] = (payoutData || []).map((payout: any) => ({
+        id: payout.id,
+        user_id: payout.user_id,
+        amount_dollars: payout.amount_dollars,
+        paypal_email: payout.paypal_email,
+        status: payout.status,
+        request_date: payout.request_date,
+        processed_date: payout.processed_date || null,
+        paid_at: payout.paid_at || null,
+        paid_by: payout.paid_by || null,
+        notes: payout.notes || null
+      }));
+      
+      setWeeklyEarnings(transformedEarnings);
+      setPayoutRequests(transformedPayouts);
       
     } catch (err) {
       console.error('Error fetching earnings:', err);

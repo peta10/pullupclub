@@ -4,8 +4,9 @@ import { supabase } from "./supabase";
 import { loadStripe } from '@stripe/stripe-js';
 import { trackEvent } from "../utils/analytics";
 
-// Initialize Stripe with publishable key
-export const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+// Initialize Stripe with publishable key - only if available
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+export const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 // Function to fetch Stripe products from Edge Function
 export async function fetchStripeProducts() {
@@ -205,7 +206,7 @@ export const getActiveSubscription = async () => {
       // Handle 401 by signing out
       if (error.status === 401) {
         console.warn('getActiveSubscription: Session expired, signing out');
-        await supabase.auth.signOut();
+        await supabase.auth.signOut({ scope: 'local' });
         return null;
       }
       throw error;

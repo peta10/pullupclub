@@ -5,7 +5,7 @@ import Layout from "../../Layout/Layout";
 import { LoadingState } from "../../ui/LoadingState";
 import { Download, DollarSign, Users, CheckCircle, AlertCircle } from "lucide-react";
 import { supabase } from "../../../lib/supabase";
-
+import Image from 'next/image';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 
@@ -60,7 +60,7 @@ const AdminPayoutsPage: React.FC = () => {
         console.log('📅 Available months RPC response:', { data, error });
         
         if (error) throw error;
-        setAvailableMonths(data || []);
+        setAvailableMonths((data as MonthData[]) || []);
         return;
       }
       
@@ -69,7 +69,7 @@ const AdminPayoutsPage: React.FC = () => {
         const monthsSet = new Set<string>();
         const monthsData: MonthData[] = [];
         
-        directData.forEach(row => {
+        directData.forEach((row: any) => {
           const date = new Date(row.created_at);
           const monthValue = date.toISOString().slice(0, 7); // YYYY-MM
           console.log('📅 Processing date:', row.created_at, '-> month:', monthValue);
@@ -85,7 +85,7 @@ const AdminPayoutsPage: React.FC = () => {
           monthsData.push({
             month_value: monthValue,
             month_label: date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-            payout_count: directData.filter(row => 
+                        payout_count: directData.filter((row: any) =>
               new Date(row.created_at).toISOString().slice(0, 7) === monthValue
             ).length
           });
@@ -137,16 +137,17 @@ const AdminPayoutsPage: React.FC = () => {
         console.log('💸 Payouts RPC response:', { data, error, month });
 
         if (error) throw error;
-        setPayouts(data || []);
+        const payoutData = (data as Payout[]) || [];
+        setPayouts(payoutData);
         
-        const readyToPay = data?.filter((p: Payout) => p.payout_paypal_email || p.user_paypal_email) || [];
-        const needsSetup = data?.filter((p: Payout) => !p.payout_paypal_email && !p.user_paypal_email) || [];
+        const readyToPay = payoutData.filter((p: Payout) => p.payout_paypal_email || p.user_paypal_email);
+        const needsSetup = payoutData.filter((p: Payout) => !p.payout_paypal_email && !p.user_paypal_email);
         
         setSummary({
-          total: data?.length || 0,
+          total: payoutData.length,
           readyToPay: readyToPay.length,
           needsSetup: needsSetup.length,
-          totalAmount: data?.reduce((sum: number, p: Payout) => sum + parseFloat(p.amount_dollars || '0'), 0) || 0,
+          totalAmount: payoutData.reduce((sum: number, p: Payout) => sum + parseFloat(p.amount_dollars || '0'), 0),
           readyAmount: readyToPay.reduce((sum: number, p: Payout) => sum + parseFloat(p.amount_dollars || '0'), 0)
         });
         return;
@@ -301,14 +302,13 @@ const AdminPayoutsPage: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex flex-1 items-center justify-center">
-            <img 
+            <Image 
               src={LOGO_PATH} 
               alt="Pull-Up Club Logo" 
+              width={48}
+              height={48}
               className="h-12 w-auto object-contain mr-4" 
-              onError={(e) => {
-                console.log('Logo failed to load, trying PNG fallback');
-                e.currentTarget.src = "/PUClogo.png";
-              }}
+              priority
             />
             <h1 className="text-2xl md:text-3xl font-bold text-[#918f6f] tracking-wide text-center">
               Admin Dashboard

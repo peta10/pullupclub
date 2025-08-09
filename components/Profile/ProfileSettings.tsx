@@ -94,13 +94,13 @@ const ProfileSettings: React.FC = () => {
       if (setProfile && updated) {
         setProfile((prev) => prev ? {
           ...prev,
-          full_name: updated.full_name,
-          social_media: updated.social_media,
-          age: updated.age,
-          gender: updated.gender,
-          organization: updated.organization,
-          region: updated.region,
-          phone: updated.phone,
+          full_name: updated.full_name as string | null,
+          social_media: updated.social_media as string | null,
+          age: updated.age as number | null,
+          gender: updated.gender as string | null,
+          organization: updated.organization as string | null,
+          region: updated.region as string,
+          phone: updated.phone as string | null,
           is_profile_completed: true,
         } : prev);
       }

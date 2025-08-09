@@ -1,6 +1,55 @@
 {
   "version": 3,
   "middleware": {},
-  "functions": {},
+  "functions": {
+    "/api/meta/track-event": {
+      "files": [
+        "server/edge-runtime-webpack.js",
+        "server/edge-chunks/720.js",
+        "server/pages/api/meta/track-event.js"
+      ],
+      "name": "pages/api/meta/track-event",
+      "page": "/api/meta/track-event",
+      "matchers": [
+        {
+          "regexp": "^/api/meta/track\\-event$",
+          "originalSource": "/api/meta/track-event"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "env": {
+        "__NEXT_BUILD_ID": "XQ1sjlfQ18aUrb4hAo7LK",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "IHarTUUqA8Hqn/6GBxnj/hyuBvUFESF3kcMzZGiI57s=",
+        "__NEXT_PREVIEW_MODE_ID": "ef876dc3a44c62a5e0079b3c02ed2341",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "cb3529329bb6aa57f0226749084db9356aa6c7cfb6c277c5e66bffeec952a714",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "02d333cdbc4da8e6ec19fa2059f90405b3fe2b010ff78a0a3a5f6ef1a032259e"
+      }
+    },
+    "/api/meta/track-purchase": {
+      "files": [
+        "server/edge-runtime-webpack.js",
+        "server/edge-chunks/720.js",
+        "server/pages/api/meta/track-purchase.js"
+      ],
+      "name": "pages/api/meta/track-purchase",
+      "page": "/api/meta/track-purchase",
+      "matchers": [
+        {
+          "regexp": "^/api/meta/track\\-purchase$",
+          "originalSource": "/api/meta/track-purchase"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "env": {
+        "__NEXT_BUILD_ID": "XQ1sjlfQ18aUrb4hAo7LK",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "IHarTUUqA8Hqn/6GBxnj/hyuBvUFESF3kcMzZGiI57s=",
+        "__NEXT_PREVIEW_MODE_ID": "ef876dc3a44c62a5e0079b3c02ed2341",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "cb3529329bb6aa57f0226749084db9356aa6c7cfb6c277c5e66bffeec952a714",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "02d333cdbc4da8e6ec19fa2059f90405b3fe2b010ff78a0a3a5f6ef1a032259e"
+      }
+    }
+  },
   "sortedMiddleware": []
 }

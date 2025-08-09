@@ -31,6 +31,7 @@ serve(async (req: Request) => {
   // Get the JWT from the Authorization header
   const authHeader = req.headers.get('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.log('Missing authorization header, received headers:', Object.fromEntries(req.headers.entries()));
     return new Response(JSON.stringify({ error: 'Missing or invalid authorization header' }), {
       status: 401,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
