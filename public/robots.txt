@@ -9,8 +9,7 @@ Allow: /login
 Allow: /create-account
 Allow: /subscription
 Allow: /ethos
-Allow: /signup
-Allow: /subscribe
+Allow: /signup-access
 
 # Prevent access to sensitive paths
 Disallow: /profile

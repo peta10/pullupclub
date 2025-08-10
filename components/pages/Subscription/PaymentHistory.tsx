@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState, useEffect } from "react";
 import { getPaymentHistory } from "../../../lib/stripe";
 import { CalendarIcon } from "lucide-react";

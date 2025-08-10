@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react';
 import { trackEvent } from '../../../utils/analytics';
 
