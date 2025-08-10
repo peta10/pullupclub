@@ -221,7 +221,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      // Step 4: Access to Protected Routes
+      // Step 4: Access to Protected Routes - ONLY redirect from auth pages, not from other pages
       if (user?.id && profile?.id && profile.is_paid && profile.is_profile_completed) {
         const isAuthPage = currentPath === '/login' || currentPath === '/create-account' || currentPath === '/subscription';
         if (isAuthPage) {
@@ -234,17 +234,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     handleAuthFlow();
   }, [user, profile, isLoading, pathname, router]);
 
-  // Additional redirect trigger when loading completes
-  useEffect(() => {
-    if (!isLoading && user && profile && (pathname === '/login' || pathname === '/create-account')) {
-      console.log('[AuthContext] Post-loading redirect check triggered');
-      // Small delay to ensure all state updates are complete
-      setTimeout(() => {
-        // Don't force admin to admin-dashboard, let them navigate normally
-        router.replace('/profile');
-      }, 100);
-    }
-  }, [isLoading, user, profile, pathname, router]);
+  // Remove the additional redirect trigger that was causing navigation issues
+  // This was causing users to get redirected back to profile when trying to navigate
 
   // Simple session validation
   useEffect(() => {
@@ -478,9 +469,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         await handlePostAuthSubscription(currentUser, pendingPlan);
       } else {
         console.log("[AuthContext] No pending plan in database.");
-        // Check if we're on an auth route and should redirect
+        // Only redirect if we're on an auth route AND user is fully authenticated
         const isAuthRoute = pathname === "/login" || pathname === "/create-account";
-        if (isAuthRoute) {
+        if (isAuthRoute && user && profile?.is_paid && profile?.is_profile_completed) {
           console.log("[AuthContext] Redirecting from auth route to profile");
           router.push("/profile");
         }

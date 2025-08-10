@@ -166,6 +166,11 @@ self.addEventListener('fetch', (event) => {
             console.warn('[SW] Failed to cache response:', err)
           })
         }
+        // Don't cache 404s to prevent refresh loops
+        if (response.status === 404) {
+          console.log('[SW] 404 detected, not caching:', request.url)
+          return response
+        }
         return response
       }).catch(() => {
         // Network failed and no cache available
@@ -259,51 +264,40 @@ async function forceReload() {
   }
 }
 
-// Check for Vercel deployment updates - simplified to reduce 404s
+// Check for Vercel deployment updates - DISABLED to prevent refresh loops
 async function checkForUpdates() {
   try {
-    console.log('[SW] Checking for updates...')
+    console.log('[SW] Update check requested but disabled to prevent refresh loops')
     
     // Check if there's a waiting service worker
     if (self.registration && self.registration.waiting) {
       console.log('[SW] New service worker waiting to activate')
-      await notifyUpdate('New version available')
+      // Don't auto-notify - let user manually refresh if needed
       return
     }
     
-    // Skip network-based update checks to prevent 404s
+    // Skip network-based update checks to prevent 404s and refresh loops
     console.log('[SW] No updates detected')
   } catch (error) {
     console.warn('[SW] Update check failed:', error)
   }
 }
 
-// Helper function to notify clients of updates
+// Helper function to notify clients of updates - DISABLED
 async function notifyUpdate(message) {
-  console.log('[SW] Notifying clients of update:', message)
+  console.log('[SW] Update notification disabled to prevent refresh loops:', message)
   
-  // Clear all caches
-  await clearAllCaches()
-  
-  // Notify all clients
-  const clients = await self.clients.matchAll()
-  clients.forEach(client => {
-    client.postMessage({ 
-      type: 'UPDATE_AVAILABLE',
-      message: message
-    })
-  })
+  // Don't clear caches or notify clients automatically
+  // Let users manually refresh if needed
 }
 
-// Periodic update check for Vercel deployments (every 5 minutes)
-let updateCheckInterval
-if (typeof setInterval !== 'undefined') {
-  updateCheckInterval = setInterval(() => {
-    checkForUpdates()
-  }, 300000) // 5 minutes
-}
-
-
+// DISABLE periodic update check to prevent refresh loops
+// let updateCheckInterval
+// if (typeof setInterval !== 'undefined') {
+//   updateCheckInterval = setInterval(() => {
+//     checkForUpdates()
+//   }, 300000) // 5 minutes
+// }
 
 // Handle chunk load errors by clearing cache
 self.addEventListener('error', (event) => {
@@ -318,9 +312,9 @@ self.addEventListener('error', (event) => {
 
 // Cleanup on service worker termination
 self.addEventListener('beforeunload', () => {
-  if (updateCheckInterval) {
-    clearInterval(updateCheckInterval)
-  }
+  // if (updateCheckInterval) {
+  //   clearInterval(updateCheckInterval)
+  // }
 })
 
-console.log('[SW] Service Worker setup complete')
+console.log('[SW] Service Worker setup complete - update checks disabled')

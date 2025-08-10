@@ -44,8 +44,8 @@ function registerValidSW(swUrl: string, config?: Config) {
         installingWorker.onstatechange = () => {
           if (installingWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
-              // New content is available; please refresh.
-              console.log('New content is available; please refresh.');
+              // New content is available; but don't force refresh
+              console.log('New content is available; user can refresh manually if needed.');
               if (config && config.onUpdate) {
                 config.onUpdate(registration);
               }
@@ -79,7 +79,8 @@ function checkValidServiceWorker(swUrl: string, config?: Config) {
         // No service worker found. Probably a different app. Reload the page.
         navigator.serviceWorker.ready.then((registration) => {
           registration.unregister().then(() => {
-            window.location.reload();
+            // Don't auto-reload - let user decide
+            console.log('Service worker not found, but not forcing reload');
           });
         });
       } else {
