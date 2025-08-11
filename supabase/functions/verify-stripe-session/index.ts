@@ -14,8 +14,24 @@ serve(async (req) => {
   }
 
   try {
-    // Initialize Stripe
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+    // Check for required environment variables
+    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
+    if (!stripeSecretKey) {
+      console.error('❌ STRIPE_SECRET_KEY environment variable is not set')
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Stripe configuration error' 
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    // Initialize Stripe with validation
+    const stripe = new Stripe(stripeSecretKey, {
       apiVersion: '2023-10-16',
     })
 
@@ -23,6 +39,7 @@ serve(async (req) => {
     const { sessionId } = await req.json()
 
     if (!sessionId) {
+      console.error('❌ No session ID provided in request')
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -35,12 +52,22 @@ serve(async (req) => {
       )
     }
 
+    console.log('🔍 Verifying Stripe session:', sessionId)
+
     // Retrieve the checkout session from Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId)
 
     // Check if the session is valid and payment was successful
     const isValid = session.payment_status === 'paid' && 
                    session.status === 'complete'
+
+    console.log('✅ Session verification result:', {
+      sessionId,
+      isValid,
+      paymentStatus: session.payment_status,
+      status: session.status,
+      customerEmail: session.customer_details?.email
+    })
 
     return new Response(
       JSON.stringify({
@@ -62,12 +89,24 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error verifying Stripe session:', error)
+    console.error('❌ Error verifying Stripe session:', error)
+    
+    // Provide more specific error messages
+    let errorMessage = 'Failed to verify session'
+    if (error instanceof Error) {
+      if (error.message.includes('No such session')) {
+        errorMessage = 'Invalid session ID'
+      } else if (error.message.includes('Invalid API key')) {
+        errorMessage = 'Stripe configuration error'
+      } else {
+        errorMessage = error.message
+      }
+    }
     
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: 'Failed to verify session' 
+        error: errorMessage 
       }),
       { 
         status: 500, 

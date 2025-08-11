@@ -1,7 +1,0 @@
-{
-  "version": 1,
-  "functions": {
-    "/api/meta/track-purchase": {},
-    "/api/meta/track-event": {}
-  }
-}

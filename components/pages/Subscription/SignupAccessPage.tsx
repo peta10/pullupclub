@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle2, XCircle, Loader2, LogIn } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../context/AuthContext';
@@ -37,6 +37,7 @@ const SignupAccessPage: React.FC = () => {
   const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const [isClaimingPayment, setIsClaimingPayment] = useState(false);
+  const [showLoginOption, setShowLoginOption] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -46,16 +47,25 @@ const SignupAccessPage: React.FC = () => {
   const sessionId = searchParams?.get('session_id');
 
   const verifyStripeSession = useCallback(async () => {
+    if (!sessionId) {
+      setVerificationStatus('invalid');
+      setVerificationResult({ isValid: false, error: 'No session ID provided' });
+      return;
+    }
+
     try {
+      console.log('🔍 Verifying Stripe session:', sessionId);
       const { data, error } = await supabase.functions.invoke('verify-stripe-session', {
         body: { sessionId }
       });
+      
       if (error) {
-        console.error('Error verifying session:', error);
+        console.error('❌ Error verifying session:', error);
         setVerificationStatus('invalid');
         setVerificationResult({ isValid: false, error: 'Failed to verify payment session' });
         return;
       }
+      
       if (data.success && data.isValid) {
         setVerificationStatus('valid');
         setVerificationResult(data);
@@ -64,10 +74,10 @@ const SignupAccessPage: React.FC = () => {
         }
       } else {
         setVerificationStatus('invalid');
-        setVerificationResult({ isValid: false, error: 'Payment session is not valid or expired' });
+        setVerificationResult({ isValid: false, error: data.error || 'Payment session is not valid or expired' });
       }
     } catch (error) {
-      console.error('Error verifying session:', error);
+      console.error('❌ Error verifying session:', error);
       setVerificationStatus('invalid');
       setVerificationResult({ isValid: false, error: 'Failed to verify payment session' });
     }
@@ -136,6 +146,8 @@ const SignupAccessPage: React.FC = () => {
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsCreatingAccount(true);
+    setShowLoginOption(false); // Reset login option state
+    
     try {
       if (formData.password !== formData.confirmPassword) {
         toast.error(t('common:errors.passwordMismatch'));
@@ -168,7 +180,16 @@ const SignupAccessPage: React.FC = () => {
         }
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        // Handle "User already registered" error
+        if (authError.message?.includes('User already registered') || authError.message?.includes('already been registered')) {
+          console.log('👤 User already exists, showing login option');
+          setShowLoginOption(true);
+          toast.error('An account with this email already exists. Please log in instead.');
+          return;
+        }
+        throw authError;
+      }
 
       // Get the new user's ID
       const { data: { user: newUser }, error: userError } = await supabase.auth.getUser();
@@ -222,14 +243,6 @@ const SignupAccessPage: React.FC = () => {
         .eq("id", newUser.id);
 
       if (profileError) throw profileError;
-      if (authError) {
-        const errorMessage = typeof authError === 'object' && authError !== null 
-          ? (authError as { message?: string }).message || 'Unknown error'
-          : 'Failed to create account';
-        console.error('Error creating account:', authError);
-        toast.error(errorMessage);
-        return;
-      }
 
       // Track CompleteRegistration event
       await trackEvent('CompleteRegistration', {
@@ -242,10 +255,18 @@ const SignupAccessPage: React.FC = () => {
       // due to the useEffect hook above
     } catch (error) {
       console.error('Error creating account:', error);
-      toast.error(t('common:errors.generic'));
+      const errorMessage = typeof error === 'object' && error !== null 
+        ? (error as { message?: string }).message || 'Unknown error'
+        : 'Failed to create account';
+      toast.error(errorMessage);
     } finally {
       setIsCreatingAccount(false);
     }
+  };
+
+  const handleLogin = () => {
+    // Redirect to login page with the session ID as a parameter
+    router.push(`/login?session_id=${sessionId}&email=${encodeURIComponent(formData.email)}`);
   };
 
   // Password validation logic
@@ -331,62 +352,76 @@ const SignupAccessPage: React.FC = () => {
           <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-[#9b9b6f] mb-2 text-center">{t('signup.successTitle')}</h1>
           <p className="text-gray-400 text-sm mb-6 text-center">{t('signup.successDesc')}</p>
-          <div className="w-full">
-            <form onSubmit={handleCreateAccount} className="flex flex-col w-full gap-4">
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-                readOnly={!!verificationResult?.customerEmail}
-                className={`w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f] ${verificationResult?.customerEmail ? 'opacity-75 cursor-not-allowed' : ''}`}
-                placeholder={t('common:labels.email')}
-              />
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                required
-                minLength={8}
-                className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
-                placeholder={t('signup.passwordPlaceholder')}
-              />
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                required
-                minLength={8}
-                className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
-                placeholder={t('signup.confirmPasswordPlaceholder')}
-              />
-              <div className="space-y-2 bg-white/5 p-4 rounded-xl">
-                <p className="text-sm font-medium text-gray-300 mb-2">{t('signup.requirementsTitle')}</p>
-                <PasswordRequirement met={hasMinLength} text={t('signup.reqMinLength')} />
-                <PasswordRequirement met={hasUpperCase} text={t('signup.reqUpperCase')} />
-                <PasswordRequirement met={hasLowerCase} text={t('signup.reqLowerCase')} />
-                <PasswordRequirement met={hasNumber} text={t('signup.reqNumber')} />
-                <PasswordRequirement met={passwordsMatch} text={t('signup.reqMatch')} />
-              </div>
+          
+          {showLoginOption ? (
+            <div className="w-full text-center">
+              <p className="text-gray-300 mb-4">An account with this email already exists.</p>
               <Button
-                type="submit"
-                disabled={isCreatingAccount || !isPasswordValid}
-                className="w-full bg-[#9b9b6f] text-black hover:bg-[#7a7a58] font-medium py-3"
+                onClick={handleLogin}
+                className="w-full bg-[#9b9b6f] text-black hover:bg-[#7a7a58] font-medium py-3 flex items-center justify-center"
               >
-                {isCreatingAccount ? (
-                  <span className="flex items-center justify-center">
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    {t('signup.creatingButton')}
-                  </span>
-                ) : (
-                  t('signup.createButton')
-                )}
+                <LogIn className="h-4 w-4 mr-2" />
+                Log In to Claim Payment
               </Button>
-            </form>
-          </div>
+            </div>
+          ) : (
+            <div className="w-full">
+              <form onSubmit={handleCreateAccount} className="flex flex-col w-full gap-4">
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  readOnly={!!verificationResult?.customerEmail}
+                  className={`w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f] ${verificationResult?.customerEmail ? 'opacity-75 cursor-not-allowed' : ''}`}
+                  placeholder={t('common:labels.email')}
+                />
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  required
+                  minLength={8}
+                  className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
+                  placeholder={t('signup.passwordPlaceholder')}
+                />
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  required
+                  minLength={8}
+                  className="w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#9b9b6f]"
+                  placeholder={t('signup.confirmPasswordPlaceholder')}
+                />
+                <div className="space-y-2 bg-white/5 p-4 rounded-xl">
+                  <p className="text-sm font-medium text-gray-300 mb-2">{t('signup.requirementsTitle')}</p>
+                  <PasswordRequirement met={hasMinLength} text={t('signup.reqMinLength')} />
+                  <PasswordRequirement met={hasUpperCase} text={t('signup.reqUpperCase')} />
+                  <PasswordRequirement met={hasLowerCase} text={t('signup.reqLowerCase')} />
+                  <PasswordRequirement met={hasNumber} text={t('signup.reqNumber')} />
+                  <PasswordRequirement met={passwordsMatch} text={t('signup.reqMatch')} />
+                </div>
+                <Button
+                  type="submit"
+                  disabled={isCreatingAccount || !isPasswordValid}
+                  className="w-full bg-[#9b9b6f] text-black hover:bg-[#7a7a58] font-medium py-3"
+                >
+                  {isCreatingAccount ? (
+                    <span className="flex items-center justify-center">
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      {t('signup.creatingButton')}
+                    </span>
+                  ) : (
+                    t('signup.createButton')
+                  )}
+                </Button>
+              </form>
+            </div>
+          )}
         </div>
       </div>
     </Layout>
