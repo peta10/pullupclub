@@ -29,7 +29,7 @@ export default function ChatbaseIdentity() {
         return
       }
 
-      // If user is logged in, set up identity verification
+      // Only proceed if user is logged in and not loading
       if (user && !isLoading) {
         try {
           const response = await fetch('/api/chatbase/verify-user', {
@@ -65,6 +65,9 @@ export default function ChatbaseIdentity() {
         } catch (error) {
           console.error('Error setting up Chatbase identity:', error)
         }
+      } else if (!isLoading && !user) {
+        // User is not authenticated, don't make API calls
+        console.log('Chatbase: User not authenticated, skipping identity setup')
       }
       // Note: When user logs out, we don't need to explicitly clear the user
       // Chatbase will handle anonymous sessions automatically when no user is set

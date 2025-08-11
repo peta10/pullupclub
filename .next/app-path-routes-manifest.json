@@ -1,0 +1,21 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/auth/callback/page": "/auth/callback",
+  "/create-account/page": "/create-account",
+  "/admin-dashboard/page": "/admin-dashboard",
+  "/admin-payouts/page": "/admin-payouts",
+  "/cookies/page": "/cookies",
+  "/ethos/page": "/ethos",
+  "/faq/page": "/faq",
+  "/login/page": "/login",
+  "/leaderboard/page": "/leaderboard",
+  "/page": "/",
+  "/privacy/page": "/privacy",
+  "/profile/page": "/profile",
+  "/rules/page": "/rules",
+  "/submit/page": "/submit",
+  "/reset-password/page": "/reset-password",
+  "/subscription/page": "/subscription",
+  "/success/page": "/success",
+  "/signup-access/page": "/signup-access"
+}

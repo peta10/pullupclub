@@ -38,6 +38,7 @@ const SignupAccessPage: React.FC = () => {
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const [isClaimingPayment, setIsClaimingPayment] = useState(false);
   const [showLoginOption, setShowLoginOption] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -52,6 +53,13 @@ const SignupAccessPage: React.FC = () => {
       setVerificationResult({ isValid: false, error: 'No session ID provided' });
       return;
     }
+
+    // Prevent multiple simultaneous calls
+    if (isVerifying) {
+      return;
+    }
+
+    setIsVerifying(true);
 
     try {
       console.log('🔍 Verifying Stripe session:', sessionId);
@@ -80,8 +88,10 @@ const SignupAccessPage: React.FC = () => {
       console.error('❌ Error verifying session:', error);
       setVerificationStatus('invalid');
       setVerificationResult({ isValid: false, error: 'Failed to verify payment session' });
+    } finally {
+      setIsVerifying(false);
     }
-  }, [sessionId, setVerificationStatus, setVerificationResult, setFormData]);
+  }, [sessionId, isVerifying]);
 
   const claimPayment = useCallback(async (sessionId: string) => {
     setIsClaimingPayment(true);
@@ -135,7 +145,13 @@ const SignupAccessPage: React.FC = () => {
       router.push('/subscription');
       return;
     }
-    verifyStripeSession();
+    
+    // Add a small delay to prevent rapid successive calls
+    const timer = setTimeout(() => {
+      verifyStripeSession();
+    }, 1000);
+    
+    return () => clearTimeout(timer);
   }, [sessionId, user, router, claimPayment, verifyStripeSession]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -216,7 +232,6 @@ const SignupAccessPage: React.FC = () => {
           
           // Access control
           role: 'user',
-          badges: [],
           
           // Profile status
           is_profile_completed: false,
