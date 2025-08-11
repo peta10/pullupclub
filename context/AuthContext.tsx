@@ -214,10 +214,21 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      // Step 3: Profile Completion
-      if (user?.id && profile?.id && !profile.is_profile_completed && currentPath !== '/create-account') {
-        console.log('[AuthContext] Profile completion required');
-        router.replace('/create-account');
+      // Step 3: Profile Completion - Allow access to profile page to complete profile
+      if (user?.id && profile?.id && !profile.is_profile_completed) {
+        // Allow access to profile page and create-account page for profile completion
+        const allowedRoutes = ['/profile', '/create-account'];
+        if (currentPath && !allowedRoutes.includes(currentPath) && currentPath !== '/login') {
+          console.log('[AuthContext] Profile completion required - redirecting to profile');
+          router.replace('/profile');
+          return;
+        }
+        // If on login page and profile incomplete, redirect to profile to complete it
+        if (currentPath === '/login') {
+          console.log('[AuthContext] Profile completion required - redirecting to profile from login');
+          router.replace('/profile');
+          return;
+        }
         return;
       }
 

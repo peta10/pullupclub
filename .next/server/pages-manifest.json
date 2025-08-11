@@ -1,9 +1,9 @@
 {
-  "/_app": "pages/_app.js",
+  "/api/debug": "pages/api/debug.js",
   "/api/chatbase/verify-user": "pages/api/chatbase/verify-user.js",
+  "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/api/meta/_meta-api": "pages/api/meta/_meta-api.js",
-  "/api/debug": "pages/api/debug.js",
   "/api/robots": "pages/api/robots.js",
   "/api/stripe/create-checkout": "pages/api/stripe/create-checkout.js",
   "/api/sitemap": "pages/api/sitemap.js",

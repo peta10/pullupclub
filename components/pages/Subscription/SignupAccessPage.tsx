@@ -266,6 +266,13 @@ const SignupAccessPage: React.FC = () => {
       });
 
       toast.success(t('common:status.success'));
+      
+      // Redirect to login page after successful account creation
+      // Small delay to show the success toast first
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+      
       // The payment will be claimed automatically when the user is logged in
       // due to the useEffect hook above
     } catch (error) {

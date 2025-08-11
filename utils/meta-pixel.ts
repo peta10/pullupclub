@@ -5,6 +5,7 @@ declare global {
   interface Window {
     fbq: any;
     _fbq: any;
+    __META_PIXEL_INITIALIZED__?: boolean;
   }
 }
 
@@ -32,10 +33,6 @@ export function isMetaPixelBlocked(): boolean {
   }
 }
 
-// Global flag to prevent multiple initializations
-let isInitializing = false;
-let isInitialized = false;
-
 // Initialize Meta Pixel
 export function initMetaPixel() {
   if (typeof window === 'undefined') {
@@ -43,27 +40,28 @@ export function initMetaPixel() {
     return;
   }
 
-  // Check if already initialized or currently initializing
-  if (isInitialized || isInitializing) {
-    console.log('🔍 Meta Pixel: Already initialized or initializing');
+  // Check if already initialized using global flag
+  if (window.__META_PIXEL_INITIALIZED__) {
+    console.log('🔍 Meta Pixel: Already initialized (global flag)');
     return;
   }
 
   // Check if Meta Pixel is already loaded from HTML
   if (window.fbq && window.fbq.loaded) {
     console.log('🔍 Meta Pixel: Already initialized from HTML');
-    isInitialized = true;
+    window.__META_PIXEL_INITIALIZED__ = true;
     return;
   }
 
   // Check if Meta Pixel is already loaded
   if (window.fbq) {
     console.log('🔍 Meta Pixel: Already initialized');
-    isInitialized = true;
+    window.__META_PIXEL_INITIALIZED__ = true;
     return;
   }
 
-  isInitializing = true;
+  // Set global flag to prevent multiple initializations
+  window.__META_PIXEL_INITIALIZED__ = true;
 
   // Load Meta Pixel script
   const script = document.createElement('script');
@@ -73,6 +71,7 @@ export function initMetaPixel() {
   // Add error handling for script loading
   script.onerror = () => {
     console.error('🔍 Meta Pixel: Failed to load script');
+    window.__META_PIXEL_INITIALIZED__ = false; // Reset flag on error
   };
   
   script.onload = () => {
@@ -94,8 +93,6 @@ export function initMetaPixel() {
   window.fbq('init', PIXEL_ID);
   window.fbq('track', 'PageView');
 
-  isInitializing = false;
-  isInitialized = true;
   console.log('🔍 Meta Pixel: Initialized with ID:', PIXEL_ID);
 }
 
