@@ -82,7 +82,7 @@ const Footer: React.FC = () => {
             </ul>
             <div className="mt-4 flex space-x-4">
               <Link
-                href="https://www.facebook.com/bbpullupclub"
+                href="https://www.facebook.com/thebattlebunker"
                 className="text-gray-400 hover:text-white"
               >
                 <span className="sr-only">Facebook</span>
@@ -100,7 +100,7 @@ const Footer: React.FC = () => {
                 </svg>
               </Link>
               <Link
-                href="https://www.instagram.com/bbpullupclub"
+                href="https://www.instagram.com/battlebunkerpullupclub"
                 className="text-gray-400 hover:text-white"
               >
                 <span className="sr-only">Instagram</span>
@@ -118,7 +118,7 @@ const Footer: React.FC = () => {
                 </svg>
               </Link>
               <Link
-                href="https://www.youtube.com/@battlebunkerpullupclub"
+                href="https://www.youtube.com/@Bbpullupclub"
                 className="text-gray-400 hover:text-white"
               >
                 <span className="sr-only">YouTube</span>
