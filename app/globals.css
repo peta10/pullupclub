@@ -18,6 +18,18 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
   font-family: var(--font-inter);
+  background-color: #000000;
+}
+
+/* Ensure mobile browser address bar stays black */
+@media screen and (max-width: 768px) {
+  html {
+    background-color: #000000;
+  }
+  
+  body {
+    background-color: #000000;
+  }
 }
 
 /* Lenis smooth scroll styles */
