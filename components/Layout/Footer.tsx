@@ -82,7 +82,7 @@ const Footer: React.FC = () => {
             </ul>
             <div className="mt-4 flex space-x-4">
               <Link
-                href="https://www.facebook.com/thebattlebunker"
+                href="https://www.facebook.com/pull-upclub"
                 className="text-gray-400 hover:text-white"
               >
                 <span className="sr-only">Facebook</span>
