@@ -1,9 +1,22 @@
-// Next.js Service Worker for Pull-Up Club with Vercel optimization
-const CACHE_NAME = 'pullup-club-v1'
+// Enhanced Service Worker for Pull-Up Club Vite→Next.js Migration Cache Management
+const CACHE_NAME = 'pullup-club-nextjs'
 const BUILD_ID = self.location.search.includes('buildId=') ? 
   new URLSearchParams(self.location.search).get('buildId') : Date.now().toString()
 
-console.log('[SW] Service Worker initialized with BUILD_ID:', BUILD_ID)
+// Old cache patterns from Vite to clean up
+const OLD_CACHE_PATTERNS = [
+  'pullup-club-v1',
+  'workbox-precache-',
+  'workbox-runtime-',
+  'vite-',
+  'sw-precache-',
+  'runtime-cache',
+  'precache-manifest',
+  'sw-precache'
+]
+
+console.log('[SW] Pull-Up Club Service Worker initialized with BUILD_ID:', BUILD_ID)
+console.log('[SW] Ready to clean up old Vite caches and manage Next.js cache')
 
 // Assets to cache - essential pages and resources
 const STATIC_ASSETS = [
@@ -43,32 +56,59 @@ self.addEventListener('install', (event) => {
   )
 })
 
-// Activate event - clean up old caches
+// Activate event - aggressive cleanup of ALL old caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating service worker...')
+  console.log('[SW] Activating Pull-Up Club service worker for cache cleanup...')
   event.waitUntil(
     Promise.all([
-      // Clean up old caches
-      caches.keys().then((cacheNames) => {
-        const currentCache = CACHE_NAME + '-' + BUILD_ID
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName.startsWith(CACHE_NAME) && cacheName !== currentCache) {
-              console.log('[SW] Deleting old cache:', cacheName)
-              return caches.delete(cacheName)
-            }
-          }).filter(Boolean)
-        )
-      }),
+      // Aggressive cleanup of all old caches (Vite + old Next.js)
+      clearAllOldCaches(),
       // Take control of all clients immediately
       self.clients.claim()
     ]).then(() => {
-      console.log('[SW] Service worker activated successfully')
+      console.log('[SW] ✅ Pull-Up Club service worker activated successfully')
+      
+      // Notify all clients that cache has been cleaned
+      return self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({
+            type: 'CACHE_CLEANED',
+            message: 'Old caches cleared, you have the latest version'
+          });
+        });
+      });
     }).catch(err => {
-      console.error('[SW] Activation failed:', err)
+      console.error('[SW] ❌ Activation failed:', err)
     })
   )
 })
+
+// Function to aggressively clear all old cache entries
+async function clearAllOldCaches() {
+  try {
+    const cacheNames = await caches.keys();
+    const currentCache = CACHE_NAME + '-' + BUILD_ID;
+    
+    // Identify old caches to delete
+    const oldCaches = cacheNames.filter(name => {
+      // Delete if it matches old patterns OR is an old Pull-Up Club cache
+      return OLD_CACHE_PATTERNS.some(pattern => name.includes(pattern)) ||
+             (name.startsWith(CACHE_NAME) && name !== currentCache) ||
+             (name.startsWith('pullup-club') && name !== currentCache);
+    });
+    
+    console.log('[SW] 🗑️ Clearing old caches:', oldCaches);
+    
+    // Delete all identified old caches
+    await Promise.all(oldCaches.map(cacheName => caches.delete(cacheName)));
+    
+    console.log('[SW] ✅ All old caches cleared successfully');
+    return true;
+  } catch (error) {
+    console.error('[SW] ❌ Error clearing old caches:', error);
+    return false;
+  }
+}
 
 // Fetch event - handle network requests with intelligent caching
 self.addEventListener('fetch', (event) => {

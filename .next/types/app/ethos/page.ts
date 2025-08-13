@@ -1,4 +1,4 @@
-// File: C:\Users\Parker Gawne\pullupclub\app\ethos\page.tsx
+// File: C:\Users\julie\pullupclub\pullupclub\app\ethos\page.tsx
 import * as entry from '../../../../app/ethos/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

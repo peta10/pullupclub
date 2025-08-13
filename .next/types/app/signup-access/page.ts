@@ -1,4 +1,4 @@
-// File: C:\Users\Parker Gawne\pullupclub\app\signup-access\page.tsx
+// File: C:\Users\julie\pullupclub\pullupclub\app\signup-access\page.tsx
 import * as entry from '../../../../app/signup-access/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

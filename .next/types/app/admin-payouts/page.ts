@@ -1,4 +1,4 @@
-// File: C:\Users\Parker Gawne\pullupclub\app\admin-payouts\page.tsx
+// File: C:\Users\julie\pullupclub\pullupclub\app\admin-payouts\page.tsx
 import * as entry from '../../../../app/admin-payouts/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

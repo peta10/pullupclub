@@ -1,6 +1,6 @@
 'use client'
 
-import React from "react";
+import React, { useEffect } from "react";
 import { AuthProvider } from "../context/AuthContext";
 import { CacheProvider } from "../context/CacheProvider";
 import StripeProvider from "../lib/StripeProvider";
@@ -12,6 +12,8 @@ import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+// Initialize service worker for cache management
+import * as serviceWorkerRegistration from '../utils/serviceWorkerRegistration';
 // Initialize i18n system
 import "../i18n";
 
@@ -33,6 +35,27 @@ const queryClient = new QueryClient({
 });
 
 function ProvidersContent({ children }: { children: React.ReactNode }) {
+  // Register service worker for cache management
+  useEffect(() => {
+    console.log('🚀 Pull-Up Club: Initializing cache management...');
+    
+    // Register service worker with update handling
+    serviceWorkerRegistration.register({
+      onSuccess: (registration) => {
+        console.log('✅ Pull-Up Club service worker registered successfully');
+      },
+      onUpdate: (registration) => {
+        console.log('🔄 Pull-Up Club service worker updated');
+        // The registration will handle auto-refresh
+      },
+    });
+
+    // Cleanup function
+    return () => {
+      // Service worker will persist, which is what we want
+    };
+  }, []);
+
   return (
     <>
       <Toaster

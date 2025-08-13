@@ -97,7 +97,7 @@
         "transform": "lodash/{{member}}"
       }
     },
-    "outputFileTracingRoot": "C:\\Users\\Parker Gawne\\pullupclub",
+    "outputFileTracingRoot": "C:\\Users\\julie\\pullupclub\\pullupclub",
     "experimental": {
       "useSkewCookie": false,
       "nodeMiddleware": false,
@@ -156,7 +156,7 @@
       "middlewarePrefetch": "flexible",
       "optimisticClientCache": true,
       "manualClientBasePath": false,
-      "cpus": 15,
+      "cpus": 31,
       "memoryBasedWorkersCount": false,
       "imgOptConcurrency": null,
       "imgOptTimeoutInSeconds": 7,
@@ -288,10 +288,10 @@
     "bundlePagesRouterDependencies": false,
     "configFileName": "next.config.js",
     "turbopack": {
-      "root": "C:\\Users\\Parker Gawne\\pullupclub"
+      "root": "C:\\Users\\julie\\pullupclub\\pullupclub"
     }
   },
-  "appDir": "C:\\Users\\Parker Gawne\\pullupclub",
+  "appDir": "C:\\Users\\julie\\pullupclub\\pullupclub",
   "relativeAppDir": "",
   "files": [
     ".next\\routes-manifest.json",
