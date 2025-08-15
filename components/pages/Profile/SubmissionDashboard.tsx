@@ -6,7 +6,7 @@ import { supabase } from "../../../lib/supabase";
 import { useAuth } from "../../../context/AuthContext";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useTranslation } from "react-i18next";
+import { useStableTranslation } from "../../../hooks/useStableTranslation";
 import { useMetaTracking } from '../../../hooks/useMetaTracking';
 
 // Live countdown hook with seconds
@@ -44,7 +44,7 @@ interface NextBeatTarget {
 }
 
 const NextToBeat = ({ bestScore }: { bestScore: number }) => {
-  const { t } = useTranslation('profile');
+  const { t } = useStableTranslation('profile');
   const { user } = useAuth();
   const [targets, setTargets] = useState<NextBeatTarget[]>([]);
   const [loading, setLoading] = useState(false);
@@ -138,7 +138,7 @@ const NextToBeat = ({ bestScore }: { bestScore: number }) => {
 const SubmissionDashboard = () => {
   const { user } = useAuth();
   const timeLeft = useLiveCountdown();
-  const { t } = useTranslation('profile');
+  const { t } = useStableTranslation('profile');
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(false);
   const [bestPerformance, setBestPerformance] = useState(0);

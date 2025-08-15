@@ -1,11 +1,11 @@
 import React from 'react';
 import { Camera, Award, Medal } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { useStableTranslation } from '../../../hooks/useStableTranslation';
 import VideoEmbed from '../../ui/VideoEmbed';
 import VideoErrorBoundary from '../../ui/VideoErrorBoundary';
 
 const HowItWorks: React.FC = () => {
-  const { t } = useTranslation('home');
+  const { t } = useStableTranslation('home');
 
   const steps = [
     {

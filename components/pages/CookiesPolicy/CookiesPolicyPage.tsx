@@ -2,10 +2,10 @@
 
 import React from "react";
 import Layout from "../../Layout/Layout";
-import { useTranslation } from "react-i18next";
+import { useStableTranslation } from "../../../hooks/useStableTranslation";
 
 const CookiesPolicyPage: React.FC = () => {
-  const { t } = useTranslation('cookies');
+  const { t } = useStableTranslation('cookies');
 
   return (
     <Layout>

@@ -1,5 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import Backend from 'i18next-http-backend';
 
 // SSR-safe i18n configuration
 const isClient = typeof window !== 'undefined';
@@ -10,12 +11,15 @@ const config = {
   lng: 'en',
   debug: false,
   interpolation: { escapeValue: false },
-  ns: ['common'],
+  ns: ['common', 'auth', 'home', 'submission', 'subscription', 'leaderboard', 'profile', 'admin', 'faq', 'rules', 'ethos', 'cookies'],
   defaultNS: 'common',
   react: {
-    useSuspense: false, // Critical for SSR compatibility
+    useSuspense: false, // Critical for SSR compatibility - NO SUSPENSE per user memory
   },
-  // Built-in resources to prevent loading issues
+  backend: {
+    loadPath: '/locales/{{lng}}/{{ns}}.json',
+  },
+  // Built-in fallback resources to prevent loading issues
   resources: {
     en: {
       common: {
@@ -49,11 +53,39 @@ const config = {
   }
 };
 
-// Initialize i18n properly
-if (!i18n.isInitialized) {
-  i18n
-    .use(initReactI18next)
-    .init(config);
+// Initialize i18n properly with error handling
+const initializeI18n = async () => {
+  if (i18n.isInitialized) return i18n;
+  
+  try {
+    await i18n
+      .use(Backend)
+      .use(initReactI18next)
+      .init(config);
+    console.log('🌍 i18n initialized successfully');
+    return i18n;
+  } catch (error) {
+    console.warn('🌍 i18n initialization error (non-critical):', error);
+    // Fallback to basic configuration without backend
+    try {
+      await i18n
+        .use(initReactI18next)
+        .init({
+          ...config,
+          backend: undefined, // Remove backend for fallback
+        });
+      console.log('🌍 i18n initialized with fallback configuration');
+      return i18n;
+    } catch (fallbackError) {
+      console.warn('🌍 i18n fallback initialization failed:', fallbackError);
+      return i18n;
+    }
+  }
+};
+
+// Initialize immediately if possible, otherwise on first use
+if (typeof window !== 'undefined') {
+  initializeI18n();
 }
 
 /** Central list of supported languages + flags + text-direction */
@@ -69,4 +101,6 @@ export const getAvailableLanguages = () => [
   { code: 'ar', name: 'العربية',    flag: '🇸🇦', dir: 'rtl' },
 ]
 
+// Export both the instance and the initialization function
+export { initializeI18n };
 export default i18n; 

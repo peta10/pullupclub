@@ -7,7 +7,7 @@ import { supabase } from "../../../lib/supabase";
 import { regions } from '../../../data/mockData';
 import { useOrganizations } from '../../../hooks/useOrganizations';
 import toast from 'react-hot-toast';
-import { useTranslation } from 'react-i18next';
+import { useStableTranslation } from '../../../hooks/useStableTranslation';
 import { useMetaTracking } from '../../../hooks/useMetaTracking';
 
 interface VideoSubmissionFormProps {
@@ -17,7 +17,7 @@ interface VideoSubmissionFormProps {
 const VideoSubmissionForm: React.FC<VideoSubmissionFormProps> = ({
   onSubmissionComplete,
 }) => {
-  const { t } = useTranslation('submission');
+  const { t } = useStableTranslation('submission');
   const { user, refreshProfile } = useAuth();
   const { trackEvent } = useMetaTracking();
   const { organizations, isLoading: organizationsLoading } = useOrganizations();

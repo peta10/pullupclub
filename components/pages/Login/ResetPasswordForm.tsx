@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
-import { useTranslation } from "react-i18next";
+import { useStableTranslation } from "../../../hooks/useStableTranslation";
 
 interface ResetPasswordFormProps {
   onBackToLogin: () => void;
@@ -17,7 +17,7 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const { resetPassword } = useAuth();
-  const { t } = useTranslation(['auth', 'common']);
+  const { t } = useStableTranslation('auth');
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();

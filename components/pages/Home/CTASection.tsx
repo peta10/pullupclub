@@ -3,12 +3,12 @@
 import React, { memo } from "react";
 import { Button } from "../../ui/Button";
 import { Link } from "../../ui/Link";
-import { useTranslation } from "react-i18next";
+import { useStableTranslation } from "../../../hooks/useStableTranslation";
 import { useMetaTracking } from "../../../hooks/useMetaTracking";
 import { useLenis } from "../../../hooks/useLenis";
 
 const CTASection: React.FC = memo(() => {
-  const { t } = useTranslation('home');
+  const { t } = useStableTranslation('home');
   const { trackEvent } = useMetaTracking();
   const { scrollToTop } = useLenis();
 

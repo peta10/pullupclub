@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
+import { initializeI18n } from '../i18n';
 
 /**
  * Stable wrapper for useTranslation that prevents hook order issues
@@ -12,31 +13,47 @@ export const useStableTranslation = (namespace: string = 'common') => {
   const translation = useTranslation(namespace);
   
   useEffect(() => {
+    // Ensure i18n is initialized
+    const ensureInitialized = async () => {
+      try {
+        await initializeI18n();
+        if (translation.i18n && translation.i18n.isInitialized) {
+          setIsReady(true);
+        }
+      } catch (error) {
+        console.warn('Failed to initialize i18n in useStableTranslation:', error);
+        setIsReady(true); // Set ready anyway to prevent hanging
+      }
+    };
+
     // Set ready when i18n is initialized
-    if (translation.i18n.isInitialized) {
+    if (translation.i18n && translation.i18n.isInitialized) {
       setIsReady(true);
+    } else {
+      ensureInitialized();
     }
     
-    const handleInitialized = () => setIsReady(true);
-    translation.i18n.on('initialized', handleInitialized);
-    
-    return () => {
-      translation.i18n.off('initialized', handleInitialized);
-    };
+    // Safely handle i18n event listeners
+    if (translation.i18n && typeof translation.i18n.on === 'function') {
+      const handleInitialized = () => setIsReady(true);
+      translation.i18n.on('initialized', handleInitialized);
+      
+      return () => {
+        if (translation.i18n && typeof translation.i18n.off === 'function') {
+          translation.i18n.off('initialized', handleInitialized);
+        }
+      };
+    }
   }, [translation.i18n]);
   
   // Return stable t function that always works
-  const stableT = (key: string, defaultValue?: string) => {
+  const stableT = (key: string, options?: any) => {
     if (!isReady) {
-      return defaultValue || key;
+      return options?.defaultValue || key;
     }
     
-    // Only pass defaultValue if it's defined
-    if (defaultValue !== undefined) {
-      return translation.t(key, { defaultValue });
-    }
-    
-    return translation.t(key);
+    // Pass through all options to the original t function
+    return translation.t(key, options);
   };
   
   return {

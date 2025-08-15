@@ -1,9 +1,9 @@
 import React, { memo } from 'react';
 import Image from 'next/image';
-import { useTranslation } from 'react-i18next';
+import { useStableTranslation } from '../../../hooks/useStableTranslation';
 
 const TestimonialSection: React.FC = memo(() => {
-  const { t } = useTranslation('home');
+  const { t } = useStableTranslation('home');
 
   const testimonials = [
     {

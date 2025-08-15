@@ -2,10 +2,11 @@ import React from "react";
 import Image from 'next/image';
 import badges, { femaleBadges } from "../../../data/mockData";
 import { Award } from "lucide-react";
-import { useTranslation, Trans } from "react-i18next";
+import { useStableTranslation } from "../../../hooks/useStableTranslation";
+import { Trans } from "react-i18next";
 
 const BadgeLegend: React.FC = () => {
-  const { t } = useTranslation('leaderboard');
+  const { t } = useStableTranslation('leaderboard');
   
   // Helper function to get requirements for both genders
   const getBadgeRequirements = (badgeId: string) => {

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Timer } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { useStableTranslation } from '../../../hooks/useStableTranslation';
 
 const CountdownTimer: React.FC = () => {
-  const { t } = useTranslation('home');
+  const { t } = useStableTranslation('home');
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,

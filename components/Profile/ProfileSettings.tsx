@@ -3,7 +3,7 @@ import { User, Hash, Calendar, Users, Building, MapPin, Phone, Settings } from '
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
-import { useTranslation } from 'react-i18next';
+import { useStableTranslation } from '../../hooks/useStableTranslation';
 
 const REGION_OPTIONS = [
   'North America',
@@ -17,7 +17,7 @@ const REGION_OPTIONS = [
 
 const ProfileSettings: React.FC = () => {
   const { user, profile, setProfile } = useAuth();
-  const { t } = useTranslation('profile');
+  const { t } = useStableTranslation('profile');
   const [formData, setFormData] = useState({
     fullName: '',
     socialMedia: '',

@@ -10,7 +10,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { createCheckoutSession } from "../../../lib/stripe";
 import { supabase } from "../../../lib/supabase";
 import toast from 'react-hot-toast';
-import { useTranslation } from 'react-i18next';
+import { useStableTranslation } from '../../../hooks/useStableTranslation';
 
 // Form reducer
 const formReducer = (state: FormState, action: any): FormState => {
@@ -59,7 +59,7 @@ const initialFormState: FormState = {
 };
 
 const SubmissionForm: React.FC = () => {
-  const { t } = useTranslation('submission');
+  const { t } = useStableTranslation('submission');
   const [formState, dispatch] = useReducer(formReducer, initialFormState);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [emailError, setEmailError] = useState("");

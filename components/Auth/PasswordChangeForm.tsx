@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import { CheckCircle2 } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { useStableTranslation } from "../../hooks/useStableTranslation";
 import toast from "react-hot-toast";
 
 interface PasswordChangeFormProps {
@@ -15,7 +15,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({ onSuccess }) =>
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-  const { t } = useTranslation(['auth', 'common']);
+  const { t } = useStableTranslation('auth');
 
   // Password validation
   const hasMinLength = password.length >= 6;

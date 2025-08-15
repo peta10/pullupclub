@@ -8,7 +8,7 @@ import LeaderboardFilters from "./LeaderboardFilters";
 import PUCBankBanner from "../../PUCBank/PUCBankBanner";
 import { LeaderboardFilters as FiltersType } from "../../../types";
 import { LoadingState, ErrorState } from '../../ui/LoadingState';
-import { useTranslation } from 'react-i18next';
+import { useStableTranslation } from '../../../hooks/useStableTranslation';
 import { useLeaderboard } from '../../../hooks/useLeaderboard';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { getBadgesForSubmission } from '../../../data/mockData';
@@ -22,7 +22,7 @@ const PaginationControls: React.FC<{
   totalPages: number;
   onPageChange: (page: number) => void;
 }> = ({ currentPage, totalPages, onPageChange }) => {
-  const { t } = useTranslation('leaderboard');
+  const { t } = useStableTranslation('leaderboard');
 
   const getPageNumbers = () => {
     const pages = [];
@@ -79,7 +79,7 @@ const LeaderboardPage: React.FC = () => {
   const [itemsPerPage] = useState(10);
   const [showBadgeLegend, setShowBadgeLegend] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const { t } = useTranslation(['leaderboard', 'common']);
+  const { t } = useStableTranslation('leaderboard');
   const { leaderboardData: data = [], isLoading, error } = useLeaderboard();
   const { trackViewContent } = useMetaTracking();
   const { user } = useAuth();

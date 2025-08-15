@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { LeaderboardFilters as FiltersType } from '../../../types';
 import badges, { getAgeGroups, getAllBadgesForFilters } from '../../../data/mockData';
-import { useTranslation } from 'react-i18next';
+import { useStableTranslation } from '../../../hooks/useStableTranslation';
 import { useOrganizations } from '../../../hooks/useOrganizations';
 import { ChevronDown } from 'lucide-react';
 
@@ -94,7 +94,7 @@ const OrganizationDropdown: React.FC<{
 };
 
 const LeaderboardFilters: React.FC<LeaderboardFiltersProps> = ({ filters, onFilterChange }) => {
-  const { t } = useTranslation('leaderboard');
+  const { t } = useStableTranslation('leaderboard');
   const { organizations, isLoading: organizationsLoading } = useOrganizations();
   
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

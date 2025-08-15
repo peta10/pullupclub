@@ -1,6 +1,6 @@
 import React from "react";
 import { CheckCircle2 } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { useStableTranslation } from "../../../hooks/useStableTranslation";
 
 interface ResetSentConfirmationProps {
   email: string;
@@ -11,7 +11,7 @@ const ResetSentConfirmation: React.FC<ResetSentConfirmationProps> = ({
   email,
   onBackToLogin,
 }) => {
-  const { t } = useTranslation('auth');
+  const { t } = useStableTranslation('auth');
 
   return (
     <div className="text-center">

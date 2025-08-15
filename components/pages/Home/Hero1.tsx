@@ -4,14 +4,15 @@ import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
 import { Button } from '../../ui/Button';
 import { Link } from '../../ui/Link';
 import { Zap } from 'lucide-react';
-import { useTranslation, Trans } from 'react-i18next';
+import { useStableTranslation } from '../../../hooks/useStableTranslation';
+import { Trans } from 'react-i18next';
 import { supabase } from '../../../lib/supabase';
 import { useMetaTracking } from "../../../hooks/useMetaTracking";
 import { useLenis } from "../../../hooks/useLenis";
 
 // Lazy load non-critical features
 const LazyActivityTicker = memo(() => {
-  const { t } = useTranslation('home');
+  const { t } = useStableTranslation('home');
   const [recentActivity, setRecentActivity] = useState([
     { id: "initial", name: "Marcus", location: "Chicago", pullUps: 25, time: "2 min ago" }
   ]);
@@ -72,7 +73,7 @@ LazyActivityTicker.displayName = 'LazyActivityTicker';
 
 const Hero1: React.FC = () => {
   // All hooks must be called in the exact same order every time - no conditional hooks!
-  const { t } = useTranslation('home');
+  const { t } = useStableTranslation('home');
   const { trackEvent } = useMetaTracking();
   const { scrollToElement } = useLenis();
   const [imageLoaded, setImageLoaded] = useState(false);

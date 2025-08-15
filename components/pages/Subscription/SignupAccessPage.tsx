@@ -8,7 +8,7 @@ import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../context/AuthContext';
 import Layout from '../../Layout/Layout';
 import { Button } from '../../ui/Button';
-import { useTranslation } from 'react-i18next';
+import { useStableTranslation } from '../../../hooks/useStableTranslation';
 import Image from 'next/image';
 import Head from 'next/head';
 import { useMetaTracking } from '../../../hooks/useMetaTracking';
@@ -28,7 +28,7 @@ interface VerificationResult {
 }
 
 const SignupAccessPage: React.FC = () => {
-  const { t } = useTranslation('subscription');
+  const { t } = useStableTranslation('subscription');
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user } = useAuth();

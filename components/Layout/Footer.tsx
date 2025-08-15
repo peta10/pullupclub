@@ -2,10 +2,10 @@
 
 import React from "react";
 import { Link } from "../ui/Link";
-// Temporarily disabled i18n: import { useTranslation } from "react-i18next";
+import { useStableTranslation } from "../../hooks/useStableTranslation";
 
 const Footer: React.FC = () => {
-  // Temporarily disabled i18n: const { t } = useTranslation('common');
+  const { t } = useStableTranslation('common');
   const currentYear = new Date().getFullYear();
 
   return (

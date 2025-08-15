@@ -16,6 +16,11 @@ export default function ChatbaseIdentity() {
   const { user, isLoading } = useAuth()
 
   useEffect(() => {
+    // Skip entirely if auth is still loading
+    if (isLoading) {
+      return
+    }
+
     let hasSetupIdentity = false
     
     const setupChatbaseIdentity = async () => {
@@ -29,8 +34,8 @@ export default function ChatbaseIdentity() {
         return
       }
 
-      // Only proceed if user is logged in and not loading
-      if (user && !isLoading) {
+      // Only make API calls if user is actually authenticated
+      if (user) {
         try {
           const response = await fetch('/api/chatbase/verify-user', {
             method: 'POST',
@@ -49,7 +54,7 @@ export default function ChatbaseIdentity() {
                 hmac: hash
               })
               hasSetupIdentity = true
-              console.log('Chatbase user identity set successfully')
+              console.log('🔍 Chatbase: User identity set successfully')
             } catch (chatbaseError) {
               console.warn('Chatbase setUser failed, trying alternative method:', chatbaseError)
               // Alternative method if setUser doesn't work
@@ -60,26 +65,22 @@ export default function ChatbaseIdentity() {
               hasSetupIdentity = true
             }
           } else {
-            console.warn('Failed to verify user identity for Chatbase')
+            console.warn('🔍 Chatbase: Authentication failed')
           }
         } catch (error) {
-          console.error('Error setting up Chatbase identity:', error)
+          console.warn('🔍 Chatbase: Error setting up identity (non-critical):', error)
         }
-      } else if (!isLoading && !user) {
-        // User is not authenticated, don't make API calls
-        console.log('Chatbase: User not authenticated, skipping identity setup')
+      } else {
+        // User is not authenticated - no API calls needed
+        console.log('🔍 Chatbase: Anonymous session (no identity setup needed)')
+        hasSetupIdentity = true // Prevent further attempts
       }
-      // Note: When user logs out, we don't need to explicitly clear the user
-      // Chatbase will handle anonymous sessions automatically when no user is set
     }
-
-    // Reset setup flag when user changes
-    hasSetupIdentity = false
 
     // Set up identity immediately if chatbase is already available
     setupChatbaseIdentity()
 
-    // Also set up when chatbase loads
+    // Also set up when chatbase loads (but only if not already set up)
     const interval = setInterval(() => {
       if (window.chatbase && !hasSetupIdentity) {
         setupChatbaseIdentity()

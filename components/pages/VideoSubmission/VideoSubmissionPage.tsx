@@ -17,7 +17,7 @@ import { regions } from '../../../data/mockData';
 import { useOrganizations } from '../../../hooks/useOrganizations';
 import toast from 'react-hot-toast';
 import { Link } from '../../ui/Link';
-import { useTranslation } from 'react-i18next';
+import { useStableTranslation } from '../../../hooks/useStableTranslation';
 import Image from 'next/image';
 import { useMetaTracking } from '../../../hooks/useMetaTracking';
 
@@ -67,7 +67,7 @@ const useMonthlyCountdown = () => {
 
 // Add eligibility message component
 const EligibilityMessage: React.FC<{ status: EligibilityStatus; countdown: Countdown }> = ({ status, countdown }) => {
-  const { t } = useTranslation('submission');
+  const { t } = useStableTranslation('submission');
   if (!status) return null;
   switch (status.status) {
     case 'eligible':
@@ -129,7 +129,7 @@ const EligibilityMessage: React.FC<{ status: EligibilityStatus; countdown: Count
 
 const VideoSubmissionPage: React.FC = () => {
   const { user } = useAuth();
-  const { t } = useTranslation(['submission', 'common']);
+  const { t } = useStableTranslation('submission');
   const { submitVideo, uploading } = useVideoSubmission();
   const router = useRouter();
   const { trackEvent } = useMetaTracking();

@@ -3,11 +3,11 @@
 import React, { useRef, useEffect } from "react";
 import Layout from "../../Layout/Layout";
 import { FaqSection } from "../../ui/faq-section";
-import { useTranslation } from "react-i18next";
+import { useStableTranslation } from "../../../hooks/useStableTranslation";
 import { useMetaTracking } from '../../../hooks/useMetaTracking';
 
 const FAQPage: React.FC = () => {
-  const { t } = useTranslation('faq');
+  const { t } = useStableTranslation('faq');
   const { trackViewContent } = useMetaTracking();
   const hasTracked = useRef(false);
 

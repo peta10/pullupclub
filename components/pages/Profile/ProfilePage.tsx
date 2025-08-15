@@ -8,13 +8,13 @@ import { useAuth } from "../../../context/AuthContext";
 import SubmissionDashboard from "./SubmissionDashboard";
 import ProfileSettings from "../../Profile/ProfileSettings";
 import SubscriptionRewards from "./SubscriptionRewards";
-import { useTranslation } from "react-i18next";
+import { useStableTranslation } from "../../../hooks/useStableTranslation";
 import { useMetaTracking } from '../../../hooks/useMetaTracking';
 
 const ProfilePage: React.FC = () => {
   const { user, isFirstLogin, profile } = useAuth();
   const router = useRouter();
-  const { t } = useTranslation('profile');
+  const { t } = useStableTranslation('profile');
   const [activeTab, setActiveTab] = useState<string>("submissions");
   const [formData, setFormData] = useState({
     full_name: "",

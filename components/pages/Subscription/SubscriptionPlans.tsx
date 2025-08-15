@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { products } from "../../../lib/stripe-config";
 import { trackEvent } from "../../../utils/analytics";
-import { useTranslation } from "react-i18next";
+import { useStableTranslation } from "../../../hooks/useStableTranslation";
 // Head is now handled by layout.tsx in Next.js App Router
 import { useMetaTracking } from '../../../hooks/useMetaTracking';
 
@@ -21,7 +21,7 @@ const PAYMENT_LINKS = {
 };
 
 const SubscriptionPlans: React.FC = () => {
-  const { t, ready } = useTranslation('subscription');
+  const { t, ready } = useStableTranslation('subscription');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "annual">("monthly");

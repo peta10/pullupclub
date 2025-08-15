@@ -1,9 +1,9 @@
 import React from 'react';
 import { Award, Shield, Trophy, Medal, ShoppingBag, Share2 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { useStableTranslation } from '../../../hooks/useStableTranslation';
 
 const PerksSection: React.FC = () => {
-  const { t } = useTranslation('home');
+  const { t } = useStableTranslation('home');
 
   const perks = [
     {

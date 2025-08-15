@@ -3,12 +3,13 @@
 import React, { useRef, useEffect } from "react";
 import Layout from "../Layout/Layout";
 import { Shield, Users, Activity } from "lucide-react";
-import { useTranslation, Trans } from "react-i18next";
+import { useStableTranslation } from "../../hooks/useStableTranslation";
+import { Trans } from "react-i18next";
 import Image from 'next/image';
 import { useMetaTracking } from '../../hooks/useMetaTracking';
 
 const EthosPage: React.FC = () => {
-  const { t } = useTranslation("ethos");
+  const { t } = useStableTranslation("ethos");
   const { trackViewContent } = useMetaTracking();
   const hasTracked = useRef(false);
 

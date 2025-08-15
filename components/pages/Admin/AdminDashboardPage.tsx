@@ -7,7 +7,7 @@ import { Badge } from "../../ui/Badge";
 import { LoadingState, ErrorState } from "../../ui/LoadingState";
 import { Eye, CheckCircle, XCircle, Star, Filter, Search, ChevronDown, Save, MessageSquare } from "lucide-react";
 import { supabase } from "../../../lib/supabase";
-import { useTranslation } from 'react-i18next';
+import { useStableTranslation } from '../../../hooks/useStableTranslation';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -27,7 +27,7 @@ const STATUS_MAP: Record<string, { label: string; variant: string; icon?: string
 const ITEMS_PER_PAGE = 50;
 
 const AdminDashboardPage: React.FC = () => {
-  const { t } = useTranslation('admin');
+  const { t } = useStableTranslation('admin');
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [filteredSubmissions, setFilteredSubmissions] = useState<any[]>([]);
   const [selectedSubmission, setSelectedSubmission] = useState<any | null>(null);

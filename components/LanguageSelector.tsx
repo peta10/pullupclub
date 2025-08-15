@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useStableTranslation } from '../hooks/useStableTranslation';
 import { ChevronDown, Globe } from 'lucide-react';
 import { getAvailableLanguages } from '../i18n';
 import { Flag } from './ui/Flag';
@@ -8,7 +8,7 @@ import type { FlagCode } from '../assets/flags';
 const languages = getAvailableLanguages();
 
 export const LanguageSelector: React.FC = () => {
-  const { i18n } = useTranslation();
+  const { i18n } = useStableTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 

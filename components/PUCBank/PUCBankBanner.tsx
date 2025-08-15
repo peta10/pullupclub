@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { useTranslation } from 'react-i18next';
+import { useStableTranslation } from '../../hooks/useStableTranslation';
 
 interface PoolData {
   remaining_dollars: string;
@@ -14,7 +14,7 @@ const PUCBankBanner: React.FC = () => {
   const [poolData, setPoolData] = useState<PoolData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { t } = useTranslation('leaderboard');
+  const { t } = useStableTranslation('leaderboard');
 
   const fetchPoolStatus = async () => {
     try {

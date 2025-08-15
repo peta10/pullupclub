@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../../context/AuthContext";
-import { useTranslation } from "react-i18next";
+import { useStableTranslation } from "../../../hooks/useStableTranslation";
 import { trackConversion } from "../../../utils/meta-pixel";
 
 interface LoginFormProps {
@@ -18,7 +18,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const { signIn, user } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { t } = useTranslation(['auth', 'common']);
+  const { t } = useStableTranslation('auth');
 
   // Next.js uses searchParams instead of location.state
   const intendedPlan = searchParams?.get('plan') as "monthly" | "annual" | null;

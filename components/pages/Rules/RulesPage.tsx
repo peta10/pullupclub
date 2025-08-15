@@ -1,11 +1,11 @@
 'use client';
 
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { useStableTranslation } from "../../../hooks/useStableTranslation";
 import CompetitionRules from "../Submission/CompetitionRules";
 
 const RulesPage: React.FC = () => {
-  const { t } = useTranslation('rules');
+  const { t } = useStableTranslation('rules');
 
   return (
     <div className="bg-black py-10">

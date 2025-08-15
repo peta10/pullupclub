@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useRef, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useStableTranslation } from '../../../hooks/useStableTranslation';
 import { useMetaTracking } from '../../../hooks/useMetaTracking';
 import { ExternalLink, Download, FileText } from 'lucide-react';
 
 const CompetitionRules: React.FC = () => {
-  const { t } = useTranslation('rules');
+  const { t } = useStableTranslation('rules');
   const { trackViewContent } = useMetaTracking();
   const hasTracked = useRef(false);
 

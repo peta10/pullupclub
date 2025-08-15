@@ -5,11 +5,11 @@ import { Button } from "../../ui/Button";
 import { Link } from "../../ui/Link";
 import LeaderboardTable from "../../Leaderboard/LeaderboardTable";
 import { useLeaderboard } from '../../../hooks/useLeaderboard';
-import { useTranslation } from "react-i18next";
+import { useStableTranslation } from "../../../hooks/useStableTranslation";
 import { useLenis } from "../../../hooks/useLenis";
 
 const LeaderboardPreview: React.FC = () => {
-  const { t } = useTranslation('home');
+  const { t } = useStableTranslation('home');
   const { leaderboardData: data = [], isLoading } = useLeaderboard();
   const { scrollToElement } = useLenis();
   const top5 = data.slice(0, 5);

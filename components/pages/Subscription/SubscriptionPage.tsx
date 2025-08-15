@@ -13,7 +13,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import CheckoutSuccess from "./CheckoutSuccess";
 import StripePaymentForm from "./StripePaymentForm";
 import { supabase } from "../../../lib/supabase";
-import { useTranslation, Trans } from 'react-i18next';
+import { useStableTranslation } from '../../../hooks/useStableTranslation';
+import { Trans } from 'react-i18next';
 import Image from 'next/image';
 
 const SubscriptionPage: React.FC = () => {
@@ -24,7 +25,7 @@ const SubscriptionPage: React.FC = () => {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { t, ready } = useTranslation('subscription');
+  const { t, ready } = useStableTranslation('subscription');
   
   const successParam = searchParams?.get("success");
   const cancelledParam = searchParams?.get("cancelled");

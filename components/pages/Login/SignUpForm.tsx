@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslation } from "react-i18next";
+import { useStableTranslation } from "../../../hooks/useStableTranslation";
 import { useAuth } from "../../../context/AuthContext";
 import { CheckCircle2 } from "lucide-react";
 import { trackConversion } from "../../../utils/meta-pixel";
@@ -19,7 +19,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
   const { signUp, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { t } = useTranslation(['auth', 'common']);
+  const { t } = useStableTranslation('auth');
 
   // Get intended plan from search params
   const intendedPlan = searchParams?.get('plan') as "monthly" | "annual" | null;

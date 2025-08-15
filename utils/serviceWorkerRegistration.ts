@@ -1,9 +1,12 @@
 // Enhanced Service Worker Registration for Pull-Up Club Cache Management
-const isLocalhost = Boolean(
-  window.location.hostname === 'localhost' ||
-  window.location.hostname === '[::1]' ||
-  window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/)
-);
+const isLocalhost = () => {
+  if (typeof window === 'undefined') return false;
+  return Boolean(
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '[::1]' ||
+    window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/)
+  );
+};
 
 type Config = {
   onSuccess?: (registration: ServiceWorkerRegistration) => void;
@@ -11,6 +14,10 @@ type Config = {
 };
 
 export function register(config?: Config) {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return; // Skip on server side
+  }
+  
   if ('serviceWorker' in navigator) {
     const publicUrl = new URL('/', window.location.href);
     if (publicUrl.origin !== window.location.origin) {
@@ -121,6 +128,8 @@ function checkValidServiceWorker(swUrl: string, config?: Config) {
 
 // Force clear all caches and reload - nuclear option
 export function forceUpdate(): void {
+  if (typeof window === 'undefined') return;
+  
   const reloadPage = () => {
     console.log('🔄 Force update complete, reloading...');
     window.location.reload();
@@ -162,6 +171,8 @@ export function forceUpdate(): void {
 }
 
 export function unregister() {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return;
+  
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.ready
       .then((registration) => {
@@ -175,6 +186,8 @@ export function unregister() {
 }
 
 function showUpdateNotification() {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+  
   // Create a simple notification
   const notification = document.createElement('div');
   notification.innerHTML = `
