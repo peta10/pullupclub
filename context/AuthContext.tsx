@@ -163,14 +163,14 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const router = useRouter();
   const pathname = usePathname();
 
-  // Safety net: Force clear loading after 10 seconds
+  // Safety net: Force clear loading after 2 seconds for snappy UX
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (isLoading) {
         console.warn("[AuthContext] Forcing loading to false after timeout");
         setIsLoading(false);
       }
-    }, 10000);
+    }, 2000);
     return () => clearTimeout(timeout);
   }, [isLoading]);
 
@@ -303,23 +303,32 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const fetchProfile = async (userId: string, retryCount = 0) => {
     try {
-      // Fetch profile and admin role in parallel
-      let profileData: any;
-      const [
-        { data: { session } },
-        profileResult,
-        { data: adminData }
-      ] = await Promise.all([
-        supabase.auth.getSession(),
-        supabase.from('profiles').select('*').eq('id', userId).single(),
-        supabase.from('admin_roles').select('*').eq('user_id', userId).single()
-      ]);
+      // Fetch session first
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Fetch profile data
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-      profileData = profileResult.data;
-      const profileError = profileResult.error;
+      // Fetch admin role separately (don't fail if this fails)
+      let isUserAdmin = false;
+      try {
+        const { data: adminData } = await supabase
+          .from('admin_roles')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+        isUserAdmin = !!adminData;
+      } catch (adminError) {
+        console.warn("[AuthContext] Admin role check failed (non-critical):", adminError);
+        // Check if user has admin role in profiles table instead
+        isUserAdmin = profileData?.role === 'admin';
+      }
 
       // Set admin status
-      const isUserAdmin = !!adminData;
       setIsAdmin(isUserAdmin);
 
       // Sync metadata if needed
@@ -330,9 +339,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.log("[AuthContext] Profile query complete. Error:", profileError, "Data:", profileData);
 
       if (profileError) {
-        if (retryCount < 3) {
+        if (retryCount < 2) {
           console.log("[AuthContext] Retrying profile fetch...");
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 300)); // Faster retry
           return fetchProfile(userId, retryCount + 1);
         }
         throw profileError;
@@ -444,9 +453,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.log("[AuthContext] Profile fetch completed successfully");
     } catch (error) {
       console.error("[AuthContext] Error in fetchProfile:", error);
-      if (retryCount < 3) {
+      if (retryCount < 2) {
         console.log("[AuthContext] Retrying profile fetch...");
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 300));
         return fetchProfile(userId, retryCount + 1);
       }
       throw error;
