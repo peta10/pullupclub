@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ContentData {
   name?: string;
@@ -10,52 +10,71 @@ interface ContentData {
 
 export function useMetaTracking() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    // Mark as client-side after hydration
+    setIsClient(true);
+  }, []);
 
   // Check if we're in production mode
   const isProduction = process.env.NODE_ENV === 'production';
   
   // Get Facebook-specific parameters from cookies/localStorage
   const getFacebookParams = () => {
-    if (typeof window === 'undefined') return {};
+    if (!isClient) return {};
     
-    const fbp = document.cookie.match(/_fbp=([^;]+)/)?.[1];
-    const fbc = document.cookie.match(/_fbc=([^;]+)/)?.[1];
-    const fb_login_id = localStorage.getItem('fb_login_id');
+    try {
+      const fbp = document.cookie.match(/_fbp=([^;]+)/)?.[1];
+      const fbc = document.cookie.match(/_fbc=([^;]+)/)?.[1];
+      const fb_login_id = localStorage.getItem('fb_login_id');
 
-    return {
-      fbp,
-      fbc,
-      fb_login_id,
-    };
+      return {
+        fbp,
+        fbc,
+        fb_login_id,
+      };
+    } catch (error) {
+      console.warn('Error getting Facebook params:', error);
+      return {};
+    }
   };
 
   // Enhanced user data collection
   const getEnhancedUserData = (userData: any = {}) => {
-    if (typeof window === 'undefined') return userData;
+    if (!isClient) return userData;
 
-    const facebookParams = getFacebookParams();
-    
-    // Get additional browser/user data
-    const enhancedData = {
-      ...userData,
-      ...facebookParams,
-      // Add client IP if available (will be captured server-side)
-      // Add user agent (will be captured server-side)
-      // Remove referrer from user_data - it should go in custom_data instead
-      // Add page URL for context
-      page_url: window.location.href,
-      page_path: window.location.pathname,
-    };
+    try {
+      const facebookParams = getFacebookParams();
+      
+      // Get additional browser/user data
+      const enhancedData = {
+        ...userData,
+        ...facebookParams,
+        // Add page URL for context
+        page_url: window.location.href,
+        page_path: window.location.pathname,
+      };
 
-    return enhancedData;
+      return enhancedData;
+    } catch (error) {
+      console.warn('Error enhancing user data:', error);
+      return userData;
+    }
   };
 
   const trackEvent = async (eventName: string, userData = {}, customData = {}) => {
+    // Don't track during SSR
+    if (!isClient) {
+      console.log('🔍 Meta tracking skipped (SSR)');
+      return { success: false, reason: 'SSR' };
+    }
+
     // In development, we'll still track but log it
     if (!isProduction) {
       console.log('🔍 Meta tracking (dev mode):', { eventName, userData, customData });
       // Still track the event but mark it as test data
-      if (window.fbq) {
+      if (typeof window !== 'undefined' && window.fbq) {
         window.fbq('track', eventName, {
           ...customData,
           test_event_code: 'TEST12345', // Add your test event code here
@@ -73,7 +92,7 @@ export function useMetaTracking() {
       // Add referrer to custom_data instead of user_data
       const enrichedCustomData = {
         ...customData,
-        referrer: typeof window !== 'undefined' ? document.referrer || '' : '',
+        referrer: document.referrer || '',
       };
 
       const response = await fetch('/api/meta/track-event', {
@@ -84,21 +103,22 @@ export function useMetaTracking() {
         body: JSON.stringify({
           eventName,
           userData: enrichedUserData,
-          customData: enrichedCustomData, // Use enriched custom data
-          eventSourceUrl: typeof window !== 'undefined' ? window.location.href : '',
+          customData: enrichedCustomData,
+          eventSourceUrl: window.location.href,
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
       const result = await response.json();
-      console.log('✅ Meta tracking success:', result);
-      return result;
+      
+      if (response.ok) {
+        console.log('✅ Meta event tracked successfully:', eventName);
+        return { success: true, ...result };
+      } else {
+        console.error('❌ Meta tracking failed:', result);
+        return { success: false, error: result.error };
+      }
     } catch (error: any) {
-      console.warn('Meta tracking failed:', error.message);
-      // Return success to prevent error loops
+      console.error('❌ Meta tracking error:', error);
       return { success: false, error: error.message };
     } finally {
       setIsLoading(false);
@@ -107,7 +127,7 @@ export function useMetaTracking() {
 
   const trackViewContent = async (userData = {}, contentData: ContentData = {}) => {
     return trackEvent('ViewContent', userData, {
-      content_name: contentData.name || (typeof document !== 'undefined' ? document.title : ''),
+      content_name: contentData.name || (isClient ? document.title : ''),
       content_category: contentData.category,
       ...contentData,
     });
@@ -136,5 +156,6 @@ export function useMetaTracking() {
     trackPurchase,
     trackLead,
     isLoading,
+    isClient,
   };
 } 

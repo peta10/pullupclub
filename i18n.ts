@@ -1,52 +1,70 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
-import Backend from 'i18next-http-backend';
 
-// Initialize i18n for both client and server
+// SSR-safe i18n configuration
+const isClient = typeof window !== 'undefined';
+
+// Base configuration that works on both server and client
+const baseConfig = {
+  fallbackLng: 'en',
+  debug: false,
+  interpolation: { escapeValue: false },
+  ns: ['home', 'subscription', 'common', 'auth', 'admin', 'leaderboard', 'profile', 'rules', 'faq', 'ethos', 'submission'],
+  defaultNS: 'common',
+  react: {
+    useSuspense: false, // Critical for SSR compatibility
+  },
+  // Basic resources to prevent hydration mismatches
+  resources: {
+    en: {
+      common: {
+        loading: 'Loading...',
+        error: 'Error',
+        submit: 'Submit',
+        cancel: 'Cancel',
+      }
+    }
+  }
+};
+
+// Initialize i18n with proper SSR guards
 const initI18n = () => {
-  if (typeof window !== 'undefined') {
-    // Client-side initialization
-    i18n
-      .use(Backend)
-      .use(LanguageDetector)
-      .use(initReactI18next)
-      .init({
-        fallbackLng: 'en',
-        debug: false,
-        interpolation: { escapeValue: false },
-        backend: { 
-          loadPath: '/locales/{{lng}}/{{ns}}.json',
-          crossDomain: false
-        },
-        detection: {
-          order: ['localStorage', 'navigator', 'htmlTag'],
-          caches: ['localStorage'],
-        },
-        ns: ['home', 'subscription', 'common', 'auth', 'admin', 'leaderboard', 'profile', 'rules', 'faq', 'ethos', 'submission'],
-        defaultNS: 'common',
-        preload: ['en'],
-        saveMissing: false, // Disable to prevent performance issues
-        react: {
-          useSuspense: false, // Disable suspense to prevent hook issues
-        }
+  if (i18n.isInitialized) return i18n;
+
+  if (isClient) {
+    // Client-side: Load dynamic imports after hydration
+    import('i18next-browser-languagedetector').then((LanguageDetector) => {
+      import('i18next-http-backend').then((Backend) => {
+        i18n
+          .use(Backend.default)
+          .use(LanguageDetector.default)
+          .use(initReactI18next)
+          .init({
+            ...baseConfig,
+            backend: { 
+              loadPath: '/locales/{{lng}}/{{ns}}.json',
+              crossDomain: false
+            },
+            detection: {
+              order: ['localStorage', 'navigator', 'htmlTag'],
+              caches: ['localStorage'],
+            },
+            preload: ['en'],
+          });
       });
+    });
   } else {
-    // Server-side initialization
+    // Server-side: Minimal initialization
     i18n
       .use(initReactI18next)
       .init({
-        fallbackLng: 'en',
-        debug: false,
-        interpolation: { escapeValue: false },
-        ns: ['home', 'subscription', 'common', 'auth', 'admin', 'leaderboard', 'profile', 'rules', 'faq', 'ethos', 'submission'],
-        defaultNS: 'common',
+        ...baseConfig,
+        lng: 'en', // Default language for SSR
         preload: ['en'],
-        react: {
-          useSuspense: false, // Disable suspense for SSR
-        }
       });
   }
+
+  return i18n;
 };
 
 // Initialize immediately

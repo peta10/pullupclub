@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState, useReducer, useEffect } from "react";
 import { FormState } from "../../../types";
 import { Button } from "../../ui/Button";

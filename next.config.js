@@ -3,6 +3,11 @@ const nextConfig = {
   // Force dynamic rendering for Pull-Up Club
   reactStrictMode: true,
   
+  // Force dynamic rendering for SSR issues
+  experimental: {
+    forceSwcTransforms: true,
+  },
+  
   // Generate unique build ID for each deployment to force cache invalidation
   generateBuildId: async () => {
     // Use timestamp + random to ensure every deployment is unique
@@ -153,14 +158,15 @@ const nextConfig = {
   
   // Webpack configuration for better compatibility
   webpack: (config, { isServer }) => {
-    // Handle potential module resolution issues
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      net: false,
-      tls: false,
-    };
-    
+    // Handle client-side only modules
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
     return config;
   },
 }

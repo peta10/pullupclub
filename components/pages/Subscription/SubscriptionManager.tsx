@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState, useEffect } from 'react';
 import { CalendarX, CreditCard, Loader2, Shield } from 'lucide-react';
 import { format } from 'date-fns';
